@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Root Menu -->
+        <menuitem id="crypto_menu_root" name="Cryptocurrency"/>
+
+        <!-- Bitcoin Menu-->
+        <menuitem id="crypto_menu_bitcoin" name="Bitcoin" parent="account_cryptocurrency_addresses.crypto_menu_root"/>
+        <menuitem id="crypto_bitcoin_wallet_menu" name="Bitcoin Wallets" parent="account_cryptocurrency_addresses.crypto_menu_bitcoin" action="crypto_bitcoin_wallet_action"/>
+        <menuitem id="crypto_bitcoin_address_menu" name="Bitcoin Addresses" parent="account_cryptocurrency_addresses.crypto_menu_bitcoin" action="crypto_bitcoin_address_action"/>
+        <menuitem id="crypto_bitcoin_transaction_menu" name="Bitcoin Transactions" parent="account_cryptocurrency_addresses.crypto_menu_bitcoin" action="crypto_bitcoin_transaction_action"/>
+
+        <!-- Lightning Menu-->
+        <menuitem id="crypto_menu_lightning" name="Lightning" parent="account_cryptocurrency_addresses.crypto_menu_root"/>
+        <menuitem id="crypto_lightning_address_menu" name="Crypto Lightning Addresses" parent="account_cryptocurrency_addresses.crypto_menu_lightning" action="crypto_lightning_address_action"/>
+
+        <!-- Configuration-->
+        <menuitem id="crypto_menu_config" name="Configuration" parent="account_cryptocurrency_addresses.crypto_menu_root" />
+        <menuitem id="crypto_lightning_service_provider_menu" name="Lightning Service Providers" parent="account_cryptocurrency_addresses.crypto_menu_config" action="crypto_lightning_service_provider_action"/>
+    </data>
+</odoo>
