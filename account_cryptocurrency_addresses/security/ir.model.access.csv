@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_crypto_bitcoin_currency_cryptocurrency,crypto.bitcoin.wallet.cryptocurrency,model_res_currency_cryptocurrency,base.group_user,1,1,1,1
+access_crypto_bitcoin_wallet,crypto.bitcoin.wallet,model_crypto_bitcoin_wallet,base.group_user,1,1,1,1
+access_crypto_bitcoin_address,crypto.bitcoin.address,model_crypto_bitcoin_address,base.group_user,1,1,1,1
+access_crypto_bitcoin_transaction,crypto.bitcoin_transaction,model_crypto_bitcoin_transaction,base.group_user,1,1,1,1
+access_crypto_bitcoin_transaction_line,crypto.bitcoin.transaction.line,model_crypto_bitcoin_transaction_line,base.group_user,1,1,1,1
+access_crypto_lightning_address,crypto.lightning.address,model_crypto_lightning_address,base.group_user,1,1,1,1
+access_crypto_lightning_payment_form,crypto.lightning.payment.form,model_crypto_lightning_payment_form,base.group_user,1,1,1,1
+access_crypto_lightning_payment_processor_manager,crypto_lightning_payment_processor_manager,model_crypto_lightning_payment_processor,base.group_user,1,1,1,1
+access_crypto_lightning_service_provider_manager,crypto_lightning_service_provider_manager,model_crypto_lightning_service_provider,base.group_user,1,1,1,1
