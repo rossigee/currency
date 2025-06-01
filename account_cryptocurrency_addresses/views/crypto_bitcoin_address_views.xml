@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="crypto_bitcoin_address_view_form" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.address.form</field>
+            <field name="model">crypto.bitcoin.address</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Addresses">
+                    <group>
+                        <field name="wallet_id"/>
+                        <field name="label"/>
+                        <field name="type"/>
+                        <field name="used"/>
+                        <field name="notes"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="crypto_bitcoin_address_view_tree" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.address.tree</field>
+            <field name="model">crypto.bitcoin.address</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin Addresses">
+                    <field name="wallet_id"/>
+                    <field name="label"/>
+                    <field name="address"/>
+                    <field name="type"/>
+                    <field name="used"/>
+                </tree>
+            </field>
+        </record>
+        <record id="crypto_bitcoin_address_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Addresses</field>
+            <field name="res_model">crypto.bitcoin.address</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>
