@@ -5,6 +5,9 @@
             <field name="name">crypto.lightning.address.form</field>
             <field name="model">crypto.lightning.address</field>
             <field name="arch" type="xml">
+                <header>
+                    <button name="create_payment" string="Create Payment" type="object" class="btn-primary"/>
+                </header>
                 <form string="Crypto Lightning Address">
                     <sheet>
                         <group>
@@ -17,7 +20,6 @@
                                 <field name="notes"/>
                             </page>
                             <page string="Transactions">
-                                <button name="create_payment" string="Create Payment" type="object" class="btn-primary"/>
                                 <div><b>TODO! List historical entries.</b></div>
                             </page>
                         </notebook>
