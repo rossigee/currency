@@ -6,6 +6,8 @@ from odoo import fields, models
 
 class ResCurrencyCryptocurrency(models.Model):
     _name = 'res.currency.cryptocurrency'
+    _description = 'Cryptocurrency'
+
     _inherit = 'res.currency'
 
     blockchain = fields.Char(string='Blockchain')

@@ -25,6 +25,8 @@
         "views/crypto_lightning_payment_form.xml",
         "views/crypto_lightning_service_provider.xml",
         "views/menu.xml",
+        "views/res_partner_bitcoin_tab_view.xml",
+        "views/res_partner_lightning_tab_view.xml",
     ],
     "installable": True,
     "auto_install": False,
