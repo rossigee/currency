@@ -25,7 +25,7 @@ class CryptoBitcoinTransaction(models.Model):
     inputs = fields.Many2one('crypto.bitcoin.transaction.line', string='Input TXs')
     outputs = fields.Many2one('crypto.bitcoin.transaction.line', string='Output TXs')
     amount = fields.Float(string='Amount', required=True)
-    fee = fields.Float(string='Amount', required=True)
+    fee = fields.Float(string='Fee', required=True)
     status = fields.Selection([
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
