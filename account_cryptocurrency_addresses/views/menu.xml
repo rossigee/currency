@@ -12,7 +12,7 @@
 
         <!-- Lightning Menu-->
         <menuitem id="crypto_menu_lightning" name="Lightning" parent="account_cryptocurrency_addresses.crypto_menu_root"/>
-        <menuitem id="crypto_lightning_address_menu" name="Crypto Lightning Addresses" parent="account_cryptocurrency_addresses.crypto_menu_lightning" action="crypto_lightning_address_action"/>
+        <menuitem id="crypto_lightning_address_menu" name="Lightning Addresses" parent="account_cryptocurrency_addresses.crypto_menu_lightning" action="crypto_lightning_address_action"/>
 
         <!-- Configuration-->
         <menuitem id="crypto_menu_config" name="Configuration" parent="account_cryptocurrency_addresses.crypto_menu_root" />

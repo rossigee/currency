@@ -16,6 +16,7 @@
                 </form>
             </field>
         </record>
+
         <record id="crypto_bitcoin_address_view_tree" model="ir.ui.view">
             <field name="name">crypto.bitcoin.address.tree</field>
             <field name="model">crypto.bitcoin.address</field>
@@ -29,6 +30,7 @@
                 </tree>
             </field>
         </record>
+
         <record id="crypto_bitcoin_address_action" model="ir.actions.act_window">
             <field name="name">Bitcoin Addresses</field>
             <field name="res_model">crypto.bitcoin.address</field>

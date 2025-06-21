@@ -58,7 +58,7 @@ class BitcoinPriceChecker:
 
 class CryptoLightningPaymentForm(models.TransientModel):
     _name = 'crypto.lightning.payment.form'
-    _description = 'Crypto Lightning Payment Form'
+    _description = 'Lightning Payment Form'
 
     address_id = fields.Many2one('crypto.lightning.address', string='Lightning Address', required=True)
     amount = fields.Float(string='Amount', required=True, default=0.0)
