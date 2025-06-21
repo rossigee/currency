@@ -8,7 +8,7 @@
                 <header>
                     <button name="create_payment" string="Create Payment" type="object" class="btn-primary"/>
                 </header>
-                <form string="Crypto Lightning Address">
+                <form string="Lightning Address">
                     <sheet>
                         <group>
                             <field name="owner_id"/>
@@ -32,7 +32,7 @@
             <field name="name">crypto.lightning.address.tree</field>
             <field name="model">crypto.lightning.address</field>
             <field name="arch" type="xml">
-                <tree string="Crypto Lightning Addresses">
+                <tree string="Lightning Addresses">
                     <field name="owner_id"/>
                     <field name="address"/>
                     <field name="type"/>
@@ -41,7 +41,7 @@
         </record>
 
         <record id="crypto_lightning_address_action" model="ir.actions.act_window">
-            <field name="name">Crypto Lightning Addresses</field>
+            <field name="name">Lightning Addresses</field>
             <field name="res_model">crypto.lightning.address</field>
             <field name="view_mode">tree,form</field>
         </record>
