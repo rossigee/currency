@@ -1,300 +1,455 @@
-=============================
-Bitcoin Module Usage Guide
-=============================
+===============================
+Vault Connector Usage Guide
+===============================
 
-This guide provides step-by-step instructions for common Bitcoin operations in Odoo.
+This guide provides step-by-step instructions and examples for using the HashiCorp Vault Connector in your Odoo modules.
 
 🚀 **Getting Started**
 ======================
 
-After installation and configuration, you'll find the Bitcoin functionality under **Accounting** → **Bitcoin** in the main menu.
+After installation and configuration, the Vault Connector provides a secure API for storing and retrieving secrets. The module operates as a utility library for other modules to use.
 
-**Note**: Bitcoin functionality is only visible to users with appropriate permissions. See the CONFIGURE.rst file for user group setup.
+**Note**: This is a technical module designed for developers building secure Odoo applications.
 
-📋 **Basic Workflow**
+📋 **Basic API Usage**
+======================
+
+1. **Import the Connector** → 2. **Store Secrets** → 3. **Retrieve Secrets** → 4. **Handle Errors**
+
+💡 **Core Concepts**
 =====================
 
-1. **Create Private Key** → 2. **Generate Account Keys** → 3. **Derive Addresses** → 4. **Use for Payments**
+Understanding the Vault Connector
+----------------------------------
 
-🔑 **Private Key Management**
-=============================
+The Vault Connector provides a secure interface between Odoo and HashiCorp Vault for:
 
-Creating a New Private Key
----------------------------
+* **Secret Storage**: Store sensitive data outside Odoo database
+* **Token Management**: Generate and manage UUID tokens for secret references
+* **Secure Retrieval**: Retrieve secrets using tokens with proper authentication
+* **Error Handling**: Robust error handling and status reporting
 
-1. Navigate to **Accounting** → **Bitcoin** → **Key Management** → **Create Private Key**
-2. Choose your key generation method:
+🔧 **API Reference**
+====================
 
-   **Generate New Key (Recommended)**:
-   
-   * Select "Generate New Private Key"
-   * Choose word count (12, 15, 18, 21, or 24 words)
-   * Optionally add a BIP39 passphrase for extra security
-   * Click **Save**
-   * **IMPORTANT**: Write down the mnemonic phrase shown - this is your only backup!
+Importing the Connector
+------------------------
 
-   **Import Existing Key**:
-   
-   * Select "Import from Mnemonic" or "Import from XPRV"
-   * Enter your mnemonic phrase or extended private key
-   * Add passphrase if used
-   * Click **Save**
+In your Odoo module, import the VaultConnector class::
 
-3. The private key will be created and stored securely in Vault
-4. You can now create a Master Public Key if needed
+    from odoo.addons.vault_connector.models.vault_connector import VaultConnector
 
-Viewing Private Keys
---------------------
+Basic Usage Pattern
+-------------------
 
-1. Go to **Accounting** → **Bitcoin** → **Key Management** → **Private Keys**
-2. Click on any private key to view:
+1. **Create Connector Instance**::
 
-   * **Key Data**: XPRV and derived XPUB (click tabs to see)
-   * **Account Public Keys**: List of account-level keys created from this private key
-   * **Multisig Public Keys**: Multisig cosigner keys (if you have advanced permissions)
+    vault = VaultConnector()
 
-🏦 **Account Public Key Management**
-====================================
+2. **Check Vault Status**::
 
-Account public keys follow BIP44 standard (m/44'/0'/account') and are used for single-signature Bitcoin operations.
+    status = vault.check_status()
+    if status['status'] == 'connected':
+        print("Vault is ready")
+    else:
+        print(f"Vault error: {status['message']}")
 
-Creating Account Public Keys
+3. **Store a Secret**::
+
+    secret_data = {
+        'api_key': 'your-secret-api-key',
+        'database_url': 'postgres://user:pass@host:5432/db'
+    }
+    token = vault.store_secret(secret_data)
+    # Store only the token in your Odoo model
+    your_model.vault_token = token
+
+4. **Retrieve a Secret**::
+
+    secret_data = vault.get_secret(token)
+    api_key = secret_data.get('api_key')
+    database_url = secret_data.get('database_url')
+
+📚 **Advanced API Methods**
+===========================
+
+Available Methods
+-----------------
+
+The VaultConnector provides these methods for secret management:
+
+**Connection Methods**::
+
+    # Check Vault connection and status
+    status = vault.check_status()
+    
+    # Get detailed connection info
+    info = vault.get_connection_info()
+
+**Secret Management Methods**::
+
+    # Store a secret and get a token
+    token = vault.store_secret(data_dict)
+    
+    # Retrieve secret by token
+    data = vault.get_secret(token)
+    
+    # Update existing secret
+    success = vault.update_secret(token, new_data_dict)
+    
+    # Delete secret (optional - secrets can be left to expire)
+    success = vault.delete_secret(token)
+
+**Error Handling**::
+
+    try:
+        token = vault.store_secret(sensitive_data)
+    except VaultConnectionError as e:
+        # Handle connection issues
+        _logger.error(f"Vault connection failed: {e}")
+    except VaultAuthenticationError as e:
+        # Handle authentication issues
+        _logger.error(f"Vault authentication failed: {e}")
+    except Exception as e:
+        # Handle other errors
+        _logger.error(f"Unexpected error: {e}")
+
+Method Parameters and Returns
 -----------------------------
 
-1. Open a private key record
-2. Go to the **Account Public Keys** tab
-3. Click **Create Account Public Key**
-4. Configure the account:
+**store_secret(data)**:
 
-   * **Account Index**: Choose account number (0, 1, 2, etc.)
-   * **Auto-suggest**: Let the system suggest the next available account
-   * **Partner Assignment**: Optionally assign to a business partner
-   * **Name Suffix**: Add custom identifier
+* **Parameter**: `data` (dict) - The secret data to store
+* **Returns**: `str` - UUID token for retrieving the secret
+* **Raises**: VaultConnectionError, VaultAuthenticationError
 
-5. Click **Save** - the account key is created automatically
-6. View the results:
+**get_secret(token)**:
 
-   * **XPUB**: Extended public key for this account
-   * **Sample Addresses**: Example addresses for verification
-   * **Success Message**: Instructions for next steps
+* **Parameter**: `token` (str) - UUID token from store_secret
+* **Returns**: `dict` - The stored secret data
+* **Raises**: VaultConnectionError, VaultNotFoundError
 
-Using Account Public Keys
---------------------------
+**check_status()**:
 
-**For Receiving Payments**:
+* **Returns**: `dict` with keys:
+  * `status`: 'connected', 'error', or 'unavailable'
+  * `message`: Descriptive status message
+  * `vault_url`: Configured Vault URL
+  * `authenticated`: Boolean authentication status
 
-1. Open the created account public key
-2. Go to **Derived Addresses** tab
-3. Copy receive addresses (m/44'/0'/account'/0/x) for invoices/payments
-4. Share with customers or use in payment systems
+🏗️ **Integration Examples**
+============================
 
-**For Payment Processing**:
+Example 1: Secure API Key Storage
+----------------------------------
 
-1. Use the XPUB in external wallet software
-2. Derive new addresses for each payment
-3. Monitor transactions using the derivation path
+Store third-party API keys securely in your Odoo module::
 
-🛡️ **Multisig Operations** (Advanced Users Only)
-=================================================
+    from odoo import models, fields, api
+    from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+    
+    class PaymentProvider(models.Model):
+        _name = 'payment.provider'
+        
+        name = fields.Char('Provider Name')
+        vault_token = fields.Char('Vault Token', readonly=True)
+        
+        @api.model
+        def store_api_credentials(self, api_key, secret_key):
+            """Store API credentials securely in Vault"""
+            vault = VaultConnector()
+            credentials = {
+                'api_key': api_key,
+                'secret_key': secret_key,
+                'provider': self.name
+            }
+            self.vault_token = vault.store_secret(credentials)
+            return True
+        
+        def get_api_credentials(self):
+            """Retrieve API credentials from Vault"""
+            if not self.vault_token:
+                return None
+            vault = VaultConnector()
+            return vault.get_secret(self.vault_token)
 
-Multisig functionality requires the "Bitcoin Advanced" user group.
+Example 2: Database Connection Strings
+---------------------------------------
 
-Creating Multisig Public Keys
-------------------------------
+Securely manage database connections::
 
-1. Open a private key record
-2. Go to the **Multisig Public Keys** tab
-3. Click **Create Multisig Public Key**
-4. Configure the multisig setup:
+    class DatabaseConnection(models.Model):
+        _name = 'database.connection'
+        
+        name = fields.Char('Connection Name')
+        vault_token = fields.Char('Vault Token', readonly=True)
+        
+        def store_connection_string(self, connection_string):
+            """Store database connection string securely"""
+            vault = VaultConnector()
+            data = {
+                'connection_string': connection_string,
+                'connection_name': self.name,
+                'created_date': fields.Datetime.now().isoformat()
+            }
+            self.vault_token = vault.store_secret(data)
+        
+        def get_connection_string(self):
+            """Get database connection string"""
+            vault = VaultConnector()
+            data = vault.get_secret(self.vault_token)
+            return data.get('connection_string')
 
-   **Basic Settings**:
-   
-   * **Account Index**: Choose account number for this multisig setup
-   * **Script Type**: Select multisig format:
-     
-     - **P2SH**: Legacy multisig (addresses start with '3')
-     - **P2WSH**: Native SegWit multisig (addresses start with 'bc1')
-     - **P2SH-P2WSH**: Wrapped SegWit multisig (addresses start with '3')
-   
-   * **Cosigner Index**: Your position in the multisig (0, 1, 2, etc.)
+Example 3: Certificate Management
+----------------------------------
 
-   **Optional Settings**:
-   
-   * **Multisig Wallet**: Associate with existing multisig wallet record
-   * **Name Suffix**: Custom identifier for this key
+Store SSL certificates and private keys::
 
-5. Click **Save** - the multisig key is created automatically
-6. Review the setup guide for next steps
+    class SSLCertificate(models.Model):
+        _name = 'ssl.certificate'
+        
+        name = fields.Char('Certificate Name')
+        vault_token = fields.Char('Vault Token', readonly=True)
+        
+        def store_certificate(self, cert_data, private_key):
+            """Store SSL certificate and private key"""
+            vault = VaultConnector()
+            data = {
+                'certificate': cert_data,
+                'private_key': private_key,
+                'name': self.name,
+                'expiry_date': self.calculate_expiry(cert_data)
+            }
+            self.vault_token = vault.store_secret(data)
+        
+        def get_certificate_data(self):
+            """Retrieve certificate data"""
+            vault = VaultConnector()
+            return vault.get_secret(self.vault_token)
 
-Setting Up a Multisig Wallet
+🔒 **Security Best Practices**
+==============================
+
+Data Handling Guidelines
+-------------------------
+
+**Never Store Secrets in Odoo**:
+
+* Always use Vault for sensitive data storage
+* Only store UUID tokens in Odoo database
+* Never log or print sensitive data
+* Use proper exception handling to avoid data leaks
+
+**Token Management**:
+
+* Store tokens in readonly fields when possible
+* Implement proper access controls on token fields
+* Consider token rotation for long-lived secrets
+* Clean up unused tokens periodically
+
+**Error Handling**:
+
+* Always use try/except blocks for Vault operations
+* Log errors without exposing sensitive data
+* Provide meaningful error messages to users
+* Implement fallback mechanisms where appropriate
+
+Example Secure Implementation
 -----------------------------
 
-**Step 1: Collect XPUBs**
+Here's a secure pattern for handling secrets::
 
-1. Each cosigner creates their multisig public key using the same:
-   
-   * Account index (e.g., all use account 0)
-   * Script type (e.g., all use P2WSH)
-   * Different cosigner indices (0, 1, 2, etc.)
-
-2. Exchange XPUBs securely between all cosigners
-
-**Step 2: Create Wallet**
-
-1. Use external wallet software (Electrum, Bitcoin Core, etc.)
-2. Import all cosigner XPUBs
-3. Configure m-of-n threshold (e.g., 2-of-3)
-4. Verify first few addresses match across all cosigners
-
-**Step 3: Test Setup**
-
-1. Generate test addresses
-2. Send small test transaction
-3. Practice signing with multiple cosigners
-4. Verify transaction broadcasts successfully
-
-👥 **Partner Integration**
-==========================
-
-Assigning Keys to Partners
----------------------------
-
-**During Key Creation**:
-
-1. When creating account or multisig keys
-2. Select partner in "Assign to Partner" field
-3. Key will be associated with that partner's payment workflow
-
-**After Key Creation**:
-
-1. Open the public key record
-2. Set the "Assigned Partner" field
-3. Save the record
-
-**Viewing Partner Bitcoin Data**:
-
-1. Open any partner record
-2. Go to the **Bitcoin** tab (if you have Bitcoin permissions)
-3. View all Bitcoin wallets associated with this partner
+    import logging
+    from odoo import models, fields, api
+    from odoo.addons.vault_connector.models.vault_connector import (
+        VaultConnector, VaultConnectionError, VaultNotFoundError
+    )
+    
+    _logger = logging.getLogger(__name__)
+    
+    class SecureModel(models.Model):
+        _name = 'secure.model'
+        
+        name = fields.Char('Name', required=True)
+        vault_token = fields.Char('Vault Token', readonly=True)
+        
+        def store_sensitive_data(self, data):
+            """Securely store sensitive data"""
+            try:
+                vault = VaultConnector()
+                # Check connection first
+                status = vault.check_status()
+                if status['status'] != 'connected':
+                    raise UserError("Vault is not available")
+                
+                # Store the secret
+                self.vault_token = vault.store_secret(data)
+                _logger.info(f"Secret stored for {self.name}")
+                return True
+                
+            except VaultConnectionError:
+                _logger.error("Failed to connect to Vault")
+                raise UserError("Unable to store sensitive data - connection failed")
+            except Exception as e:
+                _logger.error(f"Unexpected error storing secret: {str(e)}")
+                raise UserError("Unable to store sensitive data")
+        
+        def get_sensitive_data(self):
+            """Securely retrieve sensitive data"""
+            if not self.vault_token:
+                return None
+                
+            try:
+                vault = VaultConnector()
+                return vault.get_secret(self.vault_token)
+            except VaultNotFoundError:
+                _logger.warning(f"Secret not found for {self.name}")
+                return None
+            except VaultConnectionError:
+                _logger.error("Failed to connect to Vault")
+                return None
+            except Exception as e:
+                _logger.error(f"Error retrieving secret: {str(e)}")
+                return None
 
 📋 **Common Workflows**
 =======================
 
-Workflow 1: Single Customer Payment Setup
-------------------------------------------
+Workflow 1: API Key Management
+-------------------------------
 
-**Scenario**: You want unique receiving addresses for each customer
+**Scenario**: Securely manage third-party API keys for payment processors
 
-1. **Create Private Key**: Generate new key for receiving payments
-2. **Create Account Keys**: One account per major customer
+1. **Create Model**: Define a model for payment providers
+2. **Store Credentials**: Use Vault to store API keys and secrets::
 
-   * Account 0 → Customer A
-   * Account 1 → Customer B
-   * Account 2 → Customer C
+    provider = self.env['payment.provider'].create({
+        'name': 'Stripe Payment Gateway'
+    })
+    provider.store_api_credentials(api_key, secret_key)
 
-3. **Generate Addresses**: For each customer account, derive receiving addresses
-4. **Invoice Integration**: Use derived addresses in customer invoices
-5. **Payment Monitoring**: Track payments to each customer's account path
+3. **Use Credentials**: Retrieve when making API calls::
 
-Workflow 2: Partner Payment Processing
+    credentials = provider.get_api_credentials()
+    api_key = credentials['api_key']
+    # Make secure API call
+
+4. **Rotate Keys**: Update credentials when needed::
+
+    provider.store_api_credentials(new_api_key, new_secret_key)
+
+Workflow 2: Database Connection Security
+-----------------------------------------
+
+**Scenario**: Securely store database connection strings for integrations
+
+1. **Define Connection Model**: Create model for external database connections
+2. **Store Connection String**: Use Vault for connection details::
+
+    connection = self.env['database.connection'].create({
+        'name': 'Customer CRM Database'
+    })
+    connection.store_connection_string('postgres://user:password@host:5432/db')
+
+3. **Use Connection**: Retrieve for database operations::
+
+    conn_string = connection.get_connection_string()
+    # Establish database connection securely
+
+4. **Monitor & Rotate**: Regular credential rotation for security
+
+Workflow 3: Certificate Management
+-----------------------------------
+
+**Scenario**: Manage SSL certificates and private keys for integrations
+
+1. **Certificate Storage**: Store certificates securely::
+
+    cert = self.env['ssl.certificate'].create({
+        'name': 'API Gateway Certificate'
+    })
+    cert.store_certificate(cert_data, private_key_data)
+
+2. **Certificate Usage**: Retrieve for HTTPS connections::
+
+    cert_data = cert.get_certificate_data()
+    certificate = cert_data['certificate']
+    private_key = cert_data['private_key']
+
+3. **Expiry Management**: Monitor and renew certificates
+4. **Automated Deployment**: Update systems with new certificates
+
+Workflow 4: Multi-Environment Secrets
 --------------------------------------
 
-**Scenario**: Regular payments to vendor with enhanced privacy
+**Scenario**: Different secrets for development, staging, and production
 
-1. **Get Vendor XPUB**: Request vendor's account-level XPUB for your payments
-2. **Create Private Key**: For making payments to this vendor
-3. **External Wallet**: Import your private key and vendor's XPUB
-4. **Generate Addresses**: Derive new address for each payment
-5. **Payment Process**: Send payments to unique addresses each time
+1. **Environment-Specific Storage**: Use different Vault paths or instances
+2. **Configuration Management**: Environment variables for Vault selection::
 
-Workflow 3: Multisig Treasury Setup
------------------------------------
+    # Different Vault configurations per environment
+    VAULT_ADDR=https://vault-prod.company.com:8200  # Production
+    VAULT_ADDR=https://vault-staging.company.com:8200  # Staging
 
-**Scenario**: Company treasury requiring multiple signatures
+3. **Secret Versioning**: Track secret versions across environments
+4. **Deployment Automation**: Automated secret deployment with CI/CD
 
-1. **Plan Setup**: Decide on m-of-n configuration (e.g., 2-of-3)
-2. **Create Keys**: Each cosigner creates private key
-3. **Generate Multisig Keys**: Each cosigner creates multisig public key
+🔍 **Advanced Topics**
+======================
 
-   * Same account index (e.g., 0)
-   * Same script type (e.g., P2WSH)
-   * Different cosigner indices (0, 1, 2)
+Performance Considerations
+---------------------------
 
-4. **Exchange XPUBs**: Securely share XPUBs between cosigners
-5. **Create Wallet**: Import all XPUBs into wallet software
-6. **Test & Deploy**: Verify with small amounts before using for treasury
+**Connection Pooling**: The VaultConnector creates new connections for each request. For high-volume applications, consider:
 
-Workflow 4: Department Segregation
------------------------------------
+* Implementing connection pooling in your module
+* Caching Vault status checks
+* Batching multiple secret operations
 
-**Scenario**: Different Bitcoin accounts for different departments
+**Error Recovery**: Implement robust error handling:
 
-1. **Create Master Key**: One private key for the organization
-2. **Create Department Accounts**:
+* Retry logic for temporary network issues
+* Graceful degradation when Vault is unavailable
+* Fallback mechanisms for critical operations
 
-   * Account 0 → Sales Department
-   * Account 1 → Marketing Department  
-   * Account 2 → Operations Department
-   * Account 3 → Executive Treasury
+**Monitoring**: Track Vault operations:
 
-3. **Assign Partners**: Link department accounts to relevant partners
-4. **Generate Addresses**: Each department gets their own address space
-5. **Reporting**: Track activities by department using account paths
+* Log all Vault interactions (without sensitive data)
+* Monitor connection performance
+* Set up alerts for Vault failures
 
-🔍 **Address Management**
-=========================
-
-Understanding Address Types
-----------------------------
-
-**Receive Addresses** (m/44'/0'/account'/0/index):
-
-* Used for receiving payments
-* Share these with customers/partners
-* Each index generates a new address
-
-**Change Addresses** (m/44'/0'/account'/1/index):
-
-* Used internally for change outputs
-* Not typically shared externally
-* Automatically used by wallet software
-
-Viewing Derived Addresses
---------------------------
-
-1. Open any public key record
-2. Go to the **Derived Addresses** tab
-3. View sample addresses:
-
-   * **Receive Addresses**: For customer payments
-   * **Change Addresses**: For internal use
-
-4. Copy addresses as needed for payment processing
-
-🚨 **Security Best Practices**
-==============================
-
-Key Backup
------------
-
-* **Write Down Mnemonics**: Always backup mnemonic phrases offline
-* **Secure Storage**: Store backups in secure, offline locations
-* **Test Recovery**: Verify you can restore keys from backups
-
-Access Control
---------------
-
-* **User Groups**: Only grant Bitcoin permissions to authorized users
-* **Vault Security**: Ensure Vault instance is properly secured
-* **Network Security**: Use HTTPS for all Vault connections
-
-Operational Security
+Custom Configuration
 --------------------
 
-* **Test First**: Always test with small amounts before production use
-* **Verify Addresses**: Double-check addresses before sending large payments
-* **Monitor Access**: Review Vault access logs regularly
-* **Update Regularly**: Keep Vault and Odoo updated with security patches
+**Environment Variables**: Customize Vault connection:
+
+* `VAULT_ADDR`: Vault server URL
+* `VAULT_TOKEN`: Authentication token
+* `VAULT_KV_PATH`: Custom KV store path (default: 'secret')
+* `VAULT_TIMEOUT`: Request timeout in seconds
+
+**Multiple Vault Instances**: For complex deployments:
+
+* Different Vault instances per environment
+* Vault clustering for high availability
+* Geographic distribution for global deployments
+
+Migration and Backup
+--------------------
+
+**Secret Migration**: When changing Vault instances:
+
+1. Export secrets from old Vault (if possible)
+2. Re-encrypt and import to new Vault
+3. Update tokens in Odoo records
+4. Verify all secrets accessible
+
+**Backup Strategy**: Ensure business continuity:
+
+* Regular Vault backups (follow HashiCorp guidelines)
+* Token inventory and mapping
+* Recovery procedures documentation
+* Test restoration processes
 
 📞 **Troubleshooting**
 ======================
@@ -302,36 +457,63 @@ Operational Security
 Common Issues
 -------------
 
-**"XPRV required" Error**:
+**"Vault not accessible" Error**:
 
-* Check Vault connection status
-* Verify environment variables (VAULT_ADDR, VAULT_TOKEN)
-* Refresh vault status on private key record
+* Check VAULT_ADDR and VAULT_TOKEN environment variables
+* Verify network connectivity to Vault server
+* Check Vault server status and unseal state
+* Verify token has proper permissions
 
-**"Bitcoin menu not visible"**:
+**"Import Error" for VaultConnector**:
 
-* Check user permissions
-* Ensure user is in appropriate Bitcoin group
-* Contact administrator for access
+* Ensure module is properly installed
+* Check module is in correct addons path
+* Restart Odoo server after installation
+* Verify no circular import dependencies
 
-**"Invalid XPUB" Error**:
+**"Secret not found" Error**:
 
-* Verify XPUB format is correct
-* Check for copy/paste errors
-* Ensure XPUB matches expected network (mainnet/testnet)
+* Verify token exists and is correct
+* Check if secret has been deleted from Vault
+* Verify KV store path configuration
+* Check Vault token permissions for read access
 
-**Address Generation Fails**:
+**Performance Issues**:
 
-* Check public key has valid XPUB
-* Verify Vault connectivity
-* Check derivation parameters are valid
+* Check network latency to Vault server
+* Monitor Vault server performance
+* Implement connection pooling if needed
+* Consider caching for frequently accessed secrets
+
+Debugging Tips
+--------------
+
+**Enable Debug Logging**: Add to Odoo configuration::
+
+    [logger_vault_connector]
+    level = DEBUG
+    handlers = console
+    qualname = odoo.addons.vault_connector
+
+**Test Connection Manually**::
+
+    # In Odoo shell
+    from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+    vault = VaultConnector()
+    print(vault.check_status())
+
+**Verify Environment Variables**::
+
+    import os
+    print("VAULT_ADDR:", os.environ.get('VAULT_ADDR'))
+    print("VAULT_TOKEN:", os.environ.get('VAULT_TOKEN', 'Not set'))
 
 Getting Help
 ------------
 
-1. **Check Logs**: Review Odoo logs for error details
-2. **Vault Status**: Verify Vault connectivity and permissions
-3. **User Groups**: Confirm proper user group assignments
-4. **Documentation**: Refer to CONFIGURE.rst for setup issues
+For advanced troubleshooting, check:
 
-For advanced troubleshooting, check the Vault logs and Odoo server logs for detailed error messages.
+1. **Odoo Logs**: Review server logs for detailed error messages
+2. **Vault Logs**: Check Vault audit logs for access attempts
+3. **Network Connectivity**: Test HTTPS connection to Vault
+4. **Token Permissions**: Verify Vault token policies and capabilities

@@ -2,7 +2,7 @@
 Contributors & Development
 ===========================
 
-This document outlines the contributors to the Bitcoin Operations module and provides guidelines for future development.
+This document outlines the contributors to the HashiCorp Vault Connector module and provides guidelines for future development.
 
 👥 **Contributors**
 ===================
@@ -14,18 +14,18 @@ Original Development
   * **Role**: Original Author & Lead Developer
   * **Contributions**: 
     * Initial module architecture and design
-    * Vault integration for secure key storage
-    * BIP32/39/44/48 implementation
-    * Security model and user permissions
-    * Core functionality and UI design
+    * Vault integration for secure secret storage
+    * Core API implementation
+    * Error handling and status reporting
+    * Security model and best practices
 
 **Claude (Anthropic AI)** 
   * **Role**: Development Assistant
   * **Contributions**:
     * Code architecture improvements
-    * Multisig functionality implementation
-    * Security group design
+    * API design refinements
     * Documentation creation
+    * Error handling improvements
     * Code consolidation and optimization
 
 🏗️ **Development Guidelines**
@@ -48,23 +48,24 @@ Code Standards
 
 **Security First**:
   * Never store sensitive data in plain text
-  * Always use Vault for key material storage
-  * Implement proper permission checks
+  * Always use Vault for secret storage
+  * Implement proper error handling to prevent data leaks
   * Include audit logging for sensitive operations
 
-Bitcoin Standards Compliance
------------------------------
+Vault Integration Standards
+---------------------------
 
-**BIP Implementation**:
-  * **BIP32**: Hierarchical Deterministic key derivation
-  * **BIP39**: Mnemonic phrase generation and validation
-  * **BIP44**: Standard account structure (m/44'/0'/account')
-  * **BIP48**: Multisig derivation paths (m/48'/0'/account'/script_type')
+**Connection Handling**:
+  * **Environment Variables**: Use secure environment variable configuration
+  * **Error Handling**: Robust error categorization and handling
+  * **Status Monitoring**: Real-time connection status checking
+  * **Token Management**: Secure UUID token generation and validation
 
-**Address Standards**:
-  * Bech32 encoding for SegWit addresses
-  * Proper script type handling
-  * Mainnet/testnet compatibility
+**API Standards**:
+  * RESTful communication with Vault
+  * JSON data serialization
+  * Proper HTTP status code handling
+  * Timeout and retry mechanisms
 
 🔧 **Development Setup**
 ========================
@@ -75,7 +76,7 @@ Local Development Environment
 **Prerequisites**::
 
     # Python dependencies
-    pip install mnemonic
+    pip install requests
 
     # Development Vault (Docker)
     docker run --cap-add=IPC_LOCK -d --name=dev-vault -p 8200:8200 vault:latest
@@ -93,21 +94,21 @@ Testing Framework
 -----------------
 
 **Unit Tests**:
-  * Test key generation and derivation
-  * Validate BIP compliance
-  * Check security controls
-  * Verify Vault integration
+  * Test secret storage and retrieval
+  * Validate error handling
+  * Check connection status monitoring
+  * Verify token generation
 
 **Integration Tests**:
-  * End-to-end workflows
-  * UI functionality
-  * Permission enforcement
-  * Partner integration
+  * End-to-end secret workflows
+  * Vault connectivity testing
+  * Error recovery scenarios
+  * Performance under load
 
 **Security Tests**:
   * Vault token validation
-  * Access control verification
-  * Data encryption checks
+  * Secret data isolation verification
+  * Connection security checks
   * Audit trail validation
 
 📝 **Contributing Guidelines**
@@ -136,7 +137,7 @@ Code Contributions
 
 **Code Review Process**:
   * Security-focused review required
-  * Bitcoin standards compliance check
+  * Vault integration best practices check
   * Odoo conventions validation
   * Performance impact assessment
 
@@ -160,9 +161,9 @@ Security Contributions
 
 **Security Review Areas**:
   * Vault integration security
-  * Cryptographic implementations
-  * User permission models
-  * Data handling practices
+  * Secret data handling practices
+  * Error handling security
+  * Token management security
 
 **Reporting Security Issues**:
   * Contact maintainers privately first
@@ -177,35 +178,35 @@ Planned Features
 ----------------
 
 **Near-term (Next Release)**:
-  * Transaction monitoring and notifications
-  * Enhanced partner payment workflows
-  * Improved address management
-  * Performance optimizations
+  * Connection pooling for performance
+  * Enhanced error categorization
+  * Improved logging and monitoring
+  * Additional configuration options
 
 **Medium-term**:
-  * PSBT (Partially Signed Bitcoin Transaction) support
-  * Hardware wallet integration
-  * Multi-currency support (other cryptocurrencies)
-  * Advanced reporting and analytics
+  * Multiple Vault instance support
+  * Secret versioning and rotation
+  * Batch operations for performance
+  * Advanced monitoring and metrics
 
 **Long-term**:
-  * Lightning Network integration
-  * Automated payment processing
-  * DeFi protocol integrations
+  * Auto-scaling and load balancing
+  * Secret lifecycle management
+  * Integration with other secret stores
   * Enterprise compliance features
 
 Technical Debt
 --------------
 
 **Current Areas for Improvement**:
-  * Simplified crypto implementations (move to proper libraries)
-  * Enhanced error handling and user feedback
-  * Performance optimization for large derivations
+  * Enhanced connection management and pooling
+  * Improved error handling and user feedback
+  * Performance optimization for high-volume operations
   * Expanded test coverage
 
 **Architecture Improvements**:
-  * Plugin architecture for different Bitcoin networks
-  * Modular design for different crypto standards
+  * Plugin architecture for different secret stores
+  * Modular design for different authentication methods
   * Enhanced caching for performance
   * Better separation of concerns
 
@@ -306,7 +307,7 @@ Communication Channels
   * OCA Forums: Odoo-specific questions
 
 **User Support**:
-  * Documentation: First resource for users
+  * Documentation: First resource for developers
   * Community Forums: Peer support
   * Professional Support: Available for enterprise users
 
@@ -328,22 +329,22 @@ Recognition
 📋 **Release History**
 ======================
 
-Version 16.0.1.0.3 (Current)
+Version 16.0.1.0.0 (Current)
 -----------------------------
   * Initial public release
-  * Core Bitcoin operations functionality
-  * BIP44 account key derivation
-  * BIP48 multisig support
-  * Vault integration for secure storage
-  * Role-based security model
-  * Partner integration
+  * Core Vault connector functionality
+  * Secret storage and retrieval API
+  * Connection status monitoring
+  * Error handling and categorization
+  * UUID token management
+  * Environment variable configuration
   * Comprehensive documentation
 
 Previous Development
 --------------------
   * Internal development and testing
   * Security architecture design
-  * Bitcoin standards implementation
+  * Vault integration implementation
   * Odoo integration framework
 
 Thank you to all contributors who have helped make this module possible!
