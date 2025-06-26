@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Create Multisig Public Key Wizard Form View -->
+        <record id="view_wizard_create_multisig_public_key_form" model="ir.ui.view">
+            <field name="name">wizard.create.multisig.public.key.form</field>
+            <field name="model">wizard.create.multisig.public.key</field>
+            <field name="arch" type="xml">
+                <form string="Create Cosigner Key">
+                    <header attrs="{'invisible': [('created_public_key_id', '=', False)]}">
+                        <button name="action_view_public_key" 
+                                string="View Cosigner Key" 
+                                class="btn-primary" 
+                                type="object"/>
+                        <button name="action_create_another" 
+                                string="Create Another" 
+                                class="btn-secondary" 
+                                type="object"/>
+                    </header>
+                    
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <span attrs="{'invisible': [('created_public_key_id', '!=', False)]}">
+                                    Create Cosigner Key
+                                </span>
+                                <span attrs="{'invisible': [('created_public_key_id', '=', False)]}">
+                                    Cosigner Key Created Successfully
+                                </span>
+                            </h1>
+                        </div>
+
+                        <!-- Input Form (shown before creation) -->
+                        <group attrs="{'invisible': [('created_public_key_id', '!=', False)]}">
+                            <group>
+                                <field name="private_key_id" readonly="1"/>
+                                <field name="private_key_name" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="account_index"/>
+                                <field name="suggest_next_account"/>
+                                <field name="next_available_account" readonly="1" 
+                                       attrs="{'invisible': [('suggest_next_account', '=', False)]}"/>
+                            </group>
+                        </group>
+
+                        <notebook attrs="{'invisible': [('created_public_key_id', '!=', False)]}">
+                            <page string="Cosigner Details">
+                                <group>
+                                    <group>
+                                        <field name="script_type" widget="radio"/>
+                                        <field name="cosigner_index"/>
+                                        <field name="derivation_path" readonly="1"/>
+                                    </group>
+                                    <group>
+                                        <field name="multisig_wallet_id" options="{'no_create': True}"/>
+                                        <field name="name_suffix"/>
+                                    </group>
+                                </group>
+                                
+                                <div class="alert alert-info mt16" role="alert">
+                                    <strong>🛡️ BIP48 Cosigner Script Types:</strong><br/>
+                                    • <strong>P2SH:</strong> Legacy multisig (final addresses start with '3')<br/>
+                                    • <strong>P2WSH:</strong> Native SegWit multisig (final addresses start with 'bc1')<br/>
+                                    • <strong>P2SH-P2WSH:</strong> Wrapped SegWit multisig (final addresses start with '3')<br/>
+                                    <em>Note: All cosigners must use the same script type for the multisig wallet</em>
+                                </div>
+                            </page>
+                            
+                            <page string="Existing Cosigner Keys">
+                                <field name="existing_multisig_keys" readonly="1" nolabel="1"/>
+                            </page>
+                            
+                            <page string="Options">
+                                <group>
+                                    <field name="notes"/>
+                                    <field name="create_sample_addresses"/>
+                                    <field name="sample_address_count" 
+                                           attrs="{'invisible': [('create_sample_addresses', '=', False)]}"/>
+                                </group>
+                            </page>
+                        </notebook>
+
+                        <!-- Results Display (shown after creation) -->
+                        <div attrs="{'invisible': [('created_public_key_id', '=', False)]}">
+                            <group>
+                                <field name="success_message" readonly="1" nolabel="1" 
+                                       widget="html" class="oe_read_only"/>
+                            </group>
+                            
+                            <notebook>
+                                <page string="XPUB Details">
+                                    <group>
+                                        <field name="derived_xpub" readonly="1" widget="CopyClipboardChar"/>
+                                        <field name="derivation_path" readonly="1"/>
+                                        <field name="script_type" readonly="1"/>
+                                        <field name="cosigner_index" readonly="1"/>
+                                    </group>
+                                </page>
+                                
+                                <page string="Sample Addresses" 
+                                      attrs="{'invisible': [('sample_addresses', '=', False)]}">
+                                    <field name="sample_addresses" readonly="1" nolabel="1" 
+                                           widget="text" class="font-monospace small"/>
+                                </page>
+                                
+                                <page string="Multisig Setup Guide">
+                                    <div class="alert alert-warning" role="alert">
+                                        <h4>📋 Next Steps for Multisig Wallet Creation:</h4>
+                                        <ol>
+                                            <li><strong>Collect XPUBs:</strong> Get the corresponding XPUB from each cosigner for the same derivation path</li>
+                                            <li><strong>Verify Derivation:</strong> Ensure all cosigners use the same account index and script type</li>
+                                            <li><strong>Create Wallet:</strong> Use wallet software to combine all XPUBs into a multisig wallet</li>
+                                            <li><strong>Test Setup:</strong> Generate and verify the first few addresses match across all cosigners</li>
+                                            <li><strong>Backup:</strong> Securely store the wallet configuration and all cosigner information</li>
+                                        </ol>
+                                        
+                                        <h4>🔒 Security Reminders:</h4>
+                                        <ul>
+                                            <li>Each cosigner should independently verify the multisig setup</li>
+                                            <li>Test with small amounts before using for large transactions</li>
+                                            <li>Ensure you can sign transactions with your private key</li>
+                                            <li>Keep your private key secure and backed up</li>
+                                        </ul>
+                                    </div>
+                                </page>
+                            </notebook>
+                        </div>
+
+                        <!-- Hidden fields for form state management -->
+                        <group invisible="1">
+                            <field name="created_public_key_id"/>
+                            <field name="derived_xpub"/>
+                            <field name="sample_addresses"/>
+                            <field name="success_message"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Create Multisig Public Key Wizard Action -->
+        <record id="action_wizard_create_multisig_public_key" model="ir.actions.act_window">
+            <field name="name">Create Multisig Public Key</field>
+            <field name="res_model">wizard.create.multisig.public.key</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{}</field>
+        </record>
+    </data>
+</odoo>

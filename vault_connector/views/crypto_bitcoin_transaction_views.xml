@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="crypto_bitcoin_transaction_view_form" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.transaction.form</field>
+            <field name="model">crypto.bitcoin.transaction</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Transaction">
+                    <header>
+                        <button name="action_create_psbt" string="Create PSBT" 
+                                type="object" class="btn-primary"
+                                attrs="{'invisible': ['|', ('status', '!=', 'draft'), ('multisig_wallet_id', '=', False)]}"/>
+                        <button name="action_export_psbt" string="Export PSBT" 
+                                type="object" class="btn-secondary"
+                                attrs="{'invisible': [('psbt_base64', '=', False)]}"/>
+                        <button name="action_import_psbt" string="Import Signed PSBT" 
+                                type="object" class="btn-secondary"
+                                attrs="{'invisible': ['|', ('psbt_base64', '=', False), ('signatures_complete', '=', True)]}"/>
+                        <field name="status" widget="statusbar" 
+                               statusbar_visible="draft,unsigned_psbt,partial_psbt,signed_psbt,pending,confirmed"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="tx_hash" placeholder="Transaction Hash (will be set when broadcast)" readonly="1"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Basic Information">
+                                <field name="date"/>
+                                <field name="amount"/>
+                                <field name="fee"/>
+                                <field name="target_fee_rate" attrs="{'invisible': [('target_fee_rate', '=', 0)]}"/>
+                            </group>
+                            <group string="Status">
+                                <field name="multisig_wallet_id" readonly="1"/>
+                                <field name="created_by_id" readonly="1"/>
+                                <field name="rbf_enabled" readonly="1" attrs="{'invisible': [('rbf_enabled', '=', False)]}"/>
+                                <field name="lock_time" readonly="1" attrs="{'invisible': [('lock_time', '=', 0)]}"/>
+                                <field name="mined_block" readonly="1" attrs="{'invisible': [('mined_block', '=', 0)]}"/>
+                            </group>
+                        </group>
+                        
+                        <!-- PSBT-specific fields -->
+                        <group string="PSBT Signing Status" attrs="{'invisible': [('multisig_wallet_id', '=', False)]}">
+                            <group>
+                                <field name="required_signatures" readonly="1"/>
+                                <field name="current_signatures" readonly="1"/>
+                                <field name="signatures_complete" readonly="1" widget="boolean"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Notes" attrs="{'invisible': [('notes', '=', False)]}">
+                            <field name="notes" nolabel="1" readonly="1"/>
+                        </group>
+                        
+                        <notebook>
+                            <page string="PSBT Data" attrs="{'invisible': [('psbt_base64', '=', False)]}">
+                                <div class="alert alert-info" role="alert">
+                                    <strong>📄 PSBT (Partially Signed Bitcoin Transaction):</strong><br/>
+                                    This transaction is in PSBT format and can be signed by multisig cosigners.
+                                    Export the PSBT file to sign with hardware wallets or other Bitcoin software.
+                                </div>
+                                
+                                <group>
+                                    <field name="psbt_base64" widget="text" readonly="1"
+                                           style="font-family: monospace; font-size: 11px;"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Raw Transaction" attrs="{'invisible': [('raw_transaction', '=', False)]}">
+                                <div class="alert alert-success" role="alert">
+                                    <strong>✅ Signed Transaction:</strong><br/>
+                                    This transaction has been fully signed and is ready to broadcast.
+                                </div>
+                                
+                                <group>
+                                    <field name="raw_transaction" widget="text" readonly="1"
+                                           style="font-family: monospace; font-size: 11px;"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Transaction Details" attrs="{'invisible': ['&amp;', ('inputs', '=', False), ('outputs', '=', False)]}">
+                                <group>
+                                    <group string="Inputs">
+                                        <field name="inputs" readonly="1"/>
+                                        <field name="from_wallet_id" readonly="1"/>
+                                    </group>
+                                    <group string="Outputs">
+                                        <field name="outputs" readonly="1"/>
+                                        <field name="to_wallet_id" readonly="1"/>
+                                    </group>
+                                </group>
+                                
+                                <group>
+                                    <field name="size" readonly="1" attrs="{'invisible': [('size', '=', 0)]}"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="crypto_bitcoin_transaction_view_tree" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.transaction.tree</field>
+            <field name="model">crypto.bitcoin.transaction</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin Transactions">
+                    <field name="date"/>
+                    <field name="multisig_wallet_id"/>
+                    <field name="amount"/>
+                    <field name="fee"/>
+                    <field name="current_signatures" attrs="{'invisible': [('multisig_wallet_id', '=', False)]}"/>
+                    <field name="required_signatures" attrs="{'invisible': [('multisig_wallet_id', '=', False)]}"/>
+                    <field name="status" widget="badge" 
+                           decoration-info="status in ('draft', 'unsigned_psbt')" 
+                           decoration-warning="status in ('partial_psbt')"
+                           decoration-success="status in ('signed_psbt', 'confirmed')"
+                           decoration-muted="status in ('pending')"/>
+                    <field name="tx_hash"/>
+                    <field name="created_by_id"/>
+                </tree>
+            </field>
+        </record>
+        <record id="crypto_bitcoin_transaction_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Transactions</field>
+            <field name="res_model">crypto.bitcoin.transaction</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>
