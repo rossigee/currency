@@ -1,8 +1,8 @@
-=======================================
-Bitcoin Module Configuration Guide
-=======================================
+=========================================
+Vault Connector Configuration Guide
+=========================================
 
-This guide covers installation, configuration, and setup of the Bitcoin operations module for Odoo.
+This guide covers installation, configuration, and setup of the HashiCorp Vault Connector module for Odoo.
 
 📋 **Prerequisites**
 ====================
@@ -10,16 +10,16 @@ This guide covers installation, configuration, and setup of the Bitcoin operatio
 System Requirements
 -------------------
 * **Odoo 16.0 or later**: Compatible with Odoo 16+
-* **Python 3.8+**: Required for mnemonic library support
-* **External Vault**: HashiCorp Vault or OpenBao instance
+* **Python 3.8+**: Required for requests library support
+* **External Vault**: HashiCorp Vault or OpenBao instance (v1.0+)
 * **Network Access**: HTTPS connectivity between Odoo and Vault
 
 Required Knowledge
 ------------------
-* **Odoo Administration**: Module installation and user management
+* **Odoo Administration**: Module installation and configuration
 * **Vault Administration**: Basic Vault setup and token management
-* **Bitcoin Concepts**: Understanding of Bitcoin keys, addresses, and BIP standards
-* **Security Practices**: Cryptocurrency security best practices
+* **Secret Management**: Understanding of secure secret storage practices
+* **Network Security**: Knowledge of secure network configurations
 
 🚀 **Installation**
 ===================
@@ -27,26 +27,26 @@ Required Knowledge
 Step 1: Install Python Dependencies
 ------------------------------------
 
-The module requires the `mnemonic` Python library for BIP39 support.
+The module requires the `requests` Python library for HTTP operations.
 
 **On Ubuntu/Debian**::
 
     sudo apt update
     sudo apt install python3-pip
-    pip3 install mnemonic
+    pip3 install requests
 
 **On CentOS/RHEL**::
 
     sudo yum install python3-pip
-    pip3 install mnemonic
+    pip3 install requests
 
 **Using Conda**::
 
-    conda install -c conda-forge mnemonic
+    conda install -c conda-forge requests
 
 **Using Poetry (if used in your Odoo deployment)**::
 
-    poetry add mnemonic
+    poetry add requests
 
 Step 2: Install Odoo Module
 ----------------------------
@@ -55,18 +55,18 @@ Step 2: Install Odoo Module
 
 1. Copy the module to your Odoo addons directory::
 
-    cp -r account_cryptocurrency_bitcoin /path/to/odoo/addons/
+    cp -r vault_connector /path/to/odoo/addons/
 
 2. Restart Odoo server
 3. Update the apps list in Odoo
-4. Install the "Bitcoin Operations" module
+4. Install the "HashiCorp Vault Connector" module
 
 **Method 2: Git Clone**
 
 1. Clone into addons directory::
 
     cd /path/to/odoo/addons/
-    git clone <repository-url> account_cryptocurrency_bitcoin
+    git clone <repository-url> vault_connector
 
 2. Follow steps 2-4 from Method 1
 
@@ -75,14 +75,14 @@ Step 3: Verify Installation
 
 1. Log into Odoo as administrator
 2. Go to **Apps** → **Update Apps List**
-3. Search for "Bitcoin Operations"
+3. Search for "HashiCorp Vault Connector"
 4. Click **Install**
 5. Verify no error messages during installation
 
 🔐 **Vault Setup**
 ==================
 
-The module requires an external Vault instance for secure key storage. This section covers basic setup.
+The module requires an external Vault instance for secure secret storage. This section covers basic setup.
 
 HashiCorp Vault Installation
 -----------------------------
@@ -161,14 +161,14 @@ Vault Configuration
     vault auth <root-token>
     
     # Create policy for Odoo
-    vault policy write odoo-bitcoin - <<EOF
+    vault policy write odoo-connector - <<EOF
     path "secret/*" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
     EOF
     
     # Create token for Odoo
-    vault token create -policy=odoo-bitcoin -ttl=8760h
+    vault token create -policy=odoo-connector -ttl=8760h
 
 🔧 **Odoo Configuration**
 =========================
@@ -213,79 +213,52 @@ Testing Vault Connection
 -------------------------
 
 1. Restart Odoo after setting environment variables
-2. Go to **Accounting** → **Bitcoin** → **Key Management**
-3. Try creating a private key
-4. Check Odoo logs for any Vault connection errors
+2. Test connection using Python console or Odoo shell::
+
+    # Test connection
+    from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+    vault = VaultConnector()
+    status = vault.check_status()
+    print(f"Vault status: {status}")
+
+3. Check Odoo logs for any Vault connection errors
 
 👥 **User Management**
 ======================
 
-The module uses security groups to control access to Bitcoin functionality.
+The Vault Connector module is a utility module that doesn't provide specific user interfaces but enables other modules to securely store and retrieve secrets.
 
-Security Groups
----------------
+Access Control
+--------------
 
-**Bitcoin User** (`group_bitcoin_user`):
-* Basic Bitcoin operations
-* Private key management
-* Account public key creation
-* Address derivation
-* Partner Bitcoin tab access
+**Technical Module**: This module operates at the technical level and doesn't define specific user groups. Access control is managed by:
 
-**Bitcoin Advanced** (`group_bitcoin_advanced`):
-* All Bitcoin User permissions
-* Multisig public key creation
-* Complex derivation operations
-* Multisig wallet management
+* **Vault Token Permissions**: Controlled by Vault policies
+* **Environment Variables**: Secured at system level
+* **Module Dependencies**: Other modules handle user access to Vault functionality
 
-**Bitcoin Manager** (`group_bitcoin_manager`):
-* All permissions
-* System configuration
-* User permission management
-* Full Vault access
+Developer Access
+----------------
 
-Assigning User Permissions
----------------------------
+**For developers building on this module**:
 
-**Method 1: Through User Form**
+1. Import the VaultConnector class in your module
+2. Use environment variables for Vault configuration
+3. Implement appropriate user permissions in your module
+4. Follow security best practices for secret handling
 
-1. Go to **Settings** → **Users & Companies** → **Users**
-2. Open a user record
-3. Go to **Access Rights** tab
-4. In **Application** section, find **Bitcoin Operations**
-5. Select appropriate level:
-   * **User**: Basic Bitcoin operations
-   * **Advanced**: Include multisig features
-   * **Manager**: Full administrative access
+**Example Integration**::
 
-**Method 2: Through Groups**
-
-1. Go to **Settings** → **Users & Companies** → **Groups**
-2. Search for "Bitcoin"
-3. Open the appropriate group
-4. Add users to the **Users** tab
-
-**Method 3: Bulk Assignment**
-
-For multiple users, you can assign groups programmatically::
-
-    # In Odoo shell or data import
-    users = self.env['res.users'].search([('login', 'in', ['user1', 'user2'])])
-    group = self.env.ref('account_cryptocurrency_bitcoin.group_bitcoin_user')
-    group.users = [(4, user.id) for user in users]
-
-Initial Administrator Setup
----------------------------
-
-**Automatic**: The main administrator automatically gets Bitcoin Manager permissions.
-
-**Manual Setup**:
-
-1. Login as main administrator
-2. Go to **Settings** → **Users & Companies** → **Users**
-3. Find your user record
-4. Assign "Bitcoin Operations / Manager" permission
-5. Refresh your browser to see Bitcoin menu
+    from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+    
+    class MySecureModel(models.Model):
+        _name = 'my.secure.model'
+        
+        def store_secret(self, secret_data):
+            vault = VaultConnector()
+            token = vault.store_secret(secret_data)
+            # Store only the token in your model
+            self.vault_token = token
 
 🔒 **Security Configuration**
 =============================
@@ -361,8 +334,25 @@ Vault Connectivity Test
 
 **Odoo Test**:
 
-1. Create a test private key
-2. Verify it appears in private key list
+1. Open Odoo shell or Python console
+2. Test the connector::
+
+    from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+    vault = VaultConnector()
+    
+    # Test connection
+    status = vault.check_status()
+    print(f"Connection status: {status}")
+    
+    # Test secret storage
+    test_data = {"test": "secret_value"}
+    token = vault.store_secret(test_data)
+    print(f"Stored secret with token: {token}")
+    
+    # Test secret retrieval
+    retrieved = vault.get_secret(token)
+    print(f"Retrieved secret: {retrieved}")
+
 3. Check Vault for stored data::
 
     vault kv get secret/<token-uuid>
@@ -377,21 +367,19 @@ Vault Connectivity Test
 Module Functionality Test
 --------------------------
 
-**Basic Workflow Test**:
+**Basic Integration Test**:
 
-1. **Create Private Key**: Generate new mnemonic-based key
-2. **Create Account Key**: Generate account 0 public key
-3. **View Addresses**: Check derived addresses tab
-4. **Partner Assignment**: Assign key to test partner
-5. **Multisig Test**: Create multisig key (if advanced user)
+1. **Store Secret**: Use VaultConnector to store test data
+2. **Retrieve Secret**: Verify data can be retrieved using token
+3. **Error Handling**: Test with invalid tokens and network issues
+4. **Performance**: Test multiple concurrent operations
 
 **Expected Results**:
 
-* Private keys stored securely in Vault
-* Public keys display valid XPUBs
-* Addresses generate correctly
-* Partner integration works
-* Appropriate permissions enforced
+* Secrets stored securely in Vault
+* Only tokens stored in Odoo
+* Proper error handling for connection issues
+* No sensitive data in Odoo logs or database
 
 📊 **Monitoring & Maintenance**
 ===============================
@@ -401,15 +389,15 @@ Log Monitoring
 
 **Odoo Logs to Monitor**:
 
-* Bitcoin module operations
+* Vault connector operations
 * Vault connection attempts
-* User permission denials
-* Key generation activities
+* Secret storage/retrieval operations
+* Authentication failures
 
 **Vault Logs to Monitor**:
 
 * Odoo authentication attempts
-* Key storage/retrieval operations
+* Secret storage/retrieval operations
 * Failed authentication attempts
 * Token usage patterns
 
@@ -452,45 +440,45 @@ Common Configuration Issues
   * Check Vault server status and unseal state
   * Verify token has proper permissions
 
-**Bitcoin Menu Not Visible**:
+**Module Not Available**:
 
-* **Symptoms**: No Bitcoin menu in Accounting section
+* **Symptoms**: Vault connector not available for import
 * **Solutions**:
-  * Check user group assignments
   * Verify module installation completed successfully
-  * Clear browser cache and refresh
-  * Check Odoo logs for permission errors
+  * Check module is in correct addons path
+  * Restart Odoo server after installation
+  * Check Odoo logs for import errors
 
 **Module Installation Fails**:
 
 * **Symptoms**: Error during module installation
 * **Solutions**:
-  * Install required Python dependencies (mnemonic)
+  * Install required Python dependencies (requests)
   * Check Odoo version compatibility
   * Verify addons path configuration
   * Review installation logs
 
-**Permission Denied Errors**:
+**Secret Storage/Retrieval Errors**:
 
-* **Symptoms**: Users can't access Bitcoin features
+* **Symptoms**: Errors when storing or retrieving secrets
 * **Solutions**:
-  * Assign appropriate security groups
-  * Check group hierarchy and implications
-  * Verify user is active and confirmed
-  * Restart user session after permission changes
+  * Check Vault token permissions
+  * Verify KV store is properly configured
+  * Check network connectivity to Vault
+  * Review Vault and Odoo error logs
 
 Performance Issues
 ------------------
 
-**Slow Key Generation**:
+**Slow Secret Operations**:
 
 * **Cause**: Network latency to Vault
 * **Solutions**: Move Vault closer to Odoo, optimize network
 
-**Address Derivation Slow**:
+**Connection Timeouts**:
 
-* **Cause**: Complex cryptographic operations
-* **Solutions**: Limit derivation count, use caching
+* **Cause**: Network issues or Vault overload
+* **Solutions**: Increase timeout values, check Vault performance
 
 Getting Support
 ---------------
@@ -500,8 +488,8 @@ Getting Support
 1. Check all configuration steps
 2. Review logs for specific error messages
 3. Test Vault connectivity independently
-4. Verify user permissions and groups
-5. Try with fresh browser session
+4. Verify environment variables are set correctly
+5. Test with minimal example code
 
 **Information to Provide**:
 
@@ -516,5 +504,5 @@ Getting Support
 
 * Module documentation and README files
 * Odoo Community Association forums
-* Bitcoin development community
+* HashiCorp Vault community
 * Professional Odoo support services
