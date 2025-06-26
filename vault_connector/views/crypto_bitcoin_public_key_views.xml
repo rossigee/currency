@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="crypto_bitcoin_public_key_view_form" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.public.key.form</field>
+            <field name="model">crypto.bitcoin.public.key</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Public Keys">
+                    <!-- Hidden fields for view logic -->
+                    <field name="private_key_id" invisible="1"/>
+                    
+                    <header>
+                        <button name="action_derive_addresses_wizard" string="Derive Addresses" 
+                                type="object" class="btn-primary" 
+                                attrs="{'invisible': [('xpub', '=', False)]}"/>
+                        <button name="action_refresh_vault_status" string="Refresh Vault Status" 
+                                type="object" class="btn-secondary" 
+                                attrs="{'invisible': [('id', '=', False)]}"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_view_private_key" type="object" 
+                                    class="oe_stat_button" icon="fa-lock"
+                                    attrs="{'invisible': [('private_key_id', '=', [])]}">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Private Key</span>
+                                </div>
+                            </button>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name" required="1"/>
+                                <field name="owner_id"/>
+                                <field name="key_type" attrs="{'readonly': [('id', '!=', False)]}"/>
+                                <field name="derivation_path" readonly="1" attrs="{'invisible': [('derivation_path', '=', False)]}"/>
+                                <field name="account_index" readonly="1" attrs="{'invisible': [('key_type', '!=', 'account')]}"/>
+                            </group>
+                            <group>
+                                <field name="partner_id" attrs="{'invisible': [('key_type', '!=', 'account')]}"/>
+                                <field name="fingerprint" readonly="1" attrs="{'invisible': [('fingerprint', '=', False)]}"/>
+                                <field name="token_uuid" readonly="1" attrs="{'invisible': [('id', '=', False)]}"/>
+                                <field name="vault_status" readonly="1" attrs="{'invisible': [('id', '=', False)]}"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="XPUB">
+                                <group string="Extended Public Key">
+                                    <field name="xpub" widget="CopyClipboardChar" 
+                                           attrs="{'readonly': [('id', '!=', False)], 'invisible': [('xpub', '=', False), ('id', '!=', False)]}"/>
+                                </group>
+                                
+                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('id', '!=', False)]}">
+                                    <strong>📖 Import XPUB:</strong><br/>
+                                    Paste the extended public key (XPUB) from your hardware wallet, Electrum, or other Bitcoin software.
+                                    Set the key type and other details above first.
+                                </div>
+                                
+                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('xpub', '!=', False)]}">
+                                    <strong>ℹ️ XPUB Not Available:</strong><br/>
+                                    The XPUB cannot be retrieved from Vault. Check vault status and try refreshing.
+                                </div>
+
+                                <group string="Key Fingerprints" attrs="{'invisible': [('xpub', '=', False)]}">
+                                    <group>
+                                        <field name="master_fingerprint" string="Master Key Fingerprint"/>
+                                        <field name="fingerprint" string="This Key Fingerprint"/>
+                                    </group>
+                                    <group>
+                                        <field name="xpub_parent_fingerprint" string="Parent Key Fingerprint"/>
+                                    </group>
+                                </group>
+
+                                <group string="XPUB Technical Details" attrs="{'invisible': [('xpub', '=', False)]}">
+                                    <group>
+                                        <field name="xpub_version"/>
+                                        <field name="xpub_depth"/>
+                                        <field name="xpub_child_number"/>
+                                    </group>
+                                    <group>
+                                        <field name="xpub_chain_code"/>
+                                        <field name="xpub_public_key"/>
+                                    </group>
+                                </group>
+                            </page>
+                            
+                            <page string="Multisig Setup Guide" attrs="{'invisible': [('key_type', '!=', 'multisig')]}">
+                                <div class="alert alert-info" role="alert">
+                                    <h4>🔑 Cosigner Key Created</h4>
+                                    <p>This is <strong>your contribution</strong> to a multisig wallet. To create actual multisig addresses, you need XPUBs from all other cosigners.</p>
+                                    
+                                    <h5>📋 Next Steps:</h5>
+                                    <ol>
+                                        <li><strong>Share Your XPUB:</strong> Provide your XPUB (from the XPUB tab) to other cosigners</li>
+                                        <li><strong>Collect Other XPUBs:</strong> Get corresponding XPUBs from other cosigners using the same derivation path</li>
+                                        <li><strong>Use Wallet Software:</strong> Import all XPUBs into multisig wallet software (Electrum, Bitcoin Core, etc.)</li>
+                                        <li><strong>Verify Setup:</strong> Ensure all cosigners generate the same multisig addresses</li>
+                                    </ol>
+                                    
+                                    <h5>⚠️ Important Notes:</h5>
+                                    <ul>
+                                        <li><strong>Single addresses shown here are NOT multisig</strong> - they're just from your individual key</li>
+                                        <li>All cosigners must use the <strong>same account index and script type</strong></li>
+                                        <li>Your derivation path: <code><field name="derivation_path" readonly="1" nolabel="1"/></code></li>
+                                        <li>Test the setup with small amounts before using for large transactions</li>
+                                    </ul>
+                                </div>
+                            </page>
+                            
+                            <page string="Notes">
+                                <field name="notes" widget="text"/>
+                            </page>
+                            
+                            <page string="Derived Addresses" attrs="{'invisible': ['|', ('xpub', '=', False), ('key_type', '=', 'multisig')]}">
+                            <group>
+                                <group string="Derivation Settings">
+                                    <field name="max_derivation_count"/>
+                                </group>
+                            </group>
+                            <separator string="Receive Addresses (m/0/x)"/>
+                            <field name="derived_receive_addresses" widget="text" readonly="1" 
+                                   attrs="{'invisible': [('derived_receive_addresses', '=', False)]}"
+                                   options="{'resizable': true}"/>
+                            <separator string="Change Addresses (m/1/x)"/>
+                            <field name="derived_change_addresses" widget="text" readonly="1"
+                                   attrs="{'invisible': [('derived_change_addresses', '=', False)]}"
+                                   options="{'resizable': true}"/>
+                        </page>
+                    </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="crypto_bitcoin_public_key_view_tree" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.public.key.tree</field>
+            <field name="model">crypto.bitcoin.public.key</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin Public Keys">
+                    <field name="name"/>
+                    <field name="key_type"/>
+                    <field name="derivation_path"/>
+                    <field name="account_index"/>
+                    <field name="vault_status"/>
+                    <field name="partner_id"/>
+                    <field name="owner_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="crypto_bitcoin_public_key_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Public Keys</field>
+            <field name="res_model">crypto.bitcoin.public.key</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_create_action': 'wizard'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first Bitcoin public key!
+                </p>
+                <p>
+                    You can create public keys in two ways:
+                </p>
+                <ul>
+                    <li><strong>Click "Create":</strong> Import extended public keys (XPUB) from hardware wallets or other sources</li>
+                    <li><strong>Derive from Private Key:</strong> Go to Private Keys → Create Account or Multisig Public Key</li>
+                </ul>
+            </field>
+        </record>
+        
+    </data>
+</odoo>
