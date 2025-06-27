@@ -1,1 +1,0 @@
-* Once installed, there will be a 'Cryptocurrency' root menu, with submenus for 'Bitcoin', 'Lightning' and 'Configuration'.
