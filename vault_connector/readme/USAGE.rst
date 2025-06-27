@@ -28,6 +28,7 @@ The Vault Connector provides a secure interface between Odoo and HashiCorp Vault
 * **Token Management**: Generate and manage UUID tokens for secret references
 * **Secure Retrieval**: Retrieve secrets using tokens with proper authentication
 * **Error Handling**: Robust error handling and status reporting
+* **UUID Enforcement**: Secret keys must be in valid UUID format, enforced by the connector to ensure uniqueness and security
 
 🔧 **API Reference**
 ====================
@@ -64,11 +65,15 @@ Basic Usage Pattern
     # Store only the token in your Odoo model
     your_model.vault_token = token
 
+    # Note: The token must be a valid UUID. The connector enforces this format for security and uniqueness.
+
 4. **Retrieve a Secret**::
 
     secret_data = vault.get_secret(token)
     api_key = secret_data.get('api_key')
     database_url = secret_data.get('database_url')
+
+    # Note: The token must be a valid UUID. The connector will raise an exception if an invalid format is used.
 
 📚 **Advanced API Methods**
 ===========================
@@ -122,12 +127,14 @@ Method Parameters and Returns
 * **Parameter**: `data` (dict) - The secret data to store
 * **Returns**: `str` - UUID token for retrieving the secret
 * **Raises**: VaultConnectionError, VaultAuthenticationError
+* **Note**: The returned token is guaranteed to be a valid UUID, enforced by the connector.
 
 **get_secret(token)**:
 
 * **Parameter**: `token` (str) - UUID token from store_secret
 * **Returns**: `dict` - The stored secret data
-* **Raises**: VaultConnectionError, VaultNotFoundError
+* **Raises**: VaultConnectionError, VaultNotFoundError, ValidationError (if token is not a valid UUID)
+* **Note**: The token must be a valid UUID, or an exception will be raised.
 
 **check_status()**:
 
@@ -246,6 +253,7 @@ Data Handling Guidelines
 * Implement proper access controls on token fields
 * Consider token rotation for long-lived secrets
 * Clean up unused tokens periodically
+* Ensure tokens are valid UUIDs as enforced by the connector
 
 **Error Handling**:
 
@@ -477,6 +485,12 @@ Common Issues
 * Check if secret has been deleted from Vault
 * Verify KV store path configuration
 * Check Vault token permissions for read access
+
+**"Invalid secret ID format" Error**:
+
+* Ensure the token provided is a valid UUID
+* Verify that the token was generated or stored correctly
+* Check for any manual edits to token fields that might have corrupted the UUID format
 
 **Performance Issues**:
 

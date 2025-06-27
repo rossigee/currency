@@ -3,9 +3,9 @@
 
 from odoo import fields, models, api
 from odoo.exceptions import ValidationError
-
 import requests
 import os
+import uuid
 
 
 class VaultConnector(models.AbstractModel):
@@ -69,6 +69,14 @@ class VaultConnector(models.AbstractModel):
         if not vault_addr or not vault_token:
             raise Exception("VAULT_ADDR and VAULT_TOKEN environment variables must be set.")
 
+        # Validate that secret_id is a valid UUID
+        try:
+            if not secret_id:
+                raise ValidationError("Secret ID cannot be empty.")
+            uuid.UUID(secret_id)
+        except ValueError:
+            raise ValidationError(f"Invalid secret ID format: {secret_id}. Must be a valid UUID.")
+
         # Check vault status first
         vault_status = self.check_vault_status()
         if not vault_status['accessible']:
@@ -101,6 +109,14 @@ class VaultConnector(models.AbstractModel):
         vault_skip_verify = os.environ.get('VAULT_SKIP_VERIFY', 'false').lower() == 'true'
         if not vault_addr or not vault_token:
             raise Exception("VAULT_ADDR and VAULT_TOKEN environment variables must be set.")
+
+        # Validate that secret_id is a valid UUID
+        try:
+            if not secret_id:
+                raise ValidationError("Secret ID cannot be empty.")
+            uuid.UUID(secret_id)
+        except ValueError:
+            raise ValidationError(f"Invalid secret ID format: {secret_id}. Must be a valid UUID.")
 
         kv_store = self._get_kv_store_name()
 
