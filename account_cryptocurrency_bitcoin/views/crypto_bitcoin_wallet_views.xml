@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="crypto_bitcoin_wallet_view_form" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.wallet.form</field>
+            <field name="model">crypto.bitcoin.wallet</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Wallets">
+                    <header>
+                        <button name="action_import_transactions" string="Import Transactions" 
+                                type="object" class="btn-primary"
+                                attrs="{'invisible': [('address_ids', '=', [])]}"/>
+                    </header>
+                    <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="owner_id"/>
+                            <field name="id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Addresses">
+                            <field name="address_ids">
+                                <tree editable="bottom" string="Addresses">
+                                    <field name="address"/>
+                                    <field name="label"/>
+                                    <field name="type"/>
+                                    <field name="used"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Transactions">
+                            <div class="alert alert-info" role="alert">
+                                <strong>📊 Transaction History:</strong><br/>
+                                Transactions related to this wallet's addresses. Use "Import Transactions" button to fetch from blockchain.
+                            </div>
+                            
+                            <separator string="Sent Transactions"/>
+                            <field name="sent_tx_ids">
+                                <tree string="Sent Transactions">
+                                    <field name="date"/>
+                                    <field name="tx_hash_display" string="Transaction Hash"/>
+                                    <field name="amount"/>
+                                    <field name="fee"/>
+                                    <field name="confirmations"/>
+                                    <field name="status"/>
+                                </tree>
+                            </field>
+                            
+                            <separator string="Received Transactions"/>
+                            <field name="rcvd_tx_ids">
+                                <tree string="Received Transactions">
+                                    <field name="date"/>
+                                    <field name="tx_hash_display" string="Transaction Hash"/>
+                                    <field name="amount"/>
+                                    <field name="fee"/>
+                                    <field name="confirmations"/>
+                                    <field name="status"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="crypto_bitcoin_wallet_view_tree" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.wallet.tree</field>
+            <field name="model">crypto.bitcoin.wallet</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin wallets">
+                    <field name="name"/>
+                    <field name="owner_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="crypto_bitcoin_wallet_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Wallets</field>
+            <field name="res_model">crypto.bitcoin.wallet</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>
