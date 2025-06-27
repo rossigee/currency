@@ -1,0 +1,13 @@
+<odoo>
+    <data>
+        <!-- Lightning Menu (requires Lightning User group)-->
+        <menuitem id="crypto_menu_lightning" name="Lightning" parent="account.menu_finance" groups="account_cryptocurrency_lightning.group_lightning_user"/>
+
+        <!-- Lightning Addresses Menu -->
+        <menuitem id="crypto_lightning_address_menu" name="Lightning Addresses" action="account_cryptocurrency_lightning.crypto_lightning_address_action" groups="account_cryptocurrency_lightning.group_lightning_user" parent="account_cryptocurrency_lightning.crypto_menu_lightning" />
+
+        <!-- Configuration-->
+        <menuitem id="crypto_menu_config_lightning" name="Lightning" parent="account.menu_finance_configuration" groups="account_cryptocurrency_lightning.group_lightning_user"/>
+        <menuitem id="crypto_lightning_service_provider_menu" name="Lightning Service Providers" parent="account_cryptocurrency_lightning.crypto_menu_config_lightning" action="crypto_lightning_service_provider_action"/>
+    </data>
+</odoo>

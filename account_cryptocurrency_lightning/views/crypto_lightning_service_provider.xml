@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="crypto_lightning_service_provider_form" model="ir.ui.view">
+            <field name="name">crypto.lightning.service.provider.form</field>
+            <field name="model">crypto.lightning.service.provider</field>
+            <field name="arch" type="xml">
+                <form string="Lightning Service Provider">
+                    <header>
+                        <button name="action_refresh_vault_status" string="Refresh Vault Status" 
+                                type="object" class="btn-secondary" 
+                                attrs="{'invisible': [('id', '=', False)]}"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="grpc_url"/>
+                            <field name="token_uuid" readonly="1" attrs="{'invisible': [('id', '=', False)]}"/>
+                            <field name="vault_status" readonly="1" attrs="{'invisible': [('id', '=', False)]}"/>
+                        </group>
+                        <notebook>
+                            <page string="Connection Details">
+                                <group>
+                                    <field name="pubkey"/>
+                                    <field name="clearnet_url"/>
+                                    <field name="tor_url"/>
+                                </group>
+                            </page>
+                            <page string="Sensitive Data" attrs="{'invisible': [('id', '=', False)]}">
+                                <div class="alert alert-warning" role="alert">
+                                    <strong>⚠️ SECURITY WARNING:</strong> 
+                                    The macaroon data is sensitive. Only view when necessary and ensure your screen is not visible to others.
+                                </div>
+                                <group string="Macaroon">
+                                    <field name="macaroon" widget="CopyClipboardChar" attrs="{'invisible': [('macaroon', '=', False)]}"/>
+                                </group>
+                                <div class="alert alert-info" role="alert">
+                                    <strong>🔐 Macaroon Security:</strong><br/>
+                                    Your macaroon is securely stored in Vault and can be accessed using token UUID: <code class="small"><field name="token_uuid" readonly="1" nolabel="1"/></code>
+                                </div>
+                            </page>
+                            <page string="Notes">
+                                <field name="notes"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="crypto_lightning_service_provider_view_tree" model="ir.ui.view">
+            <field name="name">crypto.lightning.service.provider.tree</field>
+            <field name="model">crypto.lightning.service.provider</field>
+            <field name="arch" type="xml">
+                <tree string="Lightning Service Providers">
+                    <field name="name"/>
+                    <field name="grpc_url"/>
+                    <field name="pubkey"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="crypto_lightning_service_provider_action" model="ir.actions.act_window">
+            <field name="name">Lightning Service Providers</field>
+            <field name="res_model">crypto.lightning.service.provider</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>
