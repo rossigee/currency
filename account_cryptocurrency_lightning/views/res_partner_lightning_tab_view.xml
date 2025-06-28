@@ -8,7 +8,29 @@
             <field name="arch" type="xml">
                 <notebook position="inside">
                     <page string="Lightning">
-                        <field name="lightning_address_ids"/>
+                        <separator string="Lightning Addresses"/>
+                        <field name="lightning_address_ids">
+                            <tree>
+                                <field name="address"/>
+                                <field name="owner_id"/>
+                                <field name="active"/>
+                                <field name="notes"/>
+                            </tree>
+                        </field>
+
+                        <separator string="Lightning Payments"/>
+                        <field name="lightning_payment_ids">
+                            <tree>
+                                <field name="creation_date"/>
+                                <field name="address_id"/>
+                                <field name="amount"/>
+                                <field name="currency_id"/>
+                                <field name="satoshis"/>
+                                <field name="payment_status"/>
+                                <field name="lsp_id"/>
+                                <field name="completion_date"/>
+                            </tree>
+                        </field>
                     </page>
                 </notebook>
             </field>

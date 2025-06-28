@@ -8,6 +8,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     lightning_address_ids = fields.One2many('crypto.lightning.address', 'owner_id', string='Lightning Addresses', compute='_compute_crypto_lightning_address_ids', store=True, readonly=False)
+    lightning_payment_ids = fields.One2many('crypto.lightning.payment', 'partner_id', string='Lightning Payments')
 
     def _compute_lightning_address_ids(self):
         for partner in self:

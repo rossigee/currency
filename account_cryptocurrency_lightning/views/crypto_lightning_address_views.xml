@@ -7,20 +7,36 @@
             <field name="arch" type="xml">
               <form string="Lightning Address">
                 <header>
-                  <button name="create_payment" string="Create Payment" type="object" class="btn-primary"/>
+                  <button name="create_payment" string="💸 Create Payment" type="object" class="btn-primary"/>
+                  <button name="action_fetch_transactions" string="🔄 Fetch Transactions" type="object" class="btn-secondary"
+                          attrs="{'invisible': [('service_provider_id', '=', False)]}"/>
                 </header>
                 <sheet>
                   <group>
-                    <field name="owner_id"/>
-                    <field name="address"/>
-                    <field name="type"/>
+                    <group>
+                      <field name="owner_id"/>
+                      <field name="address"/>
+                      <field name="type"/>
+                    </group>
+                    <group>
+                      <field name="service_provider_id"/>
+                      <field name="last_transaction_fetch" readonly="1" attrs="{'invisible': [('last_transaction_fetch', '=', False)]}"/>
+                    </group>
                   </group>
                   <notebook>
                     <page string="Notes">
                       <field name="notes"/>
                     </page>
-                    <page string="Transactions">
-                      <div><b>TODO! List historical entries.</b></div>
+                    <page string="Transactions" attrs="{'invisible': [('service_provider_id', '=', False)]}">
+                      <div class="alert alert-info" role="alert" attrs="{'invisible': [('transaction_data', '!=', 'No service provider configured')]}">
+                        <strong>💡 Transaction Data:</strong>
+                        Configure a service provider to fetch transaction history from your LND node.
+                      </div>
+
+                      <div attrs="{'invisible': [('service_provider_id', '=', False)]}">
+                        <p><strong>Recent Transactions (Latest 50):</strong></p>
+                        <field name="transaction_data" widget="html" nolabel="1" readonly="1"/>
+                      </div>
                     </page>
                   </notebook>
                 </sheet>
@@ -36,6 +52,7 @@
                     <field name="owner_id"/>
                     <field name="address"/>
                     <field name="type"/>
+                    <field name="service_provider_id"/>
                 </tree>
             </field>
         </record>

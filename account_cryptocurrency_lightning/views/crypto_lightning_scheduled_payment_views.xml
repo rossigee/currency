@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Tree View -->
+        <record id="crypto_lightning_scheduled_payment_view_tree" model="ir.ui.view">
+            <field name="name">crypto.lightning.scheduled.payment.tree</field>
+            <field name="model">crypto.lightning.scheduled.payment</field>
+            <field name="arch" type="xml">
+                <tree string="Scheduled Lightning Payments" decoration-info="state=='draft'"
+                      decoration-success="state=='active'" decoration-muted="state in ('paused','cancelled','completed')">
+                    <field name="name"/>
+                    <field name="address_id"/>
+                    <field name="amount_type"/>
+                    <field name="amount_fiat" attrs="{'invisible': [('amount_type', '!=', 'fiat')]}"/>
+                    <field name="currency_id" attrs="{'invisible': [('amount_type', '!=', 'fiat')]}"/>
+                    <field name="amount_satoshi" attrs="{'invisible': [('amount_type', '!=', 'satoshi')]}"/>
+                    <field name="cron_expression"/>
+                    <field name="cron_description"/>
+                    <field name="next_execution_date"/>
+                    <field name="state" widget="badge"
+                           decoration-info="state=='draft'"
+                           decoration-success="state=='active'"
+                           decoration-warning="state=='paused'"
+                           decoration-danger="state in ('cancelled','failed')"
+                           decoration-muted="state=='completed'"/>
+                    <field name="successful_executions"/>
+                    <field name="failed_executions"/>
+                    <field name="lsp_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="crypto_lightning_scheduled_payment_view_form" model="ir.ui.view">
+            <field name="name">crypto.lightning.scheduled.payment.form</field>
+            <field name="model">crypto.lightning.scheduled.payment</field>
+            <field name="arch" type="xml">
+                <form string="Scheduled Lightning Payment">
+                    <header>
+                        <button name="action_activate" string="Activate" type="object"
+                                class="btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_pause" string="Pause" type="object"
+                                attrs="{'invisible': [('state', '!=', 'active')]}"/>
+                        <button name="action_resume" string="Resume" type="object"
+                                class="btn-primary" attrs="{'invisible': [('state', '!=', 'paused')]}"/>
+                        <button name="action_execute_now" string="Execute Now" type="object"
+                                class="btn-secondary" attrs="{'invisible': [('state', 'not in', ['active', 'paused'])]}"/>
+                        <button name="action_cancel" string="Cancel" type="object"
+                                attrs="{'invisible': [('state', 'in', ['completed', 'cancelled'])]}"/>
+
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="draft,active,paused,completed,cancelled"
+                               statusbar_colors='{"draft":"blue","active":"green","paused":"orange","completed":"gray","cancelled":"red"}'/>
+                    </header>
+
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" type="object" name="action_view_payments" icon="fa-credit-card">
+                                <field name="payment_count" widget="statinfo" string="Payments"/>
+                            </button>
+
+                            <button class="oe_stat_button" icon="fa-check-circle" attrs="{'invisible': [('successful_executions', '=', 0)]}">
+                                <field name="successful_executions" widget="statinfo" string="Successful"/>
+                            </button>
+
+                            <button class="oe_stat_button" icon="fa-times-circle" attrs="{'invisible': [('failed_executions', '=', 0)]}">
+                                <field name="failed_executions" widget="statinfo" string="Failed"/>
+                            </button>
+                        </div>
+
+                        <group>
+                            <group string="Basic Information">
+                                <field name="name"/>
+                                <field name="address_id"/>
+                                <field name="lsp_id"/>
+                            </group>
+                            <group string="Amount Configuration">
+                                <field name="amount_type" widget="radio"/>
+                                <field name="amount_fiat" attrs="{'invisible': [('amount_type', '!=', 'fiat')], 'required': [('amount_type', '=', 'fiat')]}"/>
+                                <field name="currency_id" attrs="{'invisible': [('amount_type', '!=', 'fiat')], 'required': [('amount_type', '=', 'fiat')]}"/>
+                                <field name="amount_satoshi" attrs="{'invisible': [('amount_type', '!=', 'satoshi')], 'required': [('amount_type', '=', 'satoshi')]}"/>
+                            </group>
+                        </group>
+
+                        <group>
+                            <group string="Schedule Configuration">
+                                <field name="cron_expression" placeholder="e.g., */5 * * * * for every 5 minutes"/>
+                                <field name="cron_description" readonly="1" string="Description"/>
+                                <field name="start_date"/>
+                                <field name="end_date"/>
+                            </group>
+                            <group string="Execution Status">
+                                <field name="next_execution_date" readonly="1"/>
+                                <field name="last_execution_date" readonly="1"/>
+                                <field name="last_execution_status" readonly="1"/>
+                                <field name="total_executions" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="Execution History" attrs="{'invisible': [('payment_count', '=', 0)]}">
+                                <field name="payment_ids" readonly="1">
+                                    <tree string="Generated Payments" create="false" edit="false">
+                                        <field name="creation_date"/>
+                                        <field name="amount"/>
+                                        <field name="currency_id"/>
+                                        <field name="satoshis"/>
+                                        <field name="payment_status" widget="badge"/>
+                                        <field name="fee_paid_sat"/>
+                                        <field name="payment_hash"/>
+                                    </tree>
+                                </field>
+                            </page>
+
+                            <page string="Notes and Communication">
+                                <div class="oe_chatter">
+                                    <field name="message_follower_ids" widget="mail_followers"/>
+                                    <field name="activity_ids" widget="mail_activity"/>
+                                    <field name="message_ids" widget="mail_thread"/>
+                                </div>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Calendar View -->
+        <record id="crypto_lightning_scheduled_payment_view_calendar" model="ir.ui.view">
+            <field name="name">crypto.lightning.scheduled.payment.calendar</field>
+            <field name="model">crypto.lightning.scheduled.payment</field>
+            <field name="arch" type="xml">
+                <calendar string="Scheduled Payments" date_start="next_execution_date"
+                         color="state" mode="month" quick_add="False">
+                    <field name="name"/>
+                    <field name="address_id"/>
+                    <field name="amount_fiat"/>
+                    <field name="amount_satoshi"/>
+                    <field name="currency_id"/>
+                    <field name="state"/>
+                </calendar>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="crypto_lightning_scheduled_payment_view_search" model="ir.ui.view">
+            <field name="name">crypto.lightning.scheduled.payment.search</field>
+            <field name="model">crypto.lightning.scheduled.payment</field>
+            <field name="arch" type="xml">
+                <search string="Scheduled Lightning Payments">
+                    <field name="name"/>
+                    <field name="address_id"/>
+                    <field name="lsp_id"/>
+
+                    <filter name="active" string="Active" domain="[('state', '=', 'active')]"/>
+                    <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                    <filter name="paused" string="Paused" domain="[('state', '=', 'paused')]"/>
+
+                    <separator/>
+                    <filter name="fiat_amount" string="Fiat Amount" domain="[('amount_type', '=', 'fiat')]"/>
+                    <filter name="satoshi_amount" string="Satoshi Amount" domain="[('amount_type', '=', 'satoshi')]"/>
+
+                    <separator/>
+                    <filter name="due_soon_hour" string="Due in Next Hour"
+                            domain="[('next_execution_date', '&lt;=', (datetime.datetime.now() + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                    <filter name="due_soon" string="Due in Next 24h"
+                            domain="[('next_execution_date', '&lt;=', (context_today() + relativedelta(days=1)).strftime('%Y-%m-%d 23:59:59'))]"/>
+                    <filter name="overdue" string="Overdue"
+                            domain="[('next_execution_date', '&lt;', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')), ('state', '=', 'active')]"/>
+
+                    <separator/>
+                    <filter name="high_frequency" string="High Frequency (≤5min)"
+                            domain="['|', ('cron_expression', '=', '* * * * *'), ('cron_expression', 'ilike', '*/[1-5] * * * *')]"/>
+
+                    <group expand="0" string="Group By">
+                        <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                        <filter name="group_cron" string="Cron Expression" context="{'group_by': 'cron_expression'}"/>
+                        <filter name="group_lsp" string="LSP" context="{'group_by': 'lsp_id'}"/>
+                        <filter name="group_amount_type" string="Amount Type" context="{'group_by': 'amount_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action for Scheduled Payments -->
+        <record id="crypto_lightning_scheduled_payment_action" model="ir.actions.act_window">
+            <field name="name">Scheduled Lightning Payments</field>
+            <field name="res_model">crypto.lightning.scheduled.payment</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="view_id" ref="crypto_lightning_scheduled_payment_view_tree"/>
+            <field name="search_view_id" ref="crypto_lightning_scheduled_payment_view_search"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first scheduled Lightning payment
+                </p>
+                <p>
+                    Schedule regular payments to Lightning addresses with flexible frequencies and amount types.
+                    Supports both fixed fiat amounts and fixed satoshi amounts.
+                </p>
+            </field>
+        </record>
+
+        <!-- Cron Job for Scheduled Payment Execution -->
+        <record id="cron_execute_scheduled_lightning_payments" model="ir.cron">
+            <field name="name">Execute Scheduled Lightning Payments</field>
+            <field name="model_id" ref="model_crypto_lightning_scheduled_payment"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_execute_scheduled_payments()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+    </data>
+</odoo>
