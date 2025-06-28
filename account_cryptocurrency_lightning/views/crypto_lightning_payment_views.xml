@@ -118,7 +118,7 @@
                                 </group>
                             </page>
 
-                            <page string="Notes and Communication">
+                            <page string="Notes">
                                 <field name="notes" placeholder="Add internal notes about this payment..."/>
                                 <div class="oe_chatter">
                                     <field name="message_follower_ids" widget="mail_followers"/>
