@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Create Transaction Wizard Form View -->
+        <record id="wizard_create_transaction_form_view" model="ir.ui.view">
+            <field name="name">wizard.create.transaction.form</field>
+            <field name="model">wizard.create.transaction</field>
+            <field name="arch" type="xml">
+                <form>
+                    <footer>
+                        <button name="action_create_transaction" string="Create PSBT" 
+                                type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Transaction Name"/></h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Multisig Wallet">
+                                <field name="multisig_wallet_id"/>
+                            </group>
+                            <group string="Fee Settings">
+                                <field name="target_fee_rate"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Notes">
+                            <field name="notes" nolabel="1"/>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Transaction Outputs">
+                                <div class="alert alert-info" role="alert" 
+                                     attrs="{'invisible': [('output_line_ids', '!=', [])]}">
+                                    <strong>📤 Transaction Outputs:</strong><br/>
+                                    Add one or more outputs to specify where to send Bitcoin.
+                                    Each output requires a recipient address and amount.
+                                </div>
+                                
+                                <field name="output_line_ids" nolabel="1">
+                                    <tree editable="bottom" create="true" delete="true">
+                                        <field name="recipient_address" required="1"/>
+                                        <field name="amount_btc" sum="Total BTC"/>
+                                        <field name="description"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            
+                            <page string="Transaction Summary" 
+                                  attrs="{'invisible': [('output_line_ids', '=', [])]}">
+                                <div class="alert alert-success" role="alert">
+                                    <strong>💰 Transaction Summary:</strong><br/>
+                                    Review the transaction details before creating the PSBT.
+                                </div>
+                                
+                                <group>
+                                    <group string="Outputs">
+                                        <field name="total_output_btc" readonly="1"/>
+                                    </group>
+                                    <group string="Fees">
+                                        <field name="estimated_fee_btc" readonly="1"/>
+                                    </group>
+                                </group>
+                                
+                                <group>
+                                    <group string="Total Required">
+                                        <field name="total_needed_btc" readonly="1" 
+                                               style="font-weight: bold; font-size: 1.2em;"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Create Transaction Action -->
+        <record id="action_wizard_create_transaction" model="ir.actions.act_window">
+            <field name="name">Create Transaction</field>
+            <field name="res_model">wizard.create.transaction</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="wizard_create_transaction_form_view"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Multisig Wallet Tree View -->
+        <record id="crypto_bitcoin_multisig_wallet_tree_view" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.multisig.wallet.tree</field>
+            <field name="model">crypto.bitcoin.multisig.wallet</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="m_of_n_threshold"/>
+                    <field name="total_cosigners"/>
+                    <field name="script_type"/>
+                    <field name="is_complete" widget="boolean"/>
+                    <field name="signer_count"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Multisig Wallet Form View -->
+        <record id="crypto_bitcoin_multisig_wallet_form_view" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.multisig.wallet.form</field>
+            <field name="model">crypto.bitcoin.multisig.wallet</field>
+            <field name="arch" type="xml">
+                <form>
+                    <!-- Invisible fields for computed logic -->
+                    <field name="has_vault_issues" invisible="1"/>
+                    
+                    <header>
+                        <button name="action_add_cosigner" string="Add Cosigner" 
+                                type="object" class="btn-primary" 
+                                attrs="{'invisible': [('is_complete', '=', True)]}"/>
+                        <button name="%(action_wizard_create_transaction)d" string="Create Transaction" 
+                                type="action" class="btn-primary" 
+                                attrs="{'invisible': [('is_complete', '=', False)]}"
+                                context="{'default_multisig_wallet_id': active_id}"/>
+                        <button name="action_import_transactions" string="Import Transactions" 
+                                type="object" class="btn-secondary" 
+                                attrs="{'invisible': [('is_complete', '=', False)]}"/>
+                        <field name="is_complete" widget="statusbar" statusbar_visible="false,true"/>
+                    </header>
+                    <sheet>
+                        
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Multisig Wallet Name"/></h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Multisig Configuration">
+                                <field name="m_of_n_threshold"/>
+                                <field name="total_cosigners"/>
+                                <field name="script_type"/>
+                                <field name="network"/>
+                            </group>
+                            <group string="Status">
+                                <field name="signer_count" readonly="1"/>
+                                <field name="is_complete" readonly="1"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Description">
+                            <field name="description" nolabel="1"/>
+                        </group>
+                        
+                        <!-- Vault Status Alert -->
+                        <div class="alert alert-warning" role="alert" 
+                             attrs="{'invisible': [('has_vault_issues', '=', False)]}">
+                            <strong>⚠️ Vault Connectivity Issues:</strong><br/>
+                            <field name="vault_status_summary" nolabel="1" readonly="1" widget="text" 
+                                   style="font-family: monospace; font-size: 12px; white-space: pre-line;"/>
+                        </div>
+                        
+                        <notebook>
+                            <page string="Cosigner Public Keys">
+                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('cosigner_public_key_ids', '!=', [])]}">
+                                    <strong>📖 Multisig Setup:</strong><br/>
+                                    Add cosigner public keys to create the multisig wallet.
+                                    Each cosigner should provide their XPUB for the same derivation path.
+                                </div>
+                                
+                                <field name="cosigner_public_key_ids" nolabel="1">
+                                    <tree create="false" delete="true" editable="bottom">
+                                        <field name="name"/>
+                                        <field name="cosigner_index"/>
+                                        <field name="derivation_path"/>
+                                        <field name="owner_id"/>
+                                        <field name="vault_status"/>
+                                        <field name="xpub" widget="text"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            
+                            <page string="BSMS File" attrs="{'invisible': [('is_complete', '=', False)]}">
+                                <div class="alert alert-success" role="alert" 
+                                     attrs="{'invisible': [('has_vault_issues', '=', True)]}">
+                                    <strong>✅ Multisig Configuration Complete!</strong><br/>
+                                    You can now download the BSMS file to import this multisig wallet into other Bitcoin software.
+                                </div>
+                                
+                                <div class="alert alert-warning" role="alert" 
+                                     attrs="{'invisible': [('has_vault_issues', '=', False)]}">
+                                    <strong>⚠️ Vault Issues Detected!</strong><br/>
+                                    BSMS file generation requires all cosigner XPUBs to be accessible. Please resolve vault connectivity issues first.
+                                </div>
+                                
+                                <group>
+                                    <button name="action_download_bsms" string="Download BSMS File" 
+                                            type="object" class="btn-primary btn-lg" 
+                                            style="width: 100%; margin-bottom: 15px;"
+                                            icon="fa-download"/>
+                                </group>
+                                
+                                <group string="BSMS File Content">
+                                    <field name="bsms_content" widget="text" readonly="1" nolabel="1" 
+                                           class="text-monospace" style="font-size: 12px;"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Derived Addresses" attrs="{'invisible': [('is_complete', '=', False)]}">
+                                <div class="alert alert-warning" role="alert" 
+                                     attrs="{'invisible': [('has_vault_issues', '=', False)]}">
+                                    <strong>⚠️ Cannot Generate Addresses</strong><br/>
+                                    Address generation requires all cosigner XPUBs to be accessible from vault. Please resolve connectivity issues first.
+                                </div>
+                                <group>
+                                    <group string="Address Generation Settings">
+                                        <field name="max_address_count"/>
+                                    </group>
+                                </group>
+                                
+                                <separator string="Receive Addresses (m/0/x)"/>
+                                <field name="derived_receive_addresses" widget="text" readonly="1" 
+                                       attrs="{'invisible': [('derived_receive_addresses', '=', False)]}"
+                                       options="{'resizable': true}" style="font-family: monospace; font-size: 12px;"/>
+                                       
+                                <separator string="Change Addresses (m/1/x)"/>
+                                <field name="derived_change_addresses" widget="text" readonly="1"
+                                       attrs="{'invisible': [('derived_change_addresses', '=', False)]}"
+                                       options="{'resizable': true}" style="font-family: monospace; font-size: 12px;"/>
+                            </page>
+                            
+                            <page string="Transactions">
+                                <div class="alert alert-info" role="alert">
+                                    <strong>📊 Transaction History:</strong><br/>
+                                    Transactions related to this multisig wallet. Use "Import Transactions" button to fetch from blockchain.
+                                </div>
+                                
+                                <!-- Search for transactions related to this multisig wallet -->
+                                <field name="id" invisible="1"/>
+                                <field name="multisig_transaction_ids" nolabel="1">
+                                    <tree string="Related Transactions">
+                                        <field name="date"/>
+                                        <field name="tx_hash_display" string="Transaction Hash"/>
+                                        <field name="amount"/>
+                                        <field name="fee"/>
+                                        <field name="confirmations"/>
+                                        <field name="status"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            
+                            <page string="Legacy Wallets" attrs="{'invisible': [('wallet_ids', '=', [])]}">
+                                <field name="wallet_ids">
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="owner_id"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Multisig Wallet Action -->
+        <record id="crypto_bitcoin_multisig_wallet_action" model="ir.actions.act_window">
+            <field name="name">Multisig Wallets</field>
+            <field name="res_model">crypto.bitcoin.multisig.wallet</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="crypto_bitcoin_multisig_wallet_tree_view"/>
+        </record>
+
+        <record id="crypto_bitcoin_wallet_action_create_multisig_window" model="ir.actions.act_window">
+            <field name="name">Create Multisig Wallet</field>
+            <field name="res_model">crypto.bitcoin.multisig.wallet</field>
+            <field name="view_mode">form</field>
+            <field name="binding_model_id" ref="model_crypto_bitcoin_wallet"/>
+            <field name="binding_type">action</field>
+            <field name="binding_view_types">form,tree</field>
+            <field name="view_id" ref="crypto_bitcoin_multisig_wallet_form_view"/>
+            <field name="context">{'default_wallet_ids': active_ids}</field>
+        </record>
+
+        <record id="crypto_bitcoin_wallet_action_create_multisig_binding" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="crypto_bitcoin_wallet_action_create_multisig_window"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="crypto_bitcoin_multisig_wallet_form_view"/>
+        </record>
+    </data>
+</odoo>

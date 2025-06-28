@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="wizard_import_xpub_view_form" model="ir.ui.view">
+            <field name="name">wizard.import.xpub.form</field>
+            <field name="model">wizard.import.xpub</field>
+            <field name="arch" type="xml">
+                <form string="Import XPUB">
+                    <header>
+                        <button name="action_import_xpub" string="Import XPUB" type="object" 
+                                class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </header>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <strong>📖 Import Extended Public Key (XPUB):</strong><br/>
+                        Import an XPUB from hardware wallets, other software, or manually entered.
+                        This allows creating multisig wallets or monitoring accounts without exposing private keys.
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="name" placeholder="e.g., Hardware Wallet #1"/>
+                            <field name="key_type"/>
+                            <field name="derivation_path" attrs="{'readonly': [('key_type', '!=', 'master')]}"/>
+                        </group>
+                        <group>
+                            <field name="owner_id"/>
+                            <field name="partner_id" attrs="{'invisible': [('key_type', '!=', 'account')]}"/>
+                        </group>
+                    </group>
+                    
+                    <group string="XPUB Details">
+                        <field name="xpub" widget="text" placeholder="xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj"/>
+                        <field name="master_fingerprint" placeholder="4b4e812f" 
+                               help="8-character hex fingerprint of the master/root key for validation"/>
+                    </group>
+                    
+                    <!-- Key-specific settings -->
+                    <group string="Key Settings" attrs="{'invisible': [('key_type', 'not in', ['account', 'multisig'])]}">
+                        <group>
+                            <field name="account_index" attrs="{'invisible': [('key_type', 'not in', ['account', 'multisig'])]}"/>
+                            <field name="script_type" attrs="{'invisible': [('key_type', '!=', 'multisig')]}"/>
+                        </group>
+                        <group>
+                            <field name="cosigner_index" attrs="{'invisible': [('key_type', '!=', 'multisig')]}"/>
+                            <field name="multisig_wallet_id" attrs="{'invisible': [('key_type', '!=', 'multisig')]}"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Validation Results -->
+                    <group string="Validation Results" attrs="{'invisible': [('xpub', '=', False)]}">
+                        <field name="fingerprint_match" widget="boolean_button" readonly="1" string="Master Fingerprint Match"/>
+                    </group>
+                    
+                    <!-- XPUB Validation -->
+                    <group string="XPUB Validation" attrs="{'invisible': [('xpub', '=', False)]}">
+                        <div class="row">
+                            <div class="col-2">
+                                <field name="xpub_valid" widget="boolean_button" readonly="1"/>
+                            </div>
+                            <div class="col-10">
+                                <field name="xpub_details" widget="text" readonly="1" nolabel="1" 
+                                       class="text-monospace" style="font-size: 12px;"/>
+                            </div>
+                        </div>
+                    </group>
+                    
+                    <group string="Notes">
+                        <field name="notes" widget="text" nolabel="1"/>
+                    </group>
+                    
+                    <group>
+                        <button name="action_import_xpub" string="Import XPUB and Create Public Key" 
+                                type="object" class="btn-primary btn-lg" 
+                                style="width: 100%; margin: 10px 0;"/>
+                    </group>
+                    
+                </form>
+            </field>
+        </record>
+
+        <!-- Action for the wizard -->
+        <record id="action_import_xpub_wizard" model="ir.actions.act_window">
+            <field name="name">Import XPUB</field>
+            <field name="res_model">wizard.import.xpub</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="wizard_derive_addresses_view_form" model="ir.ui.view">
+            <field name="name">wizard.derive.addresses.form</field>
+            <field name="model">wizard.derive.addresses</field>
+            <field name="arch" type="xml">
+                <form string="Derive Addresses from XPUB">
+                    <group attrs="{'invisible': [('derived_addresses_display', '!=', False)]}">
+                        <group string="Derivation Parameters">
+                            <field name="public_key_id" readonly="context.get('default_public_key_id', False)"/>
+                            <field name="start_index"/>
+                            <field name="count"/>
+                            <field name="address_type"/>
+                        </group>
+                    </group>
+                    
+                    <group attrs="{'invisible': [('derived_addresses_display', '=', False)]}">
+                        <separator string="Derived Addresses"/>
+                        <field name="derived_addresses_display" widget="text" readonly="1" 
+                               options="{'resizable': true}" nolabel="1"/>
+                    </group>
+                    
+                    <footer>
+                        <button string="Derive Addresses" name="action_derive_addresses" type="object" 
+                                class="btn-primary" attrs="{'invisible': [('derived_addresses_display', '!=', False)]}"/>
+                        <button string="Export JSON" name="action_export_addresses" type="object" 
+                                class="btn-secondary" attrs="{'invisible': [('derived_addresses_display', '=', False)]}"/>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+        <record id="wizard_derive_addresses_action" model="ir.actions.act_window">
+            <field name="name">Derive Addresses</field>
+            <field name="res_model">wizard.derive.addresses</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>
