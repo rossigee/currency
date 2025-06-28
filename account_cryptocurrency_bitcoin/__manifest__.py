@@ -42,6 +42,7 @@
         "views/crypto_bitcoin_wallet_views.xml",
         "views/bitcoin_settings_views.xml",
         "views/res_config_settings_views.xml",
+        "views/queue_job_views.xml",
         "views/menu.xml",
         "views/res_partner_bitcoin_tab_view.xml",
     ],

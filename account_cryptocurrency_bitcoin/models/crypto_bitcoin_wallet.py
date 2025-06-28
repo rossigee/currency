@@ -13,9 +13,10 @@ _logger = logging.getLogger(__name__)
 class CryptoBitcoinWallet(models.Model):
     _name = 'crypto.bitcoin.wallet'
     _description = 'Crypto Bitcoin Wallet'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Name', required=True)
-    owner_id = fields.Many2one('res.partner', string='Owner')
+    name = fields.Char(string='Name', required=True, tracking=True)
+    owner_id = fields.Many2one('res.partner', string='Owner', tracking=True)
     notes = fields.Text(string='Notes')
 
     xpub_ids = fields.One2many('crypto.bitcoin.public.key', 'wallet_id', string='XPUBs')
