@@ -19,11 +19,9 @@
                         </group>
                         <group>
                             <field name="pubkey"/>
-                        </group>
-
-                        <group string="Macaroon Upload">
-                            <field name="macaroon" widget="text" placeholder="Paste your macaroon here (base64 or hex format)"
-                                   help="Upload your LND macaroon in base64 or hex format. This will be securely stored in vault."/>
+                            <field name="rest_url"/>
+                            <field name="clearnet_url"/>
+                            <field name="tor_url"/>
                         </group>
 
                         <group string="Notifications">
@@ -31,21 +29,20 @@
                                    help="Select a mail channel to receive payment success/failure notifications"/>
                         </group>
                         <notebook>
-                            <page string="Connection Details">
-                                <group>
-                                    <field name="rest_url"/>
-                                    <field name="clearnet_url"/>
-                                    <field name="tor_url"/>
-                                </group>
-                            </page>
-                            <page string="Macaroon Details" attrs="{'invisible': ['|', ('macaroon_format', '=', ''), ('macaroon', '=', False)]}">
+                            <page string="Macaroon Details">
                                 <div class="alert alert-warning" role="alert">
                                     <strong>⚠️ SECURITY WARNING:</strong>
                                     The macaroon data is sensitive. Only view when necessary and ensure your screen is not visible to others.
                                 </div>
 
+                                <!-- Macaroon Upload Section -->
+                                <group string="Macaroon Upload">
+                                    <field name="macaroon" widget="text" placeholder="Paste your macaroon here (base64 or hex format)"
+                                           help="Upload your LND macaroon in base64 or hex format. This will be securely stored in vault."/>
+                                </group>
+
                                 <!-- Basic Information Section -->
-                                <group>
+                                <group attrs="{'invisible': ['|', ('macaroon_format', '=', ''), ('macaroon', '=', False)]}">
                                     <group string="Macaroon Information">
                                         <field name="macaroon_format" readonly="1"/>
                                         <field name="macaroon_location" readonly="1"/>
@@ -108,6 +105,26 @@
                                 <div class="alert alert-danger" role="alert" attrs="{'invisible': [('lnd_status_error', '=', False)]}">
                                     <strong>Error:</strong>
                                     <field name="lnd_status_error" readonly="1" nolabel="1"/>
+                                </div>
+                            </page>
+                            <page string="Transactions" attrs="{'invisible': [('rest_url', '=', False)]}">
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <button name="action_fetch_transactions" string="🔄 Fetch Transactions" type="object" class="btn btn-primary" title="Fetch transaction history from LND node"/>
+                                        <span class="text-muted ml-3" attrs="{'invisible': [('last_transaction_fetch', '=', False)]}">
+                                            Last updated: <field name="last_transaction_fetch" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('rest_url', '!=', False)]}">
+                                    <strong>💡 Transaction Data:</strong>
+                                    Configure a REST URL and macaroon to fetch transaction history from your LND node.
+                                </div>
+
+                                <div attrs="{'invisible': [('rest_url', '=', False)]}">
+                                    <p><strong>Recent Transactions (Latest 100):</strong></p>
+                                    <field name="transaction_html" nolabel="1" readonly="1"/>
                                 </div>
                             </page>
                             <page string="Notes">

@@ -114,7 +114,7 @@
                                 </field>
                             </page>
 
-                            <page string="Notes and Communication">
+                            <page string="Notes">
                                 <div class="oe_chatter">
                                     <field name="message_follower_ids" widget="mail_followers"/>
                                     <field name="activity_ids" widget="mail_activity"/>
