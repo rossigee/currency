@@ -1,7 +1,7 @@
 <odoo>
     <data>
-        <!-- Lightning Menu (requires Lightning User group)-->
-        <menuitem id="crypto_menu_lightning" name="Lightning" parent="account.menu_finance" groups="account_cryptocurrency_lightning.group_lightning_user"/>
+        <!-- Lightning Menu (root level with Lightning Network logo)-->
+        <menuitem id="crypto_menu_lightning" name="Lightning Network" web_icon="account_cryptocurrency_lightning,static/description/lightning_network.svg" groups="account_cryptocurrency_lightning.group_lightning_user" sequence="95"/>
 
         <!-- Lightning Addresses Menu -->
         <menuitem id="crypto_lightning_address_menu" name="Lightning Addresses" action="account_cryptocurrency_lightning.crypto_lightning_address_action" groups="account_cryptocurrency_lightning.group_lightning_user" parent="account_cryptocurrency_lightning.crypto_menu_lightning" />
@@ -12,8 +12,8 @@
         <!-- Scheduled Lightning Payments Menu -->
         <menuitem id="crypto_lightning_scheduled_payment_menu" name="Scheduled Payments" action="account_cryptocurrency_lightning.crypto_lightning_scheduled_payment_action" groups="account_cryptocurrency_lightning.group_lightning_user" parent="account_cryptocurrency_lightning.crypto_menu_lightning" />
 
-        <!-- Configuration-->
-        <menuitem id="crypto_menu_config_lightning" name="Lightning" parent="account.menu_finance_configuration" groups="account_cryptocurrency_lightning.group_lightning_user"/>
+        <!-- Configuration (moved under Lightning Network root menu)-->
+        <menuitem id="crypto_menu_config_lightning" name="Configuration" parent="account_cryptocurrency_lightning.crypto_menu_lightning" groups="account_cryptocurrency_lightning.group_lightning_user" sequence="90"/>
         <menuitem id="crypto_lightning_service_provider_menu" name="Lightning Service Providers" parent="account_cryptocurrency_lightning.crypto_menu_config_lightning" action="crypto_lightning_service_provider_action"/>
         <menuitem id="crypto_btc_price_service_menu" name="BTC Price Services" parent="account_cryptocurrency_lightning.crypto_menu_config_lightning" action="account_cryptocurrency_lightning.crypto_btc_price_service_action"/>
     </data>

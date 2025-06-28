@@ -5,6 +5,7 @@ from odoo import fields, models, api
 from odoo.exceptions import ValidationError
 import uuid
 import base64
+import json
 from .macaroon_utils import MacaroonUtils, MacaroonValidationError
 from .lnd_rest_client import LndRestClient
 
@@ -56,6 +57,11 @@ class CryptoLightningServiceProvider(models.Model):
     lnd_channel_balance_sat = fields.Integer(string='Channel Balance (sats)', readonly=True)
     lnd_num_peers = fields.Integer(string='Connected Peers', readonly=True)
     lnd_status_error = fields.Text(string='Status Error', readonly=True)
+
+    # Transaction-related fields (computed)
+    transaction_data = fields.Text(string='Transaction Data', compute='_compute_transaction_data', store=False)
+    transaction_html = fields.Html(string='Transaction Table', compute='_compute_transaction_html', store=False)
+    last_transaction_fetch = fields.Datetime(string='Last Fetch', readonly=True)
 
     def _inverse_vault_values(self):
         """Store macaroon data in vault with validation"""
@@ -287,6 +293,214 @@ class CryptoLightningServiceProvider(models.Model):
             raise Exception(f"Failed to fetch LND status: {str(e)}")
         finally:
             client.close()
+
+    @api.depends('rest_url')
+    def _compute_transaction_data(self):
+        """Compute transaction data by fetching from LND service"""
+        for record in self:
+            if record.rest_url and record.macaroon:
+                try:
+                    transactions = record._fetch_transactions_from_lnd()
+                    record.transaction_data = json.dumps(transactions, indent=2)
+                except Exception as e:
+                    record.transaction_data = f"Error fetching transactions: {str(e)}"
+            else:
+                record.transaction_data = "No REST URL or macaroon configured"
+
+    @api.depends('rest_url')
+    def _compute_transaction_html(self):
+        """Compute transaction data as formatted HTML table"""
+        for record in self:
+            if not record.rest_url or not record.macaroon:
+                record.transaction_html = "<p class='text-muted'>No REST URL or macaroon configured</p>"
+                continue
+                
+            try:
+                transactions = record._fetch_transactions_from_lnd()
+                record.transaction_html = record._format_transactions_as_html(transactions)
+            except Exception as e:
+                record.transaction_html = f"<div class='alert alert-danger'>Error fetching transactions: {str(e)}</div>"
+
+    def _fetch_transactions_from_lnd(self):
+        """Fetch all transactions from this LND node"""
+        if not self.rest_url:
+            raise ValidationError("No REST URL configured for this service provider")
+
+        # Get macaroon from vault if not already loaded
+        if not self.macaroon:
+            self._compute_vault_values()
+            
+        vault_data = self._get_data_from_vault(self.token_uuid)
+        macaroon = vault_data.get('macaroon')
+        if not macaroon:
+            raise ValidationError("No macaroon available for service provider")
+
+        # Convert macaroon to hex if needed
+        if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):
+            macaroon_hex = macaroon
+        else:
+            import base64
+            macaroon_bytes = base64.b64decode(macaroon)
+            macaroon_hex = macaroon_bytes.hex()
+
+        # Create LND client and fetch data
+        client = LndRestClient(self.rest_url, macaroon_hex)
+        client.connect()
+
+        try:
+            # Fetch invoices and payments
+            invoices_data = client.list_invoices(100)
+            payments_data = client.list_payments(100)
+
+            # Process all transactions
+            transactions = self._process_all_transactions(invoices_data, payments_data)
+
+            return transactions
+        finally:
+            client.close()
+
+    def _process_all_transactions(self, invoices_data, payments_data):
+        """Process all transactions from LND node"""
+        transactions = []
+
+        # Process invoices (incoming payments)
+        for invoice in invoices_data.get('invoices', []):
+            transactions.append({
+                'type': 'invoice',
+                'payment_hash': invoice.get('r_hash'),
+                'amount_sat': invoice.get('value'),
+                'settled': invoice.get('settled', False),
+                'creation_date': invoice.get('creation_date'),
+                'settle_date': invoice.get('settle_date'),
+                'memo': invoice.get('memo', ''),
+                'payment_request': invoice.get('payment_request', '')
+            })
+
+        # Process payments (outgoing payments)
+        for payment in payments_data.get('payments', []):
+            transactions.append({
+                'type': 'payment',
+                'payment_hash': payment.get('payment_hash'),
+                'amount_sat': payment.get('value_sat'),
+                'status': payment.get('status'),
+                'creation_time': payment.get('creation_time_ns'),
+                'fee_sat': payment.get('fee_sat'),
+                'payment_request': payment.get('payment_request', '')
+            })
+
+        # Sort by date (most recent first)
+        transactions.sort(key=lambda x: x.get('creation_date') or x.get('creation_time', 0), reverse=True)
+
+        return transactions[:100]  # Return latest 100 transactions
+
+    def _format_transactions_as_html(self, transactions):
+        """Format transactions list as HTML table"""
+        if not transactions:
+            return "<p class='text-muted'>No transactions found</p>"
+        
+        html = """
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Amount (sats)</th>
+                        <th>Status</th>
+                        <th>Fee (sats)</th>
+                        <th>Memo/Hash</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        
+        for tx in transactions:
+            tx_type = tx.get('type', '').title()
+            
+            # Format date
+            if tx.get('creation_date'):
+                import datetime
+                date_str = datetime.datetime.fromtimestamp(int(tx['creation_date'])).strftime('%Y-%m-%d %H:%M')
+            elif tx.get('settle_date'):
+                import datetime
+                date_str = datetime.datetime.fromtimestamp(int(tx['settle_date'])).strftime('%Y-%m-%d %H:%M')
+            elif tx.get('creation_time'):
+                import datetime
+                # Convert nanoseconds to seconds
+                timestamp = int(tx['creation_time']) / 1000000000
+                date_str = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M')
+            else:
+                date_str = 'Unknown'
+            
+            # Format amount
+            amount = tx.get('amount_sat', tx.get('value', 0))
+            try:
+                amount_int = int(amount) if amount else 0
+                amount_str = f"{amount_int:,}"
+            except (ValueError, TypeError):
+                amount_str = str(amount) if amount else "0"
+            
+            # Format status/settled
+            if tx_type == 'Invoice':
+                status = "✅ Settled" if tx.get('settled') else "⏳ Pending"
+                status_class = "text-success" if tx.get('settled') else "text-warning"
+            else:
+                status = tx.get('status', 'Unknown').replace('_', ' ').title()
+                status_class = "text-success" if status == 'Succeeded' else "text-warning"
+            
+            # Format fee
+            fee = tx.get('fee_sat', 0)
+            try:
+                fee_int = int(fee) if fee else 0
+                fee_str = f"{fee_int:,}" if fee_int > 0 else "-"
+            except (ValueError, TypeError):
+                fee_str = str(fee) if fee else "-"
+            
+            # Format memo/hash
+            memo = tx.get('memo', '')
+            payment_hash = tx.get('payment_hash', '')
+            if memo:
+                memo_display = memo[:30] + "..." if len(memo) > 30 else memo
+            elif payment_hash:
+                memo_display = payment_hash[:12] + "..."
+            else:
+                memo_display = "-"
+            
+            # Add row color based on type
+            row_class = "table-success" if tx_type == 'Invoice' else "table-info"
+            
+            html += f"""
+                    <tr class="{row_class}">
+                        <td><span class="badge badge-{'success' if tx_type == 'Invoice' else 'primary'}">{tx_type}</span></td>
+                        <td>{date_str}</td>
+                        <td class="text-end font-weight-bold">{amount_str}</td>
+                        <td><span class="{status_class}">{status}</span></td>
+                        <td class="text-end">{fee_str}</td>
+                        <td class="text-muted small">{memo_display}</td>
+                    </tr>
+            """
+        
+        html += """
+                </tbody>
+            </table>
+        </div>
+        """
+        
+        return html
+
+    def action_fetch_transactions(self):
+        """Manual action to fetch and update transaction data"""
+        self.ensure_one()
+        try:
+            self._compute_transaction_data()
+            self._compute_transaction_html()
+            self.last_transaction_fetch = fields.Datetime.now()
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'reload',
+            }
+        except Exception as e:
+            raise ValidationError(f"Failed to fetch transactions: {str(e)}")
 
     def debug_permissions(self):
         """Debug method to check permissions"""
