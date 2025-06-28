@@ -40,7 +40,7 @@
         <menuitem id="bitcoin_job_monitor_menu" 
                   name="Bitcoin Job Queue" 
                   parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin"
-                  action="queue_job.action_queue_job"
+                  action="bitcoin_queue_job_action"
                   sequence="80"
                   groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
     </data>
