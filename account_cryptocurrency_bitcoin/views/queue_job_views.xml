@@ -2,7 +2,7 @@
 <odoo>
     <data>
 
-        <!-- Bitcoin Queue Job Tree View with Job Runner Status -->
+        <!-- Bitcoin Queue Job Tree View -->
         <record id="bitcoin_queue_job_tree_view" model="ir.ui.view">
             <field name="name">bitcoin.queue.job.tree</field>
             <field name="model">queue.job</field>
@@ -11,71 +11,19 @@
                 <xpath expr="//tree" position="attributes">
                     <attribute name="create">false</attribute>
                 </xpath>
-                <!-- Add job runner status to header -->
-                <xpath expr="//tree" position="inside">
-                    <header>
-                        <div class="alert alert-info" role="alert" 
-                             attrs="{'invisible': [('jobrunner_status', '=', 'active')]}">
-                            <strong>🔧 Job Runner Status:</strong>
-                            <field name="jobrunner_status" widget="badge" 
-                                   decoration-success="jobrunner_status == 'active'"
-                                   decoration-danger="jobrunner_status in ('inactive', 'disabled')"
-                                   decoration-warning="jobrunner_status == 'unknown'"
-                                   readonly="1"/>
-                            <div attrs="{'invisible': [('jobrunner_status', '!=', 'disabled')]}">
-                                Background jobs are disabled. Add <code>queue_job_cron_jobrunner = True</code> to your odoo.conf and restart.
-                            </div>
-                            <div attrs="{'invisible': [('jobrunner_status', '!=', 'inactive')]}">
-                                Job runner is not processing jobs. Check your queue_job configuration.
-                            </div>
-                            <div attrs="{'invisible': [('jobrunner_status', '!=', 'unknown')]}">
-                                Cannot determine job runner status. Check your configuration.
-                            </div>
-                        </div>
-                        <div class="alert alert-success" role="alert" 
-                             attrs="{'invisible': [('jobrunner_status', '!=', 'active')]}">
-                            <strong>✅ Job Runner Active:</strong> Background jobs are being processed normally.
-                        </div>
-                    </header>
-                    <!-- Hidden field to compute status -->
-                    <field name="jobrunner_status" invisible="1"/>
-                </xpath>
             </field>
         </record>
 
-        <!-- Bitcoin Queue Job Form View with Job Runner Status -->
+        <!-- Bitcoin Queue Job Form View -->
         <record id="bitcoin_queue_job_form_view" model="ir.ui.view">
             <field name="name">bitcoin.queue.job.form</field>
             <field name="model">queue.job</field>
             <field name="inherit_id" ref="queue_job.view_queue_job_form"/>
             <field name="arch" type="xml">
-                <!-- Add job runner status to form header -->
+                <!-- Add help text for Bitcoin jobs -->
                 <xpath expr="//sheet" position="before">
-                    <!-- Hidden field to compute status -->
-                    <field name="jobrunner_status" invisible="1"/>
-                    
-                    <!-- Job Runner Status Alert -->
-                    <div class="alert alert-warning" role="alert" 
-                         attrs="{'invisible': [('jobrunner_status', '=', 'active')]}">
-                        <strong>⚠️ Job Runner Status:</strong>
-                        <field name="jobrunner_status" widget="badge" 
-                               decoration-danger="jobrunner_status in ('inactive', 'disabled')"
-                               decoration-warning="jobrunner_status == 'unknown'"
-                               readonly="1"/>
-                        <div attrs="{'invisible': [('jobrunner_status', '!=', 'disabled')]}">
-                            Background jobs are disabled. Add <code>queue_job_cron_jobrunner = True</code> to your odoo.conf and restart.
-                        </div>
-                        <div attrs="{'invisible': [('jobrunner_status', '!=', 'inactive')]}">
-                            Job runner is not processing jobs. Check your queue_job configuration.
-                        </div>
-                        <div attrs="{'invisible': [('jobrunner_status', '!=', 'unknown')]}">
-                            Cannot determine job runner status. Check your configuration.
-                        </div>
-                    </div>
-                    
-                    <div class="alert alert-success" role="alert" 
-                         attrs="{'invisible': [('jobrunner_status', '!=', 'active')]}">
-                        <strong>✅ Job Runner Active:</strong> Background jobs are being processed normally.
+                    <div class="alert alert-info" role="alert">
+                        <strong>Bitcoin Job Queue:</strong> This shows Bitcoin-related background jobs for transaction processing and wallet operations.
                     </div>
                 </xpath>
             </field>
