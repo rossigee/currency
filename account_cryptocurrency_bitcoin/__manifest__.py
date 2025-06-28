@@ -44,6 +44,7 @@
         "views/res_config_settings_views.xml",
         "views/menu.xml",
         "views/res_partner_bitcoin_tab_view.xml",
+        "views/queue_job_views.xml",
     ],
     "installable": True,
     "auto_install": False,
