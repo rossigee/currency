@@ -4,11 +4,12 @@
         <record id="crypto_lightning_service_provider_form" model="ir.ui.view">
             <field name="name">crypto.lightning.service.provider.form</field>
             <field name="model">crypto.lightning.service.provider</field>
+            <field name="priority">1</field>
             <field name="arch" type="xml">
                 <form string="Lightning Service Provider">
                     <header>
-                        <button name="action_refresh_vault_status" string="Refresh Vault Status" 
-                                type="object" class="btn-secondary" 
+                        <button name="action_refresh_vault_status" string="Refresh Vault Status"
+                                type="object" class="btn-secondary"
                                 attrs="{'invisible': [('id', '=', False)]}"/>
                     </header>
                     <sheet>
@@ -17,29 +18,96 @@
                             <field name="active"/>
                         </group>
                         <group>
-                            <field name="grpc_url"/>
-                            <field name="token_uuid" readonly="1" attrs="{'invisible': [('id', '=', False)]}"/>
-                            <field name="vault_status" readonly="1" attrs="{'invisible': [('id', '=', False)]}"/>
+                            <field name="pubkey"/>
+                        </group>
+
+                        <group string="Macaroon Upload">
+                            <field name="macaroon" widget="text" placeholder="Paste your macaroon here (base64 or hex format)"
+                                   help="Upload your LND macaroon in base64 or hex format. This will be securely stored in vault."/>
+                        </group>
+
+                        <group string="Notifications">
+                            <field name="mail_channel_id"
+                                   help="Select a mail channel to receive payment success/failure notifications"/>
                         </group>
                         <notebook>
                             <page string="Connection Details">
                                 <group>
-                                    <field name="pubkey"/>
+                                    <field name="rest_url"/>
                                     <field name="clearnet_url"/>
                                     <field name="tor_url"/>
                                 </group>
                             </page>
-                            <page string="Sensitive Data" attrs="{'invisible': [('id', '=', False)]}">
+                            <page string="Macaroon Details" attrs="{'invisible': ['|', ('macaroon_format', '=', ''), ('macaroon', '=', False)]}">
                                 <div class="alert alert-warning" role="alert">
-                                    <strong>⚠️ SECURITY WARNING:</strong> 
+                                    <strong>⚠️ SECURITY WARNING:</strong>
                                     The macaroon data is sensitive. Only view when necessary and ensure your screen is not visible to others.
                                 </div>
-                                <group string="Macaroon">
-                                    <field name="macaroon" widget="CopyClipboardChar" attrs="{'invisible': [('macaroon', '=', False)]}"/>
+
+                                <!-- Basic Information Section -->
+                                <group>
+                                    <group string="Macaroon Information">
+                                        <field name="macaroon_format" readonly="1"/>
+                                        <field name="macaroon_location" readonly="1"/>
+                                        <field name="macaroon_identifier" readonly="1"/>
+                                        <field name="macaroon_caveat_count" readonly="1"/>
+                                    </group>
+                                    <group string="Security">
+                                        <field name="token_uuid" readonly="1"/>
+                                        <field name="vault_status" readonly="1"/>
+                                    </group>
                                 </group>
+
+                                <!-- Permissions Section -->
+                                <separator string="Permissions"/>
+                                <field name="macaroon_permission_lines" widget="html" nolabel="1" readonly="1"/>
+
+                                <!-- Raw Macaroon Section -->
+                                <separator string="Raw Macaroon"/>
                                 <div class="alert alert-info" role="alert">
                                     <strong>🔐 Macaroon Security:</strong><br/>
-                                    Your macaroon is securely stored in Vault and can be accessed using token UUID: <code class="small"><field name="token_uuid" readonly="1" nolabel="1"/></code>
+                                    Your macaroon is securely stored in Vault and can be accessed using the token UUID above.<br/>
+                                    <small><em>Macaroon permissions are automatically parsed and validated for security.</em></small>
+                                </div>
+                                <field name="macaroon" widget="CopyClipboardChar"/>
+                            </page>
+                            <page string="LND Status">
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <button name="action_get_lnd_status" string="🔄 Get Status" type="object" class="btn btn-primary" title="Fetch current status from LND node"/>
+                                        <span class="text-muted ml-3" attrs="{'invisible': [('lnd_status_last_updated', '=', False)]}">
+                                            Last updated: <field name="lnd_status_last_updated" readonly="1" nolabel="1"/>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div attrs="{'invisible': [('lnd_status_error', '!=', False)]}">
+                                    <group>
+                                        <group string="Node Information">
+                                            <field name="lnd_node_alias" readonly="1"/>
+                                            <field name="lnd_node_version" readonly="1"/>
+                                            <field name="lnd_block_height" readonly="1"/>
+                                            <field name="lnd_synced_to_chain" readonly="1"/>
+                                            <field name="lnd_num_peers" readonly="1"/>
+                                        </group>
+                                        <group string="Channel Information">
+                                            <field name="lnd_num_active_channels" readonly="1"/>
+                                            <field name="lnd_num_pending_channels" readonly="1"/>
+                                            <field name="lnd_channel_balance_sat" readonly="1" widget="integer"/>
+                                        </group>
+                                    </group>
+                                    <group string="Wallet Balances">
+                                        <group>
+                                            <field name="lnd_total_balance_sat" readonly="1" widget="integer"/>
+                                            <field name="lnd_confirmed_balance_sat" readonly="1" widget="integer"/>
+                                            <field name="lnd_unconfirmed_balance_sat" readonly="1" widget="integer"/>
+                                        </group>
+                                    </group>
+                                </div>
+
+                                <div class="alert alert-danger" role="alert" attrs="{'invisible': [('lnd_status_error', '=', False)]}">
+                                    <strong>Error:</strong>
+                                    <field name="lnd_status_error" readonly="1" nolabel="1"/>
                                 </div>
                             </page>
                             <page string="Notes">
@@ -57,7 +125,7 @@
             <field name="arch" type="xml">
                 <tree string="Lightning Service Providers">
                     <field name="name"/>
-                    <field name="grpc_url"/>
+                    <field name="rest_url"/>
                     <field name="pubkey"/>
                     <field name="active"/>
                 </tree>
@@ -68,6 +136,20 @@
             <field name="name">Lightning Service Providers</field>
             <field name="res_model">crypto.lightning.service.provider</field>
             <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="crypto_lightning_service_provider_action_tree" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="crypto_lightning_service_provider_action"/>
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="crypto_lightning_service_provider_view_tree"/>
+        </record>
+
+        <record id="crypto_lightning_service_provider_action_form" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="crypto_lightning_service_provider_action"/>
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="crypto_lightning_service_provider_form"/>
         </record>
     </data>
 </odoo>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="crypto_lightning_payment_view_tree" model="ir.ui.view">
+            <field name="name">crypto.lightning.payment.tree</field>
+            <field name="model">crypto.lightning.payment</field>
+            <field name="arch" type="xml">
+                <tree string="Lightning Payments" create="true">
+                    <header>
+                        <button name="%(account_cryptocurrency_lightning.crypto_lightning_payment_wizard_action)d"
+                                string="Create Payment" type="action" class="btn-primary"/>
+                    </header>
+                    <field name="creation_date"/>
+                    <field name="address_id"/>
+                    <field name="amount"/>
+                    <field name="currency_id"/>
+                    <field name="satoshis"/>
+                    <field name="payment_status"/>
+                    <field name="fee_paid_sat"/>
+                    <field name="lsp_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="crypto_lightning_payment_view_form" model="ir.ui.view">
+            <field name="name">crypto.lightning.payment.form</field>
+            <field name="model">crypto.lightning.payment</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <form string="Lightning Payment" create="false" edit="false">
+                    <header>
+                        <field name="payment_status" widget="statusbar"
+                               statusbar_visible="draft,pending,success,failed"
+                               statusbar_colors='{"draft":"blue","pending":"orange","success":"green","failed":"red"}'/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <!-- Pay Now button for draft payments -->
+                            <button class="oe_stat_button" type="object" name="action_pay_now"
+                                    attrs="{'invisible': ['|', ('payment_status', '!=', 'draft'), ('address_id', '=', False)]}" icon="fa-bolt">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Pay Now</span>
+                                </div>
+                            </button>
+
+                            <button class="oe_stat_button" attrs="{'invisible': [('payment_route_hops', '=', 0)]}" icon="fa-route">
+                                <field name="payment_route_hops" widget="statinfo" string="Route Hops"/>
+                            </button>
+
+                            <button class="oe_stat_button" attrs="{'invisible': [('fee_paid_sat', '=', 0)]}" icon="fa-coins">
+                                <field name="fee_paid_sat" widget="statinfo" string="Fee Paid (sats)"/>
+                            </button>
+
+                            <button class="oe_stat_button" type="object" name="action_view_attachments" icon="fa-paperclip">
+                                <field name="attachment_count" widget="statinfo" string="Attachments"/>
+                            </button>
+
+                        </div>
+
+                        <group>
+                            <group string="Payment Details">
+                                <field name="address_id"/>
+                                <field name="amount"/>
+                                <field name="currency_id"/>
+                                <field name="btc_current_price" attrs="{'invisible': [('payment_status', '!=', 'draft')]}"/>
+                                <field name="btc_price" attrs="{'invisible': [('payment_status', '=', 'draft')]}"/>
+                                <field name="satoshis_current" attrs="{'invisible': [('payment_status', '!=', 'draft')]}"/>
+                                <field name="satoshis" attrs="{'invisible': [('payment_status', '=', 'draft')]}"/>
+                                <field name="lsp_id"/>
+                            </group>
+                            <group string="Timing and State">
+                                <field name="creation_date"/>
+                                <field name="payment_creation_date" attrs="{'invisible': [('payment_creation_date', '=', False)]}"/>
+                                <field name="completion_date" attrs="{'invisible': [('completion_date', '=', False)]}"/>
+                                <field name="payment_completion_date" attrs="{'invisible': [('payment_completion_date', '=', False)]}"/>
+                                <field name="last_state_change"/>
+                                <field name="state_change_user_id"/>
+                                <separator string="Payment QR Code"/>
+                                <field name="ln_payment_qrcode_current" widget="image" nolabel="1"
+                                       attrs="{'invisible': ['|', ('payment_status', '!=', 'draft'), ('ln_payment_qrcode_current', '=', False)]}"
+                                       options="{'size': [150, 150]}"/>
+                                <field name="ln_payment_qrcode" widget="image" nolabel="1"
+                                       attrs="{'invisible': ['|', ('payment_status', '=', 'draft'), ('ln_payment_qrcode', '=', False)]}"
+                                       options="{'size': [150, 150]}"/>
+                                <div attrs="{'invisible': ['|', ('payment_status', '=', 'draft'), ('ln_payment_qrcode', '!=', False)]}" class="alert alert-warning" style="font-size: 12px;">
+                                    <strong>⚠️ No QR Code Available:</strong> This payment was created before QR code storage was implemented.
+                                </div>
+                                <div attrs="{'invisible': ['|', ('payment_status', '!=', 'draft'), ('ln_payment_qrcode_current', '!=', False)]}" class="alert alert-info" style="font-size: 12px;">
+                                    <strong>💡 QR Code for Mobile Payment:</strong> Enter payment details above to generate a QR code for out-of-band payment.
+                                </div>
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="Transaction Details">
+                                <group>
+                                    <group string="Payment Information">
+                                        <field name="payment_hash" attrs="{'invisible': [('payment_hash', '=', False)]}"/>
+                                        <field name="payment_preimage" attrs="{'invisible': [('payment_preimage', '=', False)]}"/>
+                                    </group>
+                                    <group string="Route Information">
+                                        <field name="payment_route_hops" attrs="{'invisible': [('payment_route_hops', '=', 0)]}"/>
+                                        <field name="payment_total_time_lock" attrs="{'invisible': [('payment_total_time_lock', '=', 0)]}"/>
+                                        <field name="fee_paid_sat" attrs="{'invisible': [('fee_paid_sat', '=', 0)]}"/>
+                                    </group>
+                                </group>
+
+                                <group string="Invoice Details" attrs="{'invisible': [('decoded_invoice_details', '=', False)]}">
+                                    <field name="decoded_invoice_details" widget="text" nolabel="1"/>
+                                </group>
+
+                                <group string="Error Details" attrs="{'invisible': [('payment_error', '=', False)]}">
+                                    <field name="payment_error" widget="text" nolabel="1"/>
+                                </group>
+
+                                <group string="Technical Details" attrs="{'invisible': [('ln_payment_ref', '=', False)]}">
+                                    <field name="ln_payment_ref" widget="text"/>
+                                </group>
+                            </page>
+
+                            <page string="Notes and Communication">
+                                <field name="notes" placeholder="Add internal notes about this payment..."/>
+                                <div class="oe_chatter">
+                                    <field name="message_follower_ids" widget="mail_followers"/>
+                                    <field name="activity_ids" widget="mail_activity"/>
+                                    <field name="message_ids" widget="mail_thread"/>
+                                </div>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action for viewing payment records -->
+        <record id="crypto_lightning_payment_action" model="ir.actions.act_window">
+            <field name="name">Lightning Payments</field>
+            <field name="res_model">crypto.lightning.payment</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="crypto_lightning_payment_view_tree"/>
+            <field name="context">{'create_action': 'account_cryptocurrency_lightning.crypto_lightning_payment_wizard_action'}</field>
+        </record>
+
+        <!-- Explicit view bindings for payment records -->
+        <record id="crypto_lightning_payment_action_tree" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="crypto_lightning_payment_action"/>
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="crypto_lightning_payment_view_tree"/>
+        </record>
+
+        <record id="crypto_lightning_payment_action_form" model="ir.actions.act_window.view">
+            <field name="act_window_id" ref="crypto_lightning_payment_action"/>
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="crypto_lightning_payment_view_form"/>
+        </record>
+    </data>
+</odoo>
