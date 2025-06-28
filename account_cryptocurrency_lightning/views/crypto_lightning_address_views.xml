@@ -8,10 +8,16 @@
               <form string="Lightning Address">
                 <header>
                   <button name="create_payment" string="💸 Create Payment" type="object" class="btn-primary"/>
-                  <button name="action_fetch_transactions" string="🔄 Fetch Transactions" type="object" class="btn-secondary"
-                          attrs="{'invisible': [('service_provider_id', '=', False)]}"/>
                 </header>
                 <sheet>
+                  <div class="oe_button_box" name="button_box">
+                    <button class="oe_stat_button" type="object" name="action_view_payments" icon="fa-money" attrs="{'invisible': [('payment_count', '=', 0)]}">
+                      <field string="Payments" name="payment_count" widget="statinfo"/>
+                    </button>
+                    <button class="oe_stat_button" type="object" name="action_view_attachments" icon="fa-paperclip">
+                      <field string="Attachments" name="attachment_count" widget="statinfo"/>
+                    </button>
+                  </div>
                   <group>
                     <group>
                       <field name="owner_id"/>
@@ -20,22 +26,29 @@
                     </group>
                     <group>
                       <field name="service_provider_id"/>
-                      <field name="last_transaction_fetch" readonly="1" attrs="{'invisible': [('last_transaction_fetch', '=', False)]}"/>
+                      <field name="payment_count" invisible="1"/>
+                      <field name="attachment_count" invisible="1"/>
                     </group>
                   </group>
                   <notebook>
-                    <page string="Notes">
-                      <field name="notes"/>
+                    <page string="Payments" attrs="{'invisible': [('payment_count', '=', 0)]}">
+                      <field name="payment_ids" readonly="1">
+                        <tree string="Lightning Payments" create="false" edit="false">
+                          <field name="creation_date"/>
+                          <field name="amount"/>
+                          <field name="currency_id"/>
+                          <field name="satoshis"/>
+                          <field name="payment_status" decoration-success="payment_status == 'success'" decoration-warning="payment_status == 'pending'" decoration-muted="payment_status == 'draft'"/>
+                          <field name="lsp_id"/>
+                        </tree>
+                      </field>
                     </page>
-                    <page string="Transactions" attrs="{'invisible': [('service_provider_id', '=', False)]}">
-                      <div class="alert alert-info" role="alert" attrs="{'invisible': [('transaction_data', '!=', 'No service provider configured')]}">
-                        <strong>💡 Transaction Data:</strong>
-                        Configure a service provider to fetch transaction history from your LND node.
-                      </div>
-
-                      <div attrs="{'invisible': [('service_provider_id', '=', False)]}">
-                        <p><strong>Recent Transactions (Latest 50):</strong></p>
-                        <field name="transaction_data" widget="html" nolabel="1" readonly="1"/>
+                    <page string="Notes">
+                      <field name="notes" placeholder="Add internal notes about this Lightning address..."/>
+                      <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
                       </div>
                     </page>
                   </notebook>
