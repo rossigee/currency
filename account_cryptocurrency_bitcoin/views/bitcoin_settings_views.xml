@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Bitcoin Settings Form View -->
+        <record id="bitcoin_settings_view_form" model="ir.ui.view">
+            <field name="name">bitcoin.settings.form</field>
+            <field name="model">bitcoin.settings</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Settings">
+                    <header>
+                        <button name="action_test_connection" string="Test Connection" 
+                                type="object" class="btn-primary"/>
+                        <field name="connection_status" widget="statusbar" 
+                               statusbar_visible="untested,connected,failed"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Configuration Name"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <field name="is_default"/>
+                            <field name="last_test_date" readonly="1"/>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Bitcoin Node Connection">
+                                <group>
+                                    <group string="Connection Method">
+                                        <field name="use_local_node"/>
+                                        <field name="node_network"/>
+                                    </group>
+                                    <group string="Connection Status" attrs="{'invisible': [('connection_status', '=', 'untested')]}">
+                                        <field name="status_message" widget="text" readonly="1" nolabel="1"/>
+                                    </group>
+                                </group>
+                                
+                                <group string="Local Bitcoin Node Settings" 
+                                       attrs="{'invisible': [('use_local_node', '=', False)]}">
+                                    <group>
+                                        <field name="node_rpc_host" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
+                                        <field name="node_rpc_port" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
+                                        <field name="node_use_ssl"/>
+                                    </group>
+                                    <group>
+                                        <field name="node_rpc_user" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
+                                        <field name="node_rpc_password" password="True" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
+                                    </group>
+                                </group>
+                                
+                                <div class="alert alert-info" role="alert" 
+                                     attrs="{'invisible': [('use_local_node', '=', False)]}">
+                                    <strong>📋 Bitcoin Node Setup:</strong><br/>
+                                    <ul>
+                                        <li>Ensure your Bitcoin Core node is running with RPC enabled</li>
+                                        <li>Add these lines to your bitcoin.conf:
+                                            <pre>server=1
+rpcuser=your_username
+rpcpassword=your_secure_password
+rpcallowip=127.0.0.1
+txindex=1  # Optional: enables full transaction lookup</pre>
+                                        </li>
+                                        <li>Restart Bitcoin Core after configuration changes</li>
+                                    </ul>
+                                </div>
+                            </page>
+                            
+                            <page string="External API Fallback" 
+                                  attrs="{'invisible': [('use_local_node', '=', True)]}">
+                                <group>
+                                    <group string="API Provider">
+                                        <field name="external_api_provider"/>
+                                        <field name="custom_api_base_url" 
+                                               attrs="{'invisible': [('external_api_provider', '!=', 'custom')], 
+                                                      'required': [('external_api_provider', '=', 'custom')]}"/>
+                                    </group>
+                                    <group string="Rate Limiting">
+                                        <field name="api_rate_limit_delay"/>
+                                        <field name="api_max_retries"/>
+                                    </group>
+                                </group>
+                                
+                                <div class="alert alert-warning" role="alert">
+                                    <strong>⚠️ External API Limitations:</strong><br/>
+                                    External APIs have rate limits and may not provide all features available with a local node.
+                                    Consider setting up a local Bitcoin node for production use.
+                                </div>
+                            </page>
+                            
+                            <page string="Transaction Import">
+                                <group>
+                                    <group string="Import Limits">
+                                        <field name="max_addresses_per_import"/>
+                                        <field name="import_chunk_size"/>
+                                    </group>
+                                    <group string="Performance">
+                                        <field name="import_delay_between_addresses"/>
+                                        <field name="blockchain_info_cache_minutes"/>
+                                    </group>
+                                </group>
+                                
+                                <div class="alert alert-info" role="alert">
+                                    <strong>📊 Import Settings:</strong><br/>
+                                    <ul>
+                                        <li><strong>Max Addresses:</strong> Limits the number of addresses checked in one import to prevent timeouts</li>
+                                        <li><strong>Chunk Size:</strong> Number of addresses processed before showing progress notification</li>
+                                        <li><strong>Delay:</strong> Pause between API requests to avoid rate limiting</li>
+                                        <li><strong>Cache Duration:</strong> How long to cache blockchain height before refreshing</li>
+                                    </ul>
+                                </div>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Bitcoin Settings Tree View -->
+        <record id="bitcoin_settings_view_tree" model="ir.ui.view">
+            <field name="name">bitcoin.settings.tree</field>
+            <field name="model">bitcoin.settings</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin Settings">
+                    <field name="name"/>
+                    <field name="is_default" widget="boolean"/>
+                    <field name="use_local_node" widget="boolean"/>
+                    <field name="node_network"/>
+                    <field name="connection_status" widget="badge" 
+                           decoration-success="connection_status == 'connected'"
+                           decoration-danger="connection_status == 'failed'"
+                           decoration-muted="connection_status == 'untested'"/>
+                    <field name="last_test_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Bitcoin Connectors Tree View -->
+        <record id="bitcoin_connector_view_tree" model="ir.ui.view">
+            <field name="name">bitcoin.connector.tree</field>
+            <field name="model">bitcoin.connector</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin Connectors">
+                    <field name="name"/>
+                    <field name="rpc_host"/>
+                    <field name="rpc_port"/>
+                    <field name="network"/>
+                    <field name="is_active" widget="boolean"/>
+                    <field name="connection_status" widget="badge"
+                           decoration-success="connection_status == 'connected'"
+                           decoration-danger="connection_status in ('error', 'auth_failed', 'timeout')"
+                           decoration-muted="connection_status == 'unknown'"/>
+                    <field name="current_block_height"/>
+                    <field name="last_connected"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Bitcoin Connector Form View -->
+        <record id="bitcoin_connector_view_form" model="ir.ui.view">
+            <field name="name">bitcoin.connector.form</field>
+            <field name="model">bitcoin.connector</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Connector">
+                    <header>
+                        <button name="test_connection" string="Test Connection" 
+                                type="object" class="btn-primary"/>
+                        <button name="refresh_blockchain_info" string="Refresh Info" 
+                                type="object" class="btn-secondary"/>
+                        <field name="connection_status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Connection">
+                                <field name="rpc_host"/>
+                                <field name="rpc_port"/>
+                                <field name="rpc_user"/>
+                                <field name="rpc_password" password="True"/>
+                                <field name="use_ssl"/>
+                                <field name="network"/>
+                                <field name="is_active"/>
+                            </group>
+                            <group string="Node Information">
+                                <field name="node_version" readonly="1"/>
+                                <field name="current_block_height" readonly="1"/>
+                                <field name="chain" readonly="1"/>
+                                <field name="last_connected" readonly="1"/>
+                                <field name="cache_duration_minutes"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Status" attrs="{'invisible': [('status_message', '=', False)]}">
+                            <field name="status_message" widget="text" readonly="1" nolabel="1"/>
+                        </group>
+                        
+                        <group string="Advanced" attrs="{'invisible': [('best_block_hash', '=', False)]}">
+                            <field name="best_block_hash" readonly="1"/>
+                            <field name="last_block_time" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Actions -->
+        <record id="bitcoin_settings_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Settings</field>
+            <field name="res_model">bitcoin.settings</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configure Bitcoin Settings
+                </p>
+                <p>
+                    Set up your Bitcoin node connection and API settings for transaction import and blockchain interaction.
+                </p>
+            </field>
+        </record>
+
+        <record id="bitcoin_connector_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Connectors</field>
+            <field name="res_model">bitcoin.connector</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No Bitcoin Connectors Configured
+                </p>
+                <p>
+                    Bitcoin connectors are automatically created from your settings configuration.
+                </p>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

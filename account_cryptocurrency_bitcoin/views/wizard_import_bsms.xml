@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Import BSMS Wizard Form View -->
+        <record id="wizard_import_bsms_form_view" model="ir.ui.view">
+            <field name="name">wizard.import.bsms.form</field>
+            <field name="model">wizard.import.bsms</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>Import BSMS File</h1>
+                        </div>
+                        
+                        <div class="alert alert-info" role="alert">
+                            <strong>📄 Import BSMS:</strong><br/>
+                            Import a BSMS (Bitcoin Secure Multisig Setup) file to create a multisig wallet configuration.
+                            BSMS files contain the descriptor and XPUBs needed to set up coordinated multisig wallets.
+                        </div>
+                        
+                        <!-- Upload BSMS File -->
+                        <group string="Upload BSMS File">
+                            <field name="bsms_file" filename="bsms_filename"/>
+                            <field name="bsms_filename" invisible="1"/>
+                        </group>
+                        
+                        <!-- Validation results -->
+                        <group string="Validation Results" attrs="{'invisible': [('validation_message', '=', False)]}">
+                            <!-- Success message -->
+                            <div class="alert alert-success" role="alert" 
+                                 attrs="{'invisible': [('bsms_valid', '=', False)]}">
+                                <field name="validation_message" nolabel="1" readonly="1"/>
+                            </div>
+                            
+                            <!-- Error message -->
+                            <div class="alert alert-danger" role="alert" 
+                                 attrs="{'invisible': [('bsms_valid', '=', True)]}">
+                                <field name="validation_message" nolabel="1" readonly="1"/>
+                            </div>
+                        </group>
+                        
+                        <!-- Parsed BSMS Details -->
+                        <group string="BSMS Details" attrs="{'invisible': [('bsms_valid', '=', False)]}" col="4">
+                            <field name="wallet_name" readonly="1"/>
+                            <field name="script_type" readonly="1"/>
+                            <field name="m_threshold" readonly="1"/>
+                            <field name="n_total" readonly="1"/>
+                        </group>
+                        
+                        <!-- Parsed Data (for debugging) -->
+                        <group string="Parsed Data" attrs="{'invisible': [('parsed_data', '=', False)]}" col="1">
+                            <field name="parsed_data" nolabel="1" readonly="1" widget="text"
+                                   style="font-family: monospace; font-size: 11px; max-height: 200px;"/>
+                        </group>
+                        
+                        <!-- Hidden fields -->
+                        <field name="bsms_valid" invisible="1"/>
+                    </sheet>
+                    <footer>
+                        <button name="action_import_bsms" string="Save" type="object" 
+                                class="btn-primary" attrs="{'invisible': [('bsms_valid', '=', False)]}"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Import BSMS Action -->
+        <record id="action_wizard_import_bsms" model="ir.actions.act_window">
+            <field name="name">Import BSMS File</field>
+            <field name="res_model">wizard.import.bsms</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="wizard_import_bsms_form_view"/>
+        </record>
+
+    </data>
+</odoo>
