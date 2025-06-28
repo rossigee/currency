@@ -13,16 +13,17 @@ _logger = logging.getLogger(__name__)
 class CryptoBitcoinMultisigWallet(models.Model):
     _name = 'crypto.bitcoin.multisig.wallet'
     _description = 'Crypto Bitcoin Multisig Wallet'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Name', required=True)
-    description = fields.Text(string='Description')
+    name = fields.Char(string='Name', required=True, tracking=True)
+    description = fields.Text(string='Description', tracking=True)
     notes = fields.Text(string='Notes')
     
     # Multisig configuration
     m_of_n_threshold = fields.Integer(string='Required Signatures (M)', required=True, default=2,
-                                     help="Number of signatures required to spend (M in M-of-N)")
+                                     help="Number of signatures required to spend (M in M-of-N)", tracking=True)
     total_cosigners = fields.Integer(string='Total Cosigners (N)', required=True, default=3,
-                                    help="Total number of cosigners (N in M-of-N)")
+                                    help="Total number of cosigners (N in M-of-N)", tracking=True)
     
     # Script type
     script_type = fields.Selection([
@@ -30,7 +31,7 @@ class CryptoBitcoinMultisigWallet(models.Model):
         ('p2wsh', 'P2WSH (Native SegWit)'),
         ('p2sh_p2wsh', 'P2SH-P2WSH (Wrapped SegWit)')
     ], string='Script Type', required=True, default='p2wsh',
-       help="Multisig script type for address generation")
+       help="Multisig script type for address generation", tracking=True)
     
     # Key ordering
     sorted_keys = fields.Boolean(string='Sorted Keys', default=True,

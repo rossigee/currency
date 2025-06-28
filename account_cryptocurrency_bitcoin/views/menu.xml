@@ -2,26 +2,41 @@
 <odoo>
     <data>
         <!-- Bitcoin Menu (requires Bitcoin User group)-->
-        <menuitem id="crypto_menu_bitcoin" name="Bitcoin" parent="account.menu_finance" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <menuitem id="crypto_menu_bitcoin" 
+                  name="Bitcoin" 
+                  web_icon="account_cryptocurrency_bitcoin,static/bitcoin_menu_icon.svg"
+                  sequence="25"
+                  groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         
-        <!-- Key Management Submenu -->
-        <menuitem id="crypto_bitcoin_keys_menu" name="Key Management" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <!-- Wallets Submenu -->
+        <menuitem id="crypto_bitcoin_wallets_menu" name="Wallets" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" sequence="20" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <menuitem id="crypto_bitcoin_wallet_menu" name="Bitcoin Wallets" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_wallets_menu" action="crypto_bitcoin_wallet_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <menuitem id="crypto_bitcoin_multisig_wallet_menu" name="Multisig Wallets" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_wallets_menu" action="crypto_bitcoin_multisig_wallet_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_advanced"/>
+        <menuitem id="crypto_bitcoin_address_menu" name="Bitcoin Addresses" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_wallets_menu" action="crypto_bitcoin_address_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <menuitem id="wizard_import_bsms_menu" name="Import BSMS" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_wallets_menu" action="action_wizard_import_bsms" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        
+        <!-- Transactions Submenu -->
+        <menuitem id="crypto_bitcoin_transactions_menu" name="Transactions" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" sequence="30" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <menuitem id="crypto_bitcoin_transaction_menu" name="Bitcoin Transactions" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_transactions_menu" action="crypto_bitcoin_transaction_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <menuitem id="wizard_import_psbt_menu" name="Import PSBT" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_transactions_menu" action="action_wizard_import_psbt" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        
+        <!-- Configuration Submenu -->
+        <menuitem id="crypto_bitcoin_config_menu" name="Configuration" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" sequence="90" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        
+        <!-- Key Management under Configuration -->
+        <menuitem id="crypto_bitcoin_keys_menu" name="Key Management" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_config_menu" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         <menuitem id="crypto_bitcoin_private_key_menu" name="Private Keys" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_keys_menu" action="crypto_bitcoin_private_key_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         <menuitem id="crypto_bitcoin_public_key_menu" name="Public Keys" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_keys_menu" action="crypto_bitcoin_public_key_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
-        
-        <!-- Create Actions -->
         <menuitem id="wizard_create_private_key_menu" name="Create Private Key" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_keys_menu" action="wizard_create_private_key_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         
-        <!-- Wallet Management -->
-        <menuitem id="crypto_bitcoin_wallet_menu" name="Bitcoin Wallets" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" action="crypto_bitcoin_wallet_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
-        <menuitem id="crypto_bitcoin_multisig_wallet_menu" name="Multisig Wallets" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" action="crypto_bitcoin_multisig_wallet_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_advanced"/>
-        <menuitem id="crypto_bitcoin_address_menu" name="Bitcoin Addresses" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" action="crypto_bitcoin_address_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
-        <menuitem id="crypto_bitcoin_transaction_menu" name="Bitcoin Transactions" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" action="crypto_bitcoin_transaction_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
-        <!-- PSBT Actions -->
-        <menuitem id="wizard_import_psbt_menu" name="Import PSBT" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" action="action_wizard_import_psbt" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
-        <menuitem id="wizard_import_bsms_menu" name="Import BSMS" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" action="action_wizard_import_bsms" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <!-- Job Monitoring under Configuration -->
+        <menuitem id="bitcoin_job_monitor_menu" 
+                  name="Bitcoin Job Queue" 
+                  parent="account_cryptocurrency_bitcoin.crypto_bitcoin_config_menu"
+                  action="bitcoin_queue_job_action"
+                  groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         
-        <!-- Configuration under Invoicing > Configuration -->
+        <!-- System Configuration under Invoicing > Configuration -->
         <menuitem id="bitcoin_transaction_fetcher_config_menu" 
                   name="Bitcoin Transaction Fetchers" 
                   parent="account.account_management_menu"
@@ -34,14 +49,6 @@
                   parent="account.account_management_menu"
                   action="bitcoin_connector_action"
                   sequence="51"
-                  groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
-                  
-        <!-- Job Monitoring -->
-        <menuitem id="bitcoin_job_monitor_menu" 
-                  name="Bitcoin Job Queue" 
-                  parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin"
-                  action="bitcoin_queue_job_action"
-                  sequence="80"
                   groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
     </data>
 </odoo>
