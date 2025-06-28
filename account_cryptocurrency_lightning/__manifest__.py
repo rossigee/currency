@@ -3,7 +3,7 @@
 
 {
     "name": "Account Management Tools for Lightning",
-    "version": "16.0.1.0.4",
+    "version": "16.0.2.0.1",
     "category": "Account",
     "author": "Ross Golder, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/currency",
@@ -28,7 +28,7 @@
         "queue_job",
     ],
     "external_dependencies": {
-        "python": ["requests", "qrcode"],
+        "python": ["requests", "qrcode", "cron-converter", "cron-descriptor"],
     },
     "data": [
         "security/res_groups.xml",

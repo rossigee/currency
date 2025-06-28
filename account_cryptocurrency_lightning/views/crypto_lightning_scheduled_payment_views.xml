@@ -47,6 +47,8 @@
                                 class="btn-secondary" attrs="{'invisible': [('state', 'not in', ['active', 'paused'])]}"/>
                         <button name="action_cancel" string="Cancel" type="object"
                                 attrs="{'invisible': [('state', 'in', ['completed', 'cancelled'])]}"/>
+                        <button name="action_reset_to_draft" string="Reset to Draft" type="object"
+                                class="btn-secondary" attrs="{'invisible': [('state', 'not in', ['cancelled', 'completed'])]}"/>
 
                         <field name="state" widget="statusbar"
                                statusbar_visible="draft,active,paused,completed,cancelled"

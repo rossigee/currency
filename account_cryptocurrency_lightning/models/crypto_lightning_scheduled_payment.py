@@ -171,31 +171,22 @@ class CryptoLightningScheduledPayment(models.Model):
         return True
 
     def _parse_cron_description(self, cron_expr):
-        """Parse cron expression into human-readable description"""
+        """Parse cron expression into human-readable description using cron-descriptor"""
         if not cron_expr:
             return "Invalid cron expression"
 
-        parts = cron_expr.strip().split()
-        if len(parts) != 5:
-            return "Invalid cron format"
-
-        minute, hour, day, month, weekday = parts
-
-        # Simple cases
-        if cron_expr == "* * * * *":
-            return "Every minute"
-        elif cron_expr == "*/5 * * * *":
-            return "Every 5 minutes"
-        elif cron_expr == "0 * * * *":
-            return "Every hour"
-        elif cron_expr == "0 0 * * *":
-            return "Every day at midnight"
-        elif cron_expr == "0 9 * * 1":
-            return "Every Monday at 9:00 AM"
-        elif minute.startswith("*/"):
-            interval = minute[2:]
-            return f"Every {interval} minutes"
-        else:
+        try:
+            from cron_descriptor import ExpressionDescriptor
+            
+            descriptor = ExpressionDescriptor(
+                expression=cron_expr,
+                use_24hour_time_format=True
+            )
+            
+            return descriptor.get_description()
+            
+        except Exception as e:
+            _logger.warning(f"Error generating cron description for '{cron_expr}': {e}")
             return f"Custom schedule: {cron_expr}"
 
     def action_activate(self):
@@ -248,6 +239,19 @@ class CryptoLightningScheduledPayment(models.Model):
         self.write({'state': 'cancelled'})
         self.message_post(body="Scheduled payment cancelled")
 
+    def action_reset_to_draft(self):
+        """Reset cancelled or completed schedule back to draft"""
+        self.ensure_one()
+        if self.state not in ['cancelled', 'completed']:
+            raise UserError("Only cancelled or completed schedules can be reset to draft")
+
+        self.write({
+            'state': 'draft',
+            'next_execution_date': False,
+            'last_execution_date': False
+        })
+        self.message_post(body="Scheduled payment reset to draft")
+
     def action_execute_now(self):
         """Manually execute the payment now"""
         self.ensure_one()
@@ -284,55 +288,27 @@ class CryptoLightningScheduledPayment(models.Model):
             self.next_execution_date = next_date
 
     def _calculate_cron_next_execution(self, current_datetime):
-        """Calculate next execution for cron expression"""
+        """Calculate next execution for cron expression using cron-converter"""
         if not self.cron_expression:
             return False
 
-        parts = self.cron_expression.strip().split()
-        if len(parts) != 5:
+        try:
+            from cron_converter import Cron
+            
+            # Create cron object and schedule from current time
+            cron = Cron(self.cron_expression)
+            schedule = cron.schedule(current_datetime)
+            
+            # Get next execution time
+            next_execution = schedule.next()
+            
+            # Ensure it's a datetime object (cron-converter returns datetime)
+            return next_execution
+            
+        except Exception as e:
+            _logger.error(f"Error parsing cron expression '{self.cron_expression}': {e}")
+            # Fallback: return False to indicate invalid cron expression
             return False
-
-        minute, hour, day, month, weekday = parts
-
-        # Handle simple minute intervals (*/N format)
-        if minute.startswith("*/") and hour == "*" and day == "*" and month == "*" and weekday == "*":
-            try:
-                interval = int(minute[2:])
-                base_datetime = self.last_execution_date if self.last_execution_date else current_datetime
-                next_date = base_datetime + timedelta(minutes=interval)
-
-                # Ensure next execution is in the future
-                if next_date <= current_datetime:
-                    next_date = current_datetime + timedelta(minutes=interval)
-
-                return next_date
-            except ValueError:
-                return False
-
-        # Handle every minute (* * * * *)
-        if self.cron_expression == "* * * * *":
-            base_datetime = self.last_execution_date if self.last_execution_date else current_datetime
-            next_date = base_datetime + timedelta(minutes=1)
-
-            if next_date <= current_datetime:
-                next_date = current_datetime + timedelta(minutes=1)
-
-            return next_date
-
-        # Handle hourly (0 * * * *)
-        if minute == "0" and hour == "*" and day == "*" and month == "*" and weekday == "*":
-            next_date = current_datetime.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
-            return next_date
-
-        # Handle daily (0 0 * * *)
-        if minute == "0" and hour == "0" and day == "*" and month == "*" and weekday == "*":
-            next_date = current_datetime.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-            return next_date
-
-        # For complex cron expressions, fall back to simple calculation
-        # TODO: Implement full cron parsing or integrate croniter library
-        _logger.warning(f"Complex cron expression not fully supported: {self.cron_expression}")
-        return current_datetime + timedelta(minutes=1)
 
     def _execute_payment(self):
         """Execute the scheduled payment"""
