@@ -9,10 +9,8 @@
             <field name="arch" type="xml">
                 <form string="Bitcoin Settings">
                     <header>
-                        <button name="action_test_connection" string="Test Connection" 
+                        <button name="action_test_connections" string="Test Connections" 
                                 type="object" class="btn-primary"/>
-                        <field name="connection_status" widget="statusbar" 
-                               statusbar_visible="untested,connected,failed"/>
                     </header>
                     <sheet>
                         <div class="oe_title">
@@ -23,39 +21,46 @@
                         
                         <group>
                             <field name="is_default"/>
+                            <field name="network"/>
                             <field name="last_test_date" readonly="1"/>
                         </group>
                         
                         <notebook>
-                            <page string="Bitcoin Node Connection">
+                            <page string="Bitcoin Core Integration">
                                 <group>
-                                    <group string="Connection Method">
-                                        <field name="use_local_node"/>
-                                        <field name="node_network"/>
+                                    <group string="Bitcoin Core Settings">
+                                        <field name="use_bitcoin_core"/>
+                                        <field name="bitcoin_core_rpc_host" 
+                                               attrs="{'required': [('use_bitcoin_core', '=', True)], 'invisible': [('use_bitcoin_core', '=', False)]}"/>
+                                        <field name="bitcoin_core_rpc_port" 
+                                               attrs="{'required': [('use_bitcoin_core', '=', True)], 'invisible': [('use_bitcoin_core', '=', False)]}"/>
+                                        <field name="bitcoin_core_use_ssl" 
+                                               attrs="{'invisible': [('use_bitcoin_core', '=', False)]}"/>
                                     </group>
-                                    <group string="Connection Status" attrs="{'invisible': [('connection_status', '=', 'untested')]}">
-                                        <field name="status_message" widget="text" readonly="1" nolabel="1"/>
+                                    <group string="Authentication" 
+                                           attrs="{'invisible': [('use_bitcoin_core', '=', False)]}">
+                                        <field name="bitcoin_core_rpc_user" 
+                                               attrs="{'required': [('use_bitcoin_core', '=', True)]}"/>
+                                        <field name="bitcoin_core_rpc_password" password="True" 
+                                               attrs="{'required': [('use_bitcoin_core', '=', True)]}"/>
                                     </group>
                                 </group>
                                 
-                                <group string="Local Bitcoin Node Settings" 
-                                       attrs="{'invisible': [('use_local_node', '=', False)]}">
-                                    <group>
-                                        <field name="node_rpc_host" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
-                                        <field name="node_rpc_port" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
-                                        <field name="node_use_ssl"/>
-                                    </group>
-                                    <group>
-                                        <field name="node_rpc_user" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
-                                        <field name="node_rpc_password" password="True" required="1" attrs="{'required': [('use_local_node', '=', True)]}"/>
-                                    </group>
+                                <group string="Bitcoin Core Status" 
+                                       attrs="{'invisible': [('use_bitcoin_core', '=', False)]}">
+                                    <field name="bitcoin_core_status" widget="badge" 
+                                           decoration-success="bitcoin_core_status == 'connected'"
+                                           decoration-danger="bitcoin_core_status == 'failed'"
+                                           decoration-muted="bitcoin_core_status == 'untested'"/>
+                                    <field name="bitcoin_core_status_message" widget="text" readonly="1" 
+                                           attrs="{'invisible': [('bitcoin_core_status_message', '=', False)]}"/>
                                 </group>
                                 
                                 <div class="alert alert-info" role="alert" 
-                                     attrs="{'invisible': [('use_local_node', '=', False)]}">
-                                    <strong>📋 Bitcoin Node Setup:</strong><br/>
+                                     attrs="{'invisible': [('use_bitcoin_core', '=', False)]}">
+                                    <strong>🔧 Bitcoin Core Setup:</strong><br/>
                                     <ul>
-                                        <li>Ensure your Bitcoin Core node is running with RPC enabled</li>
+                                        <li>Used for transaction broadcasting, fee estimation, and network statistics</li>
                                         <li>Add these lines to your bitcoin.conf:
                                             <pre>server=1
 rpcuser=your_username
@@ -68,25 +73,37 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                                 </div>
                             </page>
                             
-                            <page string="External API Fallback" 
-                                  attrs="{'invisible': [('use_local_node', '=', True)]}">
+                            <page string="Electrum Server">
                                 <group>
-                                    <group string="API Provider">
-                                        <field name="external_api_provider"/>
-                                        <field name="custom_api_base_url" 
-                                               attrs="{'invisible': [('external_api_provider', '!=', 'custom')], 
-                                                      'required': [('external_api_provider', '=', 'custom')]}"/>
+                                    <group string="Electrum Settings">
+                                        <field name="use_electrum"/>
+                                        <field name="electrum_host" 
+                                               attrs="{'required': [('use_electrum', '=', True)], 'invisible': [('use_electrum', '=', False)]}"/>
+                                        <field name="electrum_port" 
+                                               attrs="{'required': [('use_electrum', '=', True)], 'invisible': [('use_electrum', '=', False)]}"/>
+                                        <field name="electrum_use_ssl" 
+                                               attrs="{'invisible': [('use_electrum', '=', False)]}"/>
                                     </group>
-                                    <group string="Rate Limiting">
-                                        <field name="api_rate_limit_delay"/>
-                                        <field name="api_max_retries"/>
+                                    <group string="Electrum Status" 
+                                           attrs="{'invisible': [('use_electrum', '=', False)]}">
+                                        <field name="electrum_status" widget="badge" 
+                                               decoration-success="electrum_status == 'connected'"
+                                               decoration-danger="electrum_status == 'failed'"
+                                               decoration-muted="electrum_status == 'untested'"/>
+                                        <field name="electrum_status_message" widget="text" readonly="1" 
+                                               attrs="{'invisible': [('electrum_status_message', '=', False)]}"/>
                                     </group>
                                 </group>
                                 
-                                <div class="alert alert-warning" role="alert">
-                                    <strong>⚠️ External API Limitations:</strong><br/>
-                                    External APIs have rate limits and may not provide all features available with a local node.
-                                    Consider setting up a local Bitcoin node for production use.
+                                <div class="alert alert-info" role="alert" 
+                                     attrs="{'invisible': [('use_electrum', '=', False)]}">
+                                    <strong>⚡ Electrum Server Setup:</strong><br/>
+                                    <ul>
+                                        <li>Used for transaction history and address monitoring</li>
+                                        <li>Default: electrum.blockstream.info:50002 (SSL)</li>
+                                        <li>Environment variables: ELECTRUM_HOST, ELECTRUM_PORT, ELECTRUM_USE_SSL</li>
+                                        <li>Public servers available or run your own Electrum server</li>
+                                    </ul>
                                 </div>
                             </page>
                             
@@ -107,7 +124,7 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                                     <ul>
                                         <li><strong>Max Addresses:</strong> Limits the number of addresses checked in one import to prevent timeouts</li>
                                         <li><strong>Chunk Size:</strong> Number of addresses processed before showing progress notification</li>
-                                        <li><strong>Delay:</strong> Pause between API requests to avoid rate limiting</li>
+                                        <li><strong>Delay:</strong> Pause between requests to avoid rate limiting</li>
                                         <li><strong>Cache Duration:</strong> How long to cache blockchain height before refreshing</li>
                                     </ul>
                                 </div>
@@ -126,12 +143,17 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                 <tree string="Bitcoin Settings">
                     <field name="name"/>
                     <field name="is_default" widget="boolean"/>
-                    <field name="use_local_node" widget="boolean"/>
-                    <field name="node_network"/>
-                    <field name="connection_status" widget="badge" 
-                           decoration-success="connection_status == 'connected'"
-                           decoration-danger="connection_status == 'failed'"
-                           decoration-muted="connection_status == 'untested'"/>
+                    <field name="network"/>
+                    <field name="use_bitcoin_core" widget="boolean"/>
+                    <field name="use_electrum" widget="boolean"/>
+                    <field name="bitcoin_core_status" widget="badge" 
+                           decoration-success="bitcoin_core_status == 'connected'"
+                           decoration-danger="bitcoin_core_status == 'failed'"
+                           decoration-muted="bitcoin_core_status == 'untested'"/>
+                    <field name="electrum_status" widget="badge" 
+                           decoration-success="electrum_status == 'connected'"
+                           decoration-danger="electrum_status == 'failed'"
+                           decoration-muted="electrum_status == 'untested'"/>
                     <field name="last_test_date"/>
                 </tree>
             </field>
@@ -212,15 +234,15 @@ txindex=1  # Optional: enables full transaction lookup</pre>
 
         <!-- Actions -->
         <record id="bitcoin_settings_action" model="ir.actions.act_window">
-            <field name="name">Bitcoin Settings</field>
+            <field name="name">Bitcoin Integration</field>
             <field name="res_model">bitcoin.settings</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    Configure Bitcoin Settings
+                    Configure Bitcoin Integration
                 </p>
                 <p>
-                    Set up your Bitcoin node connection and API settings for transaction import and blockchain interaction.
+                    Set up your Bitcoin Core and Electrum server connections for comprehensive Bitcoin functionality.
                 </p>
             </field>
         </record>

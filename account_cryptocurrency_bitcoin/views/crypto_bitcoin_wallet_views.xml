@@ -22,11 +22,14 @@
                     <notebook>
                         <page string="Addresses">
                             <field name="address_ids">
-                                <tree editable="bottom" string="Addresses" create="true" delete="true">
+                                <tree string="Addresses" create="true" delete="true">
                                     <field name="address" readonly="1"/>
-                                    <field name="label" readonly="1"/>
-                                    <field name="type" readonly="1"/>
-                                    <field name="used" readonly="1"/>
+                                    <field name="label" readonly="1" optional="show"/>
+                                    <field name="type" readonly="1" optional="show"/>
+                                    <field name="transaction_count" string="Txs" optional="show"/>
+                                    <field name="last_transaction_date" string="Last Tx" optional="hide"/>
+                                    <field name="balance" string="Balance (BTC)" optional="show"/>
+                                    <field name="used" readonly="1" optional="hide"/>
                                 </tree>
                             </field>
                         </page>
