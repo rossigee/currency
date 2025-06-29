@@ -23,8 +23,23 @@
         <!-- Configuration Submenu -->
         <menuitem id="crypto_bitcoin_config_menu" name="Configuration" parent="account_cryptocurrency_bitcoin.crypto_menu_bitcoin" sequence="90" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         
+        <!-- Server Configuration under Configuration -->
+        <menuitem id="bitcoin_node_config_menu" 
+                  name="Bitcoin Core Nodes" 
+                  parent="account_cryptocurrency_bitcoin.crypto_bitcoin_config_menu"
+                  action="bitcoin_node_config_action"
+                  sequence="10"
+                  groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        
+        <menuitem id="electrum_server_config_menu" 
+                  name="Electrum Servers" 
+                  parent="account_cryptocurrency_bitcoin.crypto_bitcoin_config_menu"
+                  action="electrum_server_config_action"
+                  sequence="15"
+                  groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        
         <!-- Key Management under Configuration -->
-        <menuitem id="crypto_bitcoin_keys_menu" name="Key Management" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_config_menu" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
+        <menuitem id="crypto_bitcoin_keys_menu" name="Key Management" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_config_menu" sequence="20" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         <menuitem id="crypto_bitcoin_private_key_menu" name="Private Keys" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_keys_menu" action="crypto_bitcoin_private_key_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         <menuitem id="crypto_bitcoin_public_key_menu" name="Public Keys" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_keys_menu" action="crypto_bitcoin_public_key_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         <menuitem id="wizard_create_private_key_menu" name="Create Private Key" parent="account_cryptocurrency_bitcoin.crypto_bitcoin_keys_menu" action="wizard_create_private_key_action" groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
@@ -34,6 +49,7 @@
                   name="Bitcoin Job Queue" 
                   parent="account_cryptocurrency_bitcoin.crypto_bitcoin_config_menu"
                   action="bitcoin_queue_job_action"
+                  sequence="30"
                   groups="account_cryptocurrency_bitcoin.group_bitcoin_user"/>
         
         <!-- System Configuration under Invoicing > Configuration -->

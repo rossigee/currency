@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Bitcoin Node Configuration Views -->
+        <record id="bitcoin_node_config_view_tree" model="ir.ui.view">
+            <field name="name">bitcoin.node.config.tree</field>
+            <field name="model">bitcoin.node.config</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin Node Configurations" default_order="sequence, name">
+                    <field name="sequence" widget="handle"/>
+                    <field name="display_name"/>
+                    <field name="rpc_host"/>
+                    <field name="rpc_port"/>
+                    <field name="network"/>
+                    <field name="is_active" widget="boolean"/>
+                    <field name="connection_status" widget="badge"
+                           decoration-success="connection_status == 'connected'"
+                           decoration-danger="connection_status in ('error', 'auth_failed', 'timeout')"
+                           decoration-muted="connection_status == 'unknown'"/>
+                    <field name="current_block_height"/>
+                    <field name="last_connected"/>
+                    <button name="test_connection" string="Test" type="object" 
+                            class="btn-sm btn-secondary" icon="fa-plug"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="bitcoin_node_config_view_form" model="ir.ui.view">
+            <field name="name">bitcoin.node.config.form</field>
+            <field name="model">bitcoin.node.config</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Node Configuration">
+                    <header>
+                        <button name="test_connection" string="Test Connection" type="object" class="btn-primary"/>
+                        <button name="action_refresh_status" string="Refresh Status" type="object" class="btn-secondary"/>
+                        <field name="connection_status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_refresh_status" type="object" class="oe_stat_button" icon="fa-refresh">
+                                <field name="last_check" string="Last Check" widget="relative"/>
+                            </button>
+                        </div>
+                        
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Configuration Name"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Priority &amp; Status">
+                                <field name="sequence"/>
+                                <field name="is_active"/>
+                                <field name="network"/>
+                            </group>
+                            <group string="Connection Settings">
+                                <field name="rpc_host"/>
+                                <field name="rpc_port"/>
+                                <field name="rpc_user"/>
+                                <field name="rpc_password" password="True"/>
+                                <field name="use_ssl"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Performance Settings">
+                            <group>
+                                <field name="timeout_seconds"/>
+                                <field name="max_retries"/>
+                                <field name="cache_duration_minutes"/>
+                            </group>
+                            <group string="Environment Variables">
+                                <field name="use_env_variables"/>
+                                <field name="env_prefix" attrs="{'invisible': [('use_env_variables', '=', False)]}"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Node Information" attrs="{'invisible': [('connection_status', '!=', 'connected')]}">
+                            <group>
+                                <field name="node_version" readonly="1"/>
+                                <field name="current_block_height" readonly="1"/>
+                                <field name="chain" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="peer_count" readonly="1"/>
+                                <field name="last_connected" readonly="1"/>
+                                <field name="best_block_hash" readonly="1"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Status" attrs="{'invisible': [('status_message', '=', False)]}">
+                            <field name="status_message" widget="text" readonly="1" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Electrum Server Configuration Views -->
+        <record id="electrum_server_config_view_tree" model="ir.ui.view">
+            <field name="name">electrum.server.config.tree</field>
+            <field name="model">electrum.server.config</field>
+            <field name="arch" type="xml">
+                <tree string="Electrum Server Configurations" default_order="sequence, name">
+                    <field name="sequence" widget="handle"/>
+                    <field name="display_name"/>
+                    <field name="host"/>
+                    <field name="port"/>
+                    <field name="use_ssl" widget="boolean"/>
+                    <field name="network"/>
+                    <field name="server_type"/>
+                    <field name="is_active" widget="boolean"/>
+                    <field name="connection_status" widget="badge"
+                           decoration-success="connection_status == 'connected'"
+                           decoration-danger="connection_status in ('error', 'timeout', 'ssl_error')"
+                           decoration-muted="connection_status == 'unknown'"/>
+                    <field name="current_block_height"/>
+                    <field name="last_connected"/>
+                    <button name="test_connection" string="Test" type="object" 
+                            class="btn-sm btn-secondary" icon="fa-plug"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="electrum_server_config_view_form" model="ir.ui.view">
+            <field name="name">electrum.server.config.form</field>
+            <field name="model">electrum.server.config</field>
+            <field name="arch" type="xml">
+                <form string="Electrum Server Configuration">
+                    <header>
+                        <button name="test_connection" string="Test Connection" type="object" class="btn-primary"/>
+                        <button name="action_refresh_status" string="Refresh Status" type="object" class="btn-secondary"/>
+                        <field name="connection_status" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_refresh_status" type="object" class="oe_stat_button" icon="fa-refresh">
+                                <field name="last_check" string="Last Check" widget="relative"/>
+                            </button>
+                        </div>
+                        
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Configuration Name"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Priority &amp; Status">
+                                <field name="sequence"/>
+                                <field name="is_active"/>
+                                <field name="network"/>
+                                <field name="server_type"/>
+                            </group>
+                            <group string="Connection Settings">
+                                <field name="host"/>
+                                <field name="port"/>
+                                <field name="use_ssl"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Performance Settings">
+                            <group>
+                                <field name="timeout_seconds"/>
+                                <field name="max_retries"/>
+                                <field name="rate_limit_requests_per_second"/>
+                            </group>
+                            <group string="Environment Variables">
+                                <field name="use_env_variables"/>
+                                <field name="env_prefix" attrs="{'invisible': [('use_env_variables', '=', False)]}"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Server Information" attrs="{'invisible': [('connection_status', '!=', 'connected')]}">
+                            <group>
+                                <field name="server_version" readonly="1"/>
+                                <field name="protocol_version" readonly="1"/>
+                                <field name="current_block_height" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="last_connected" readonly="1"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Status" attrs="{'invisible': [('status_message', '=', False)]}">
+                            <field name="status_message" widget="text" readonly="1" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Actions -->
+        <record id="bitcoin_node_config_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Core Nodes</field>
+            <field name="res_model">bitcoin.node.config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configure Bitcoin Core Nodes
+                </p>
+                <p>
+                    Set up multiple Bitcoin Core nodes with automatic failover for high availability.
+                    Lower sequence numbers have higher priority.
+                </p>
+            </field>
+        </record>
+
+        <record id="electrum_server_config_action" model="ir.actions.act_window">
+            <field name="name">Electrum Servers</field>
+            <field name="res_model">electrum.server.config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configure Electrum Servers
+                </p>
+                <p>
+                    Set up multiple Electrum servers with automatic failover for transaction history and address monitoring.
+                    Lower sequence numbers have higher priority.
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -9,7 +9,7 @@
             <field name="inherit_id" ref="base.res_config_settings_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[hasclass('settings')]" position="inside">
-                    <div class="app_settings_block" data-string="Bitcoin Integration" string="Bitcoin Integration" data-key="bitcoin_integration">
+                    <div class="app_settings_block" data-string="Bitcoin Integration" string="Bitcoin Integration" data-key="bitcoin_integration" data-icon="account_cryptocurrency_bitcoin,static/bitcoin_menu_icon.svg">
                         <h2>Bitcoin Integration</h2>
                         
                         <!-- Bitcoin Node Connection -->

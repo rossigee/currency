@@ -142,6 +142,9 @@ class CryptoBitcoinWallet(models.Model):
             
             _logger.info(f"Background transaction import completed for wallet {self.name}: {total_created} new, {total_updated} updated")
             
+            # Return result summary for job queue display
+            return f"✅ Import completed: {total_created} new, {total_updated} updated, {total_transactions} total transactions found across {len(addresses_to_check)} addresses"
+            
         except Exception as e:
             error_msg = f'Failed to import wallet transactions: {str(e)}'
             _logger.error(f"Background transaction import failed for wallet {self.name}: {str(e)}")
