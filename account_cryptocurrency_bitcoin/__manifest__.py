@@ -19,11 +19,12 @@
         "queue_job",
     ],
     "external_dependencies": {
-        "python": ["mnemonic", "embit"],
+        "python": ["mnemonic", "embit", "ecdsa", "base58"],
     },
     "data": [
-        "security/res_groups.xml",
+        "security/res_groups.xml", 
         "security/ir.model.access.csv",
+        "data/default_electrum_servers.xml",
         "views/wizard_bitcoin_xpub.xml",
         "views/wizard_derive_addresses.xml",
         "views/wizard_create_private_key.xml",
@@ -41,6 +42,7 @@
         "views/crypto_bitcoin_transaction_fetcher_views.xml",
         "views/crypto_bitcoin_wallet_views.xml",
         "views/bitcoin_settings_views.xml",
+        "views/bitcoin_config_views.xml",
         "views/res_config_settings_views.xml",
         "views/queue_job_views.xml",
         "views/menu.xml",

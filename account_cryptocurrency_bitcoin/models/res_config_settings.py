@@ -119,20 +119,23 @@ class ResConfigSettings(models.TransientModel):
         """Test Bitcoin connection and update status"""
         self.ensure_one()
         
+        error_message = None
+        
         try:
             if self.bitcoin_use_local_node:
-                success = self._test_bitcoin_node_connection()
+                success, error_message = self._test_bitcoin_node_connection()
             else:
-                success = self._test_bitcoin_api_connection()
+                success, error_message = self._test_bitcoin_api_connection()
                 
             if success:
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
-                        'title': 'Bitcoin Connection Successful',
+                        'title': '✅ Bitcoin Connection Successful',
                         'message': 'Successfully connected to Bitcoin service',
-                        'type': 'success'
+                        'type': 'success',
+                        'sticky': False
                     }
                 }
             else:
@@ -140,26 +143,40 @@ class ResConfigSettings(models.TransientModel):
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
-                        'title': 'Bitcoin Connection Failed',
-                        'message': 'Failed to connect to Bitcoin service. Check your settings.',
-                        'type': 'danger'
+                        'title': '❌ Bitcoin Connection Failed',
+                        'message': error_message or 'Failed to connect to Bitcoin service. Check your settings.',
+                        'type': 'danger',
+                        'sticky': True  # Keep error messages visible longer
                     }
                 }
                 
         except Exception as e:
+            error_details = str(e)
+            _logger.error(f"Bitcoin connection test exception: {error_details}", exc_info=True)
+            
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': 'Bitcoin Connection Error',
-                    'message': f'Connection test failed: {str(e)}',
-                    'type': 'danger'
+                    'title': '💥 Bitcoin Connection Error',
+                    'message': f'Connection test failed with exception:\n\n{error_details}',
+                    'type': 'danger',
+                    'sticky': True  # Keep error messages visible longer
                 }
             }
 
     def _test_bitcoin_node_connection(self):
         """Test connection to local Bitcoin node"""
         try:
+            # Validate required fields first
+            if not self.bitcoin_node_rpc_host:
+                return False, "Bitcoin node host is required"
+                
+            if not self.bitcoin_node_rpc_user or not self.bitcoin_node_rpc_password:
+                return False, "Bitcoin node RPC username and password are required"
+            
+            _logger.info(f"Testing Bitcoin node connection to {self.bitcoin_node_rpc_host}:{self.bitcoin_node_rpc_port}")
+            
             # Create a temporary Bitcoin connector to test
             connector_vals = {
                 'name': 'Settings Test Connection',
@@ -177,15 +194,39 @@ class ResConfigSettings(models.TransientModel):
             try:
                 # Test the connection
                 blockchain_info = test_connector._make_rpc_call('getblockchaininfo')
-                return True
+                network_info = test_connector._make_rpc_call('getnetworkinfo')
+                
+                success_message = (
+                    f"✅ Connected to {blockchain_info.get('chain', 'unknown')} network\n"
+                    f"📊 Block height: {blockchain_info.get('blocks', 0)}\n"
+                    f"🔗 Node version: {network_info.get('subversion', 'unknown')}\n"
+                    f"👥 Peer connections: {network_info.get('connections', 0)}"
+                )
+                
+                _logger.info(f"Bitcoin node connection successful: {success_message}")
+                return True, success_message
                 
             finally:
                 # Clean up test connector
                 test_connector.unlink()
                 
         except Exception as e:
-            _logger.warning(f"Bitcoin node connection test failed: {str(e)}")
-            return False
+            error_str = str(e)
+            
+            # Provide specific error messages
+            if "Connection refused" in error_str:
+                error_message = f"❌ Connection refused\n\nBitcoin Core is not running or not accessible at {self.bitcoin_node_rpc_host}:{self.bitcoin_node_rpc_port}\n\n🔧 Troubleshooting:\n• Check if Bitcoin Core is running\n• Verify host and port settings\n• Check firewall settings"
+            elif "authentication failed" in error_str.lower() or "401" in error_str:
+                error_message = f"❌ Authentication failed\n\nRPC credentials are incorrect\n\n🔧 Troubleshooting:\n• Check RPC username and password\n• Verify bitcoin.conf settings:\n  rpcuser={self.bitcoin_node_rpc_user}\n  rpcpassword=your_password"
+            elif "timeout" in error_str.lower():
+                error_message = f"❌ Connection timeout\n\nBitcoin Core is not responding\n\n🔧 Troubleshooting:\n• Bitcoin Core may be starting up\n• Check if node is syncing\n• Verify network connectivity"
+            elif "Name or service not known" in error_str:
+                error_message = f"❌ DNS resolution failed\n\nCannot resolve hostname '{self.bitcoin_node_rpc_host}'\n\n🔧 Troubleshooting:\n• Check hostname spelling\n• Use IP address instead\n• Check DNS settings"
+            else:
+                error_message = f"❌ Connection failed\n\nUnexpected error: {error_str}\n\n🔧 Check Bitcoin Core logs and configuration"
+            
+            _logger.warning(f"Bitcoin node connection test failed: {error_message}")
+            return False, error_message
 
     def _test_bitcoin_api_connection(self):
         """Test connection to external blockchain API"""
@@ -196,24 +237,64 @@ class ResConfigSettings(models.TransientModel):
             if self.bitcoin_external_api_provider == 'blockstream':
                 if self.bitcoin_network == 'mainnet':
                     test_url = 'https://blockstream.info/api/blocks/tip/height'
+                    provider_name = 'Blockstream (Mainnet)'
                 else:
                     test_url = 'https://blockstream.info/testnet/api/blocks/tip/height'
+                    provider_name = 'Blockstream (Testnet)'
             elif self.bitcoin_external_api_provider == 'mempool':
                 if self.bitcoin_network == 'mainnet':
                     test_url = 'https://mempool.space/api/blocks/tip/height'
+                    provider_name = 'Mempool.space (Mainnet)'
                 else:
                     test_url = 'https://mempool.space/testnet/api/blocks/tip/height'
+                    provider_name = 'Mempool.space (Testnet)'
             elif self.bitcoin_external_api_provider == 'custom' and self.bitcoin_custom_api_base_url:
                 test_url = f"{self.bitcoin_custom_api_base_url}/blocks/tip/height"
+                provider_name = f'Custom API ({self.bitcoin_custom_api_base_url})'
             else:
-                raise ValidationError("Invalid API provider configuration")
+                return False, "❌ Invalid API provider configuration\n\nPlease select a valid API provider or configure custom URL"
+            
+            _logger.info(f"Testing {provider_name} API connection: {test_url}")
             
             response = requests.get(test_url, timeout=10)
-            return response.status_code == 200
+            
+            if response.status_code == 200:
+                block_height = response.text.strip()
+                success_message = (
+                    f"✅ Connected to {provider_name}\n"
+                    f"📊 Current block height: {block_height}\n"
+                    f"🌐 Network: {self.bitcoin_network}\n"
+                    f"🔗 URL: {test_url}"
+                )
+                _logger.info(f"Bitcoin API connection successful: {success_message}")
+                return True, success_message
+            else:
+                error_message = (
+                    f"❌ API request failed\n\n"
+                    f"HTTP {response.status_code}: {response.reason}\n"
+                    f"Provider: {provider_name}\n"
+                    f"URL: {test_url}\n\n"
+                    f"🔧 Troubleshooting:\n"
+                    f"• Check network connectivity\n"
+                    f"• Try a different API provider\n"
+                    f"• Verify URL is correct"
+                )
+                _logger.warning(f"Bitcoin API connection failed: {error_message}")
+                return False, error_message
                 
         except Exception as e:
-            _logger.warning(f"Bitcoin API connection test failed: {str(e)}")
-            return False
+            error_str = str(e)
+            provider_name = getattr(self, 'bitcoin_external_api_provider', 'Unknown')
+            
+            if "timeout" in error_str.lower():
+                error_message = f"❌ Connection timeout\n\n{provider_name} API is not responding\n\n🔧 Troubleshooting:\n• Check internet connection\n• Try again later\n• Switch to a different API provider"
+            elif "Name or service not known" in error_str:
+                error_message = f"❌ DNS resolution failed\n\nCannot resolve API hostname\n\n🔧 Troubleshooting:\n• Check internet connection\n• Check DNS settings\n• Try a different API provider"
+            else:
+                error_message = f"❌ API connection failed\n\nUnexpected error: {error_str}\n\n🔧 Try a different API provider or check network settings"
+            
+            _logger.warning(f"Bitcoin API connection test failed: {error_message}")
+            return False, error_message
 
     @api.model
     def get_bitcoin_settings_values(self):

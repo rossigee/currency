@@ -1224,3 +1224,45 @@ class CryptoBip32Utils(models.AbstractModel):
         checksum = bech32_create_checksum(hrp, data)
         combined = data + checksum
         return hrp + '1' + ''.join([CHARSET[d] for d in combined])
+
+    @api.model
+    def validate_bitcoin_address(self, address):
+        """
+        Basic Bitcoin address format validation
+        
+        Args:
+            address (str): Bitcoin address to validate
+            
+        Returns:
+            bool: True if address format appears valid
+        """
+        if not address:
+            return False
+        
+        address = address.strip()
+        
+        # Basic format checks for different address types
+        if len(address) < 26 or len(address) > 62:
+            return False
+            
+        # Legacy addresses (P2PKH, P2SH)
+        if address.startswith('1') or address.startswith('3'):
+            return len(address) >= 26 and len(address) <= 35
+        
+        # Bech32 addresses (P2WPKH, P2WSH, P2TR)
+        if address.startswith('bc1'):
+            # P2WPKH (bc1q): typically 42 chars, but can be 39-42
+            # P2WSH (bc1q): typically 62 chars
+            # P2TR (bc1p): typically 62 chars  
+            return len(address) >= 39 and len(address) <= 62
+        
+        # Testnet addresses
+        if address.startswith(('m', 'n', '2', 'tb1')):
+            # Basic testnet validation - similar rules but different prefixes
+            if address.startswith(('m', 'n', '2')):
+                return len(address) >= 26 and len(address) <= 35
+            elif address.startswith('tb1'):
+                return len(address) >= 39 and len(address) <= 62
+        
+        # If it doesn't match common patterns, let the API decide
+        return True
