@@ -19,11 +19,9 @@ class CryptoBitcoinTransactionFetcher(models.Model):
 
     name = fields.Char(string='Service Name', required=True)
     service_type = fields.Selection([
-        ('blockstream', 'Blockstream API'),
-        ('mempool', 'Mempool.space API'),
         ('electrum', 'Electrum Server'),
         ('custom', 'Custom API')
-    ], string='Service Type', required=True, default='blockstream')
+    ], string='Service Type', required=True, default='electrum')
     
     # Connection settings
     base_url = fields.Char(string='Base URL', help="Base URL for the API service")
@@ -91,14 +89,22 @@ class CryptoBitcoinTransactionFetcher(models.Model):
             import socket
             import ssl
             
+            # Get configuration using the same priority system as ElectrumClient
+            electrum_client = self.env['electrum.client']
+            host, port, use_ssl = electrum_client._get_electrum_config(
+                host=self.electrum_host,
+                port=self.electrum_port,
+                use_ssl=self.use_ssl
+            )
+            
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(10)
             
-            if self.use_ssl:
+            if use_ssl:
                 context = ssl.create_default_context()
-                sock = context.wrap_socket(sock, server_hostname=self.electrum_host)
+                sock = context.wrap_socket(sock, server_hostname=host)
             
-            sock.connect((self.electrum_host, self.electrum_port))
+            sock.connect((host, port))
             
             # Send a test request
             request = {"id": 1, "method": "server.version", "params": []}
@@ -135,75 +141,36 @@ class CryptoBitcoinTransactionFetcher(models.Model):
             return False
 
     def fetch_address_transactions(self, address):
-        """Fetch all transactions for a Bitcoin address"""
+        """Fetch all transactions for a Bitcoin address using Electrum server"""
         self.ensure_one()
-        
-        if self.service_type == 'electrum':
-            return self._fetch_address_transactions_electrum(address)
-        else:
-            return self._fetch_address_transactions_api(address)
+        return self._fetch_address_transactions_electrum(address)
 
-    def _fetch_address_transactions_api(self, address):
-        """Fetch transactions via API (Blockstream/Mempool.space)"""
+
+    def _fetch_address_transactions_electrum(self, address):
+        """Fetch transactions via Electrum protocol using dedicated client"""
         try:
             self._update_last_used()
+            _logger.info(f"Fetching transactions via Electrum for address: {address}")
             
-            if self.service_type == 'blockstream':
-                url = f"{self.base_url}/address/{address}/txs"
-            elif self.service_type == 'mempool':
-                url = f"{self.base_url}/address/{address}/txs"
-            else:
-                raise ValidationError(f"Unsupported API service type: {self.service_type}")
+            # Use dedicated Electrum client
+            electrum_client = self.env['electrum.client']
             
-            transactions = []
-            last_seen_txid = None
+            # Get transaction history
+            transactions = electrum_client.get_address_history(
+                address=address,
+                host=self.electrum_host,
+                port=self.electrum_port,
+                use_ssl=self.use_ssl
+            )
             
-            # Paginate through all transactions
-            while True:
-                paginated_url = url
-                if last_seen_txid:
-                    paginated_url = f"{url}/{last_seen_txid}"
-                
-                _logger.info(f"Fetching transactions: {paginated_url}")
-                
-                response = requests.get(paginated_url, timeout=30)
-                if response.status_code != 200:
-                    raise UserError(f"API request failed: HTTP {response.status_code}")
-                
-                batch = response.json()
-                _logger.info(f"API response type: {type(batch)}, length: {len(batch) if isinstance(batch, list) else 'N/A'}")
-                
-                # Handle empty response (no transactions or end of pagination)
-                if not batch or len(batch) == 0:
-                    _logger.info(f"No more transactions found for address {address}")
-                    break
-                
-                transactions.extend(batch)
-                
-                # Check if we need to paginate (Blockstream returns up to 25 per page)
-                if len(batch) < 25:
-                    _logger.info(f"Received partial batch ({len(batch)} transactions), pagination complete")
-                    break
-                
-                # Set up for next page
-                last_seen_txid = batch[-1]['txid']
-                _logger.info(f"Fetched {len(batch)} transactions, continuing with last_seen_txid: {last_seen_txid[:16]}...")
-                time.sleep(self.rate_limit_delay)
+            _logger.info(f"Electrum client returned {len(transactions)} transactions")
             
-            _logger.info(f"Fetched {len(transactions)} transactions for address {address}")
-            _logger.debug(f"About to normalize transactions: {[type(tx) for tx in transactions[:3]]}")  # Show types of first 3
+            # Normalize to our expected format
             return self._normalize_transaction_data(transactions)
             
         except Exception as e:
-            _logger.error(f"Failed to fetch transactions for {address}: {str(e)}")
-            raise UserError(f"Failed to fetch transactions: {str(e)}")
-
-    def _fetch_address_transactions_electrum(self, address):
-        """Fetch transactions via Electrum protocol"""
-        # This would require implementing the Electrum protocol
-        # For now, fall back to API method
-        _logger.warning("Electrum protocol not yet implemented, falling back to API")
-        return []
+            _logger.error(f"Failed to fetch transactions via Electrum for {address}: {str(e)}")
+            raise ValidationError(f"Electrum fetch failed: {str(e)}")
 
     def fetch_transaction_details(self, txid):
         """Fetch detailed transaction information by transaction ID"""

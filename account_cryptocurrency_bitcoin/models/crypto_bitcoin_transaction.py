@@ -326,11 +326,26 @@ class CryptoBitcoinTransaction(models.Model):
             raise ValidationError("Transaction hash is required to fetch from blockchain")
         
         try:
-            # Get default transaction fetcher
-            fetcher = self.env['crypto.bitcoin.transaction.fetcher'].get_default_fetcher()
+            # Try Electrum first, fallback to Bitcoin Core if available
+            tx_data = None
             
-            # Fetch transaction details
-            tx_data = fetcher.fetch_transaction_details(self.tx_hash)
+            # Try Electrum
+            try:
+                electrum_client = self.env['electrum.client'].get_default_client()
+                tx_data = electrum_client.get_transaction(self.tx_hash)
+            except Exception as e:
+                _logger.warning(f"Electrum fetch failed, trying Bitcoin Core: {str(e)}")
+            
+            # If Electrum failed, try Bitcoin Core
+            if not tx_data:
+                try:
+                    bitcoin_connector = self.env['bitcoin.connector'].get_configured_connector()
+                    tx_data = bitcoin_connector.get_transaction_details(self.tx_hash)
+                except Exception as e:
+                    _logger.warning(f"Bitcoin Core fetch also failed: {str(e)}")
+            
+            if not tx_data:
+                raise ValidationError("No Bitcoin services available or all services failed to fetch transaction")
             
             # Update transaction with blockchain data
             self._update_from_blockchain_data(tx_data)
@@ -427,11 +442,9 @@ class CryptoBitcoinTransaction(models.Model):
                 # Record the current processing time
                 self.env._tx_fetch_cache[cache_key] = current_time
                 
-                # Get default transaction fetcher
-                fetcher = self.env['crypto.bitcoin.transaction.fetcher'].get_default_fetcher(network)
-                
-                # Fetch transactions
-                transactions = fetcher.fetch_address_transactions(address)
+                # Use Electrum client to fetch transactions
+                electrum_client = self.env['electrum.client'].get_default_client()
+                transactions = electrum_client.get_address_history(address)
                 
                 created_count = 0
                 updated_count = 0
