@@ -19,34 +19,44 @@ class BitcoinSettings(models.Model):
     is_default = fields.Boolean(string='Default Configuration', default=False,
                                help="Mark this as the default configuration to use")
     
-    # Bitcoin Node Connection
-    use_local_node = fields.Boolean(string='Use Local Bitcoin Node', default=True,
-                                   help="Use local Bitcoin Core node instead of external APIs")
-    
-    # Local Node Settings
-    node_rpc_host = fields.Char(string='Bitcoin Node Host', default='localhost')
-    node_rpc_port = fields.Integer(string='Bitcoin Node Port', default=8332)
-    node_rpc_user = fields.Char(string='RPC Username')
-    node_rpc_password = fields.Char(string='RPC Password')
-    node_use_ssl = fields.Boolean(string='Use SSL for Node Connection', default=False)
-    node_network = fields.Selection([
+    # Bitcoin Network
+    network = fields.Selection([
         ('mainnet', 'Bitcoin Mainnet'),
         ('testnet', 'Bitcoin Testnet'),
         ('regtest', 'Regtest'),
         ('signet', 'Signet')
     ], string='Bitcoin Network', default='mainnet', required=True)
     
-    # External API Settings (fallback)
-    external_api_provider = fields.Selection([
-        ('blockstream', 'Blockstream API'),
-        ('mempool', 'Mempool.space API'),
-        ('custom', 'Custom API')
-    ], string='External API Provider', default='blockstream')
+    # Bitcoin Core Node Settings (for broadcasting, fee estimation, etc.)
+    use_bitcoin_core = fields.Boolean(string='Enable Bitcoin Core Integration', default=True,
+                                     help="Enable Bitcoin Core node for transaction broadcasting and advanced features")
+    bitcoin_core_rpc_host = fields.Char(string='Bitcoin Core Host', default='localhost')
+    bitcoin_core_rpc_port = fields.Integer(string='Bitcoin Core Port', default=8332)
+    bitcoin_core_rpc_user = fields.Char(string='Bitcoin Core RPC Username')
+    bitcoin_core_rpc_password = fields.Char(string='Bitcoin Core RPC Password')
+    bitcoin_core_use_ssl = fields.Boolean(string='Bitcoin Core Use SSL', default=False)
+    bitcoin_core_status = fields.Selection([
+        ('untested', 'Not Tested'),
+        ('connected', 'Connected'),
+        ('failed', 'Connection Failed')
+    ], string='Bitcoin Core Status', default='untested', readonly=True)
+    bitcoin_core_status_message = fields.Text(string='Bitcoin Core Status', readonly=True)
     
-    custom_api_base_url = fields.Char(string='Custom API Base URL',
-                                     help="Base URL for custom blockchain API")
-    api_rate_limit_delay = fields.Float(string='API Rate Limit Delay (seconds)', default=0.1)
-    api_max_retries = fields.Integer(string='API Max Retries', default=3)
+    # Electrum Server Settings (for transaction history)
+    use_electrum = fields.Boolean(string='Enable Electrum Integration', default=True,
+                                 help="Enable Electrum server for transaction history and address monitoring")
+    electrum_host = fields.Char(string='Electrum Host', default='electrum.blockstream.info',
+                               help="Electrum server hostname")
+    electrum_port = fields.Integer(string='Electrum Port', default=50002,
+                                  help="Electrum server port")
+    electrum_use_ssl = fields.Boolean(string='Electrum Use SSL', default=True,
+                                     help="Use SSL for Electrum connection")
+    electrum_status = fields.Selection([
+        ('untested', 'Not Tested'),
+        ('connected', 'Connected'),
+        ('failed', 'Connection Failed')
+    ], string='Electrum Status', default='untested', readonly=True)
+    electrum_status_message = fields.Text(string='Electrum Status', readonly=True)
     
     # Transaction Import Settings
     max_addresses_per_import = fields.Integer(string='Max Addresses per Import', default=50,
@@ -60,14 +70,8 @@ class BitcoinSettings(models.Model):
     blockchain_info_cache_minutes = fields.Integer(string='Blockchain Info Cache (minutes)', default=5,
                                                   help="How long to cache current block height and network info")
     
-    # Status and Testing
-    connection_status = fields.Selection([
-        ('untested', 'Not Tested'),
-        ('connected', 'Connected'),
-        ('failed', 'Connection Failed')
-    ], string='Connection Status', default='untested', readonly=True)
+    # General Status
     last_test_date = fields.Datetime(string='Last Connection Test', readonly=True)
-    status_message = fields.Text(string='Status Message', readonly=True)
 
     @api.constrains('is_default')
     def _check_single_default(self):
@@ -95,76 +99,121 @@ class BitcoinSettings(models.Model):
             
         return settings
 
-    def action_test_connection(self):
-        """Test the Bitcoin connection based on current settings"""
+    def action_test_connections(self):
+        """Test both Bitcoin Core and Electrum connections"""
         self.ensure_one()
         
-        try:
-            if self.use_local_node:
-                success = self._test_local_node_connection()
-            else:
-                success = self._test_external_api_connection()
-                
-            if success:
-                self.write({
-                    'connection_status': 'connected',
-                    'last_test_date': fields.Datetime.now(),
-                    'status_message': 'Connection test successful'
-                })
-                
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': 'Connection Successful',
-                        'message': self.status_message,
-                        'type': 'success'
-                    }
-                }
-            else:
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': 'Connection Failed',
-                        'message': self.status_message,
-                        'type': 'danger'
-                    }
-                }
-                
-        except Exception as e:
-            error_msg = f"Connection test failed: {str(e)}"
-            self.write({
-                'connection_status': 'failed',
-                'last_test_date': fields.Datetime.now(),
-                'status_message': error_msg
-            })
+        results = []
+        detailed_errors = []
+        
+        # Test Bitcoin Core connection
+        if self.use_bitcoin_core:
+            try:
+                _logger.info("Testing Bitcoin Core connection...")
+                bitcoin_core_success = self._test_bitcoin_core_connection()
+                if bitcoin_core_success:
+                    results.append("✅ Bitcoin Core: Connected")
+                    _logger.info(f"Bitcoin Core connected: {self.bitcoin_core_status_message}")
+                else:
+                    error_msg = self.bitcoin_core_status_message or "Unknown error"
+                    results.append(f"❌ Bitcoin Core: Failed")
+                    detailed_errors.append(f"Bitcoin Core Error: {error_msg}")
+                    _logger.warning(f"Bitcoin Core connection failed: {error_msg}")
+            except Exception as e:
+                error_msg = str(e)
+                results.append(f"❌ Bitcoin Core: Exception")
+                detailed_errors.append(f"Bitcoin Core Exception: {error_msg}")
+                _logger.error(f"Bitcoin Core connection exception: {error_msg}", exc_info=True)
+        else:
+            results.append("⚪ Bitcoin Core: Disabled")
             
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': 'Connection Test Error',
-                    'message': error_msg,
-                    'type': 'danger'
-                }
+        # Test Electrum connection
+        if self.use_electrum:
+            try:
+                _logger.info("Testing Electrum connection...")
+                electrum_success = self._test_electrum_connection()
+                if electrum_success:
+                    results.append("✅ Electrum: Connected")
+                    _logger.info(f"Electrum connected: {self.electrum_status_message}")
+                else:
+                    error_msg = self.electrum_status_message or "Unknown error"
+                    results.append(f"❌ Electrum: Failed")
+                    detailed_errors.append(f"Electrum Error: {error_msg}")
+                    _logger.warning(f"Electrum connection failed: {error_msg}")
+            except Exception as e:
+                error_msg = str(e)
+                results.append(f"❌ Electrum: Exception")
+                detailed_errors.append(f"Electrum Exception: {error_msg}")
+                _logger.error(f"Electrum connection exception: {error_msg}", exc_info=True)
+        else:
+            results.append("⚪ Electrum: Disabled")
+            
+        # Update last test date
+        self.last_test_date = fields.Datetime.now()
+        
+        # Prepare notification message
+        message_parts = results.copy()
+        if detailed_errors:
+            message_parts.append("")  # Empty line
+            message_parts.append("Detailed Errors:")
+            message_parts.extend(detailed_errors)
+        
+        message = "\n".join(message_parts)
+        success_count = len([r for r in results if r.startswith("✅")])
+        failure_count = len([r for r in results if r.startswith("❌")])
+        
+        # Determine notification type and title
+        if success_count > 0 and failure_count == 0:
+            notification_type = 'success'
+            title = f'✅ All Connections Successful ({success_count} services)'
+        elif success_count > 0 and failure_count > 0:
+            notification_type = 'warning'
+            title = f'⚠️ Partial Success ({success_count} connected, {failure_count} failed)'
+        elif failure_count > 0:
+            notification_type = 'danger'
+            title = f'❌ Connection Failed ({failure_count} services failed)'
+        else:
+            notification_type = 'info'
+            title = 'ℹ️ All Services Disabled'
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': title,
+                'message': message,
+                'type': notification_type,
+                'sticky': True if failure_count > 0 else False  # Keep error messages visible longer
             }
+        }
 
-    def _test_local_node_connection(self):
-        """Test connection to local Bitcoin node"""
+    def _test_bitcoin_core_connection(self):
+        """Test connection to Bitcoin Core node"""
         try:
+            # Validate required fields first
+            if not self.bitcoin_core_rpc_host:
+                self.bitcoin_core_status = 'failed'
+                self.bitcoin_core_status_message = "Bitcoin Core host is required"
+                return False
+                
+            if not self.bitcoin_core_rpc_user or not self.bitcoin_core_rpc_password:
+                self.bitcoin_core_status = 'failed'
+                self.bitcoin_core_status_message = "Bitcoin Core RPC username and password are required"
+                return False
+            
             # Create a temporary Bitcoin connector to test
             connector_vals = {
                 'name': 'Test Connection',
-                'rpc_host': self.node_rpc_host,
-                'rpc_port': self.node_rpc_port,
-                'rpc_user': self.node_rpc_user,
-                'rpc_password': self.node_rpc_password,
-                'use_ssl': self.node_use_ssl,
-                'network': self.node_network,
+                'rpc_host': self.bitcoin_core_rpc_host,
+                'rpc_port': self.bitcoin_core_rpc_port,
+                'rpc_user': self.bitcoin_core_rpc_user,
+                'rpc_password': self.bitcoin_core_rpc_password,
+                'use_ssl': self.bitcoin_core_use_ssl,
+                'network': self.network,
                 'is_active': False  # Don't make it active
             }
             
+            _logger.info(f"Testing Bitcoin Core connection to {self.bitcoin_core_rpc_host}:{self.bitcoin_core_rpc_port}")
             test_connector = self.env['bitcoin.connector'].create(connector_vals)
             
             try:
@@ -172,11 +221,11 @@ class BitcoinSettings(models.Model):
                 blockchain_info = test_connector._make_rpc_call('getblockchaininfo')
                 network_info = test_connector._make_rpc_call('getnetworkinfo')
                 
-                self.status_message = (
-                    f"✅ Connected to {blockchain_info.get('chain', 'unknown')} network\n"
-                    f"📊 Block height: {blockchain_info.get('blocks', 0)}\n"
-                    f"🔗 Node version: {network_info.get('subversion', 'unknown')}\n"
-                    f"👥 Connections: {network_info.get('connections', 0)}"
+                self.bitcoin_core_status = 'connected'
+                self.bitcoin_core_status_message = (
+                    f"Connected to {blockchain_info.get('chain', 'unknown')} network, "
+                    f"Block {blockchain_info.get('blocks', 0)}, "
+                    f"{network_info.get('connections', 0)} peers"
                 )
                 
                 return True
@@ -186,61 +235,91 @@ class BitcoinSettings(models.Model):
                 test_connector.unlink()
                 
         except Exception as e:
-            self.status_message = f"❌ Local node connection failed: {str(e)}"
+            self.bitcoin_core_status = 'failed'
+            
+            # Provide more specific error messages
+            error_str = str(e)
+            if "Connection refused" in error_str:
+                self.bitcoin_core_status_message = f"Connection refused - Bitcoin Core not running or not accessible at {self.bitcoin_core_rpc_host}:{self.bitcoin_core_rpc_port}"
+            elif "authentication failed" in error_str.lower() or "401" in error_str:
+                self.bitcoin_core_status_message = f"Authentication failed - check RPC username/password"
+            elif "timeout" in error_str.lower():
+                self.bitcoin_core_status_message = f"Connection timeout - Bitcoin Core not responding"
+            elif "Name or service not known" in error_str:
+                self.bitcoin_core_status_message = f"DNS error - cannot resolve hostname '{self.bitcoin_core_rpc_host}'"
+            else:
+                self.bitcoin_core_status_message = f"Connection failed: {error_str}"
+                
+            _logger.error(f"Bitcoin Core connection test failed: {self.bitcoin_core_status_message}")
             return False
 
-    def _test_external_api_connection(self):
-        """Test connection to external blockchain API"""
+    def _test_electrum_connection(self):
+        """Test connection to Electrum server"""
         try:
-            import requests
+            # Validate required fields first
+            if not self.electrum_host:
+                self.electrum_status = 'failed'
+                self.electrum_status_message = "Electrum host is required"
+                return False
             
-            # Build test URL based on provider
-            if self.external_api_provider == 'blockstream':
-                if self.node_network == 'mainnet':
-                    test_url = 'https://blockstream.info/api/blocks/tip/height'
-                else:
-                    test_url = 'https://blockstream.info/testnet/api/blocks/tip/height'
-            elif self.external_api_provider == 'mempool':
-                if self.node_network == 'mainnet':
-                    test_url = 'https://mempool.space/api/blocks/tip/height'
-                else:
-                    test_url = 'https://mempool.space/testnet/api/blocks/tip/height'
-            elif self.external_api_provider == 'custom' and self.custom_api_base_url:
-                test_url = f"{self.custom_api_base_url}/blocks/tip/height"
-            else:
-                raise ValidationError("Invalid API provider configuration")
+            if not self.electrum_port:
+                self.electrum_status = 'failed'
+                self.electrum_status_message = "Electrum port is required"
+                return False
             
-            response = requests.get(test_url, timeout=10)
+            _logger.info(f"Testing Electrum connection to {self.electrum_host}:{self.electrum_port} (SSL: {self.electrum_use_ssl})")
             
-            if response.status_code == 200:
-                block_height = response.text.strip()
-                self.status_message = (
-                    f"✅ Connected to {self.external_api_provider} API\n"
-                    f"📊 Current block height: {block_height}\n"
-                    f"🌐 Network: {self.node_network}"
-                )
+            # Use the dedicated Electrum client for testing
+            electrum_client = self.env['electrum.client']
+            
+            # Test server connection
+            result = electrum_client.test_connection(
+                host=self.electrum_host,
+                port=self.electrum_port,
+                use_ssl=self.electrum_use_ssl
+            )
+            
+            if result['success']:
+                self.electrum_status = 'connected'
+                self.electrum_status_message = result['message']
                 return True
             else:
-                self.status_message = f"❌ API request failed: HTTP {response.status_code}"
+                self.electrum_status = 'failed'
+                self.electrum_status_message = result['message']
                 return False
-                
+            
         except Exception as e:
-            self.status_message = f"❌ External API connection failed: {str(e)}"
+            self.electrum_status = 'failed'
+            
+            # Provide more specific error messages
+            error_str = str(e)
+            if "Connection refused" in error_str:
+                self.electrum_status_message = f"Connection refused - Electrum server not accessible at {self.electrum_host}:{self.electrum_port}"
+            elif "timeout" in error_str.lower():
+                self.electrum_status_message = f"Connection timeout - Electrum server not responding"
+            elif "Name or service not known" in error_str:
+                self.electrum_status_message = f"DNS error - cannot resolve hostname '{self.electrum_host}'"
+            elif "SSL" in error_str or "certificate" in error_str.lower():
+                self.electrum_status_message = f"SSL/Certificate error - try disabling SSL or check server certificate"
+            else:
+                self.electrum_status_message = f"Connection failed: {error_str}"
+                
+            _logger.error(f"Electrum connection test failed: {self.electrum_status_message}")
             return False
 
     def get_bitcoin_connector(self):
-        """Get or create Bitcoin connector based on current settings"""
+        """Get or create Bitcoin Core connector based on current settings"""
         self.ensure_one()
         
-        if not self.use_local_node:
-            return None  # Will use external APIs
+        if not self.use_bitcoin_core:
+            return None  # Bitcoin Core disabled
             
         # Look for existing connector with matching settings
         existing_connector = self.env['bitcoin.connector'].search([
-            ('rpc_host', '=', self.node_rpc_host),
-            ('rpc_port', '=', self.node_rpc_port),
-            ('rpc_user', '=', self.node_rpc_user),
-            ('network', '=', self.node_network),
+            ('rpc_host', '=', self.bitcoin_core_rpc_host),
+            ('rpc_port', '=', self.bitcoin_core_rpc_port),
+            ('rpc_user', '=', self.bitcoin_core_rpc_user),
+            ('network', '=', self.network),
             ('is_active', '=', True)
         ], limit=1)
         
@@ -249,69 +328,28 @@ class BitcoinSettings(models.Model):
             
         # Create new connector
         connector = self.env['bitcoin.connector'].create({
-            'name': f'{self.name} - Bitcoin Node',
-            'rpc_host': self.node_rpc_host,
-            'rpc_port': self.node_rpc_port,
-            'rpc_user': self.node_rpc_user,
-            'rpc_password': self.node_rpc_password,
-            'use_ssl': self.node_use_ssl,
-            'network': self.node_network,
+            'name': f'{self.name} - Bitcoin Core',
+            'rpc_host': self.bitcoin_core_rpc_host,
+            'rpc_port': self.bitcoin_core_rpc_port,
+            'rpc_user': self.bitcoin_core_rpc_user,
+            'rpc_password': self.bitcoin_core_rpc_password,
+            'use_ssl': self.bitcoin_core_use_ssl,
+            'network': self.network,
             'is_active': True,
             'cache_duration_minutes': self.blockchain_info_cache_minutes
         })
         
         return connector
 
-    def get_transaction_fetcher(self):
-        """Get or create transaction fetcher based on current settings"""
+    def get_electrum_client(self):
+        """Get Electrum client for transaction history"""
         self.ensure_one()
         
-        if self.use_local_node:
-            # Bitcoin connector will handle transaction fetching
-            return None
+        if not self.use_electrum:
+            return None  # Electrum disabled
             
-        # Look for existing fetcher
-        fetcher = self.env['crypto.bitcoin.transaction.fetcher'].search([
-            ('service_type', '=', self.external_api_provider),
-            ('network', '=', self.node_network),
-            ('is_active', '=', True)
-        ], limit=1)
-        
-        if fetcher:
-            # Update settings
-            fetcher.write({
-                'rate_limit_delay': self.api_rate_limit_delay,
-                'max_retries': self.api_max_retries
-            })
-            return fetcher
-            
-        # Create new fetcher
-        base_urls = {
-            'blockstream': {
-                'mainnet': 'https://blockstream.info/api',
-                'testnet': 'https://blockstream.info/testnet/api'
-            },
-            'mempool': {
-                'mainnet': 'https://mempool.space/api',
-                'testnet': 'https://mempool.space/testnet/api'
-            }
-        }
-        
-        base_url = self.custom_api_base_url
-        if self.external_api_provider in base_urls:
-            base_url = base_urls[self.external_api_provider].get(self.node_network)
-            
-        fetcher = self.env['crypto.bitcoin.transaction.fetcher'].create({
-            'name': f'{self.name} - {self.external_api_provider.title()} API',
-            'service_type': self.external_api_provider,
-            'base_url': base_url,
-            'network': self.node_network,
-            'rate_limit_delay': self.api_rate_limit_delay,
-            'max_retries': self.api_max_retries,
-            'is_active': True
-        })
-        
-        return fetcher
+        # Return the Electrum client (it will use our configuration)
+        return self.env['electrum.client']
 
     @api.model
     def get_import_settings(self):
@@ -321,4 +359,23 @@ class BitcoinSettings(models.Model):
             'max_addresses': settings.max_addresses_per_import,
             'chunk_size': settings.import_chunk_size,
             'delay_between_addresses': settings.import_delay_between_addresses
+        }
+        
+    @api.model
+    def get_services_config(self):
+        """Get configuration for both Bitcoin services"""
+        settings = self.get_default_settings()
+        return {
+            'bitcoin_core': {
+                'enabled': settings.use_bitcoin_core,
+                'connector': settings.get_bitcoin_connector() if settings.use_bitcoin_core else None
+            },
+            'electrum': {
+                'enabled': settings.use_electrum,
+                'client': settings.get_electrum_client() if settings.use_electrum else None,
+                'host': settings.electrum_host,
+                'port': settings.electrum_port,
+                'use_ssl': settings.electrum_use_ssl
+            },
+            'network': settings.network
         }

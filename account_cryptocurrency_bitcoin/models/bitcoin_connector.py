@@ -58,22 +58,114 @@ class BitcoinConnector(models.Model):
                                           help="How long to cache blockchain info before refreshing")
 
     @api.model
-    def get_default_connector(self, network='mainnet'):
-        """Get the default active connector for a network"""
-        connector = self.search([
-            ('network', '=', network),
-            ('is_active', '=', True)
-        ], limit=1, order='last_connected desc')
-        
-        if not connector:
-            # Try to create from environment variables
-            connector = self._create_from_env(network)
+    def get_default_connector(self, network=None):
+        """Get the default active connector for a network using failover logic"""
+        try:
+            # Use new node configuration system
+            node_config = self.env['bitcoin.node.config'].get_best_node(network)
+            return node_config.get_connector()
+        except UserError:
+            # Fallback to old system for backward compatibility
+            if not network:
+                network = 'mainnet'  # Default network
+                
+            connector = self.search([
+                ('network', '=', network),
+                ('is_active', '=', True)
+            ], limit=1, order='last_connected desc')
             
-        if not connector:
-            raise UserError(f"No active Bitcoin connector found for {network}. Please configure a Bitcoin node connection.")
+            if not connector:
+                # Try to create from environment variables
+                connector = self._create_from_env(network)
+                
+            if not connector:
+                # Try to create default node configuration
+                try:
+                    node_config = self.env['bitcoin.node.config'].create_default_node(network)
+                    return node_config.get_connector()
+                except:
+                    pass
+                    
+                raise UserError(f"No active Bitcoin connector found for {network}. Please configure a Bitcoin node connection.")
+                
+            return connector
+    
+    @api.model
+    def get_configured_connector(self):
+        """Get connector using new configuration system with failover"""
+        try:
+            # Try new system first
+            return self.get_default_connector()
+        except UserError:
+            # Fallback for compatibility
+            try:
+                services_config = self.env['bitcoin.settings'].get_services_config()
+                if not services_config['bitcoin_core']['enabled']:
+                    raise ValidationError("Bitcoin Core integration is disabled")
+                return services_config['bitcoin_core']['connector'] or self.get_default_connector()
+            except:
+                # Last resort - try any available connector
+                connector = self.search([('is_active', '=', True)], limit=1)
+                if not connector:
+                    raise UserError("No Bitcoin connectors available. Please configure at least one Bitcoin node.")
+                return connector
+    
+    @api.model
+    def get_with_failover(self, network=None, max_attempts=3):
+        """Get connector with automatic failover to next available node"""
+        try:
+            # Get failover chain from node configurations
+            nodes = self.env['bitcoin.node.config'].get_active_nodes(network)
             
-        return connector
+            for attempt, node in enumerate(nodes[:max_attempts]):
+                try:
+                    connector = node.get_connector()
+                    # Quick test to ensure connector is working
+                    connector._make_rpc_call('getnetworkinfo')
+                    _logger.info(f"Using Bitcoin node: {node.display_name}")
+                    return connector
+                except Exception as e:
+                    _logger.warning(f"Bitcoin node {node.name} failed (attempt {attempt + 1}): {str(e)}")
+                    if attempt == len(nodes) - 1 or attempt == max_attempts - 1:
+                        # Last attempt, re-raise error
+                        raise
+                    continue
+                    
+        except Exception as e:
+            # Fallback to old system
+            _logger.warning(f"Node configuration system failed, using fallback: {str(e)}")
+            return self.get_default_connector(network)
 
+    @api.model
+    def _create_from_config(self, network='mainnet'):
+        """Create connector from settings or environment variables"""
+        # Try settings first
+        try:
+            settings = self.env['bitcoin.settings'].get_default_settings()
+            if (settings.use_bitcoin_core and 
+                settings.bitcoin_core_rpc_host and 
+                settings.bitcoin_core_rpc_user and 
+                settings.bitcoin_core_rpc_password):
+                
+                connector = self.create({
+                    'name': f'{settings.name} - Bitcoin Core',
+                    'rpc_host': settings.bitcoin_core_rpc_host,
+                    'rpc_port': settings.bitcoin_core_rpc_port,
+                    'rpc_user': settings.bitcoin_core_rpc_user,
+                    'rpc_password': settings.bitcoin_core_rpc_password,
+                    'use_ssl': settings.bitcoin_core_use_ssl,
+                    'network': network,
+                    'is_active': True,
+                    'cache_duration_minutes': settings.blockchain_info_cache_minutes
+                })
+                _logger.info(f"Created Bitcoin connector from settings: {connector.name}")
+                return connector
+        except Exception as e:
+            _logger.warning(f"Failed to create connector from settings: {str(e)}")
+        
+        # Fallback to environment variables
+        return self._create_from_env(network)
+    
     @api.model 
     def _create_from_env(self, network='mainnet'):
         """Create connector from environment variables"""
