@@ -43,6 +43,7 @@ class CryptoBitcoinTransactionLine(models.Model):
 class CryptoBitcoinTransaction(models.Model):
     _name = 'crypto.bitcoin.transaction'
     _description = 'Crypto Bitcoin Transaction'
+    _rec_name = 'tx_hash_display'
 
     date = fields.Datetime(string='Date')
     imported_date = fields.Datetime(string='Imported Date', default=fields.Datetime.now, readonly=True)
@@ -181,32 +182,76 @@ class CryptoBitcoinTransaction(models.Model):
 
     @api.depends('mined_block')
     def _compute_confirmations(self):
-        """Compute real-time confirmations using Bitcoin connector"""
-        for record in self:
-            if not record.mined_block:
-                record.confirmations = 0
-                continue
-                
-            try:
-                # Get Bitcoin settings from config parameters
-                use_local_node = self.env['ir.config_parameter'].sudo().get_param('bitcoin.use_local_node', True)
-                
-                if use_local_node:
-                    # Use local Bitcoin node for real-time confirmations
-                    connector = self.env['bitcoin.connector'].get_default_connector()
-                    if connector:
-                        record.confirmations = connector.get_transaction_confirmations(
-                            record.tx_hash, record.mined_block
-                        )
-                    else:
-                        record.confirmations = 0
-                else:
-                    # Fallback: estimate based on stored data (will be stale)
+        """Compute real-time confirmations using Bitcoin connector - OPTIMIZED for batch processing"""
+        # Group records by whether they need confirmation calculation
+        unconfirmed_records = self.filtered(lambda r: not r.mined_block)
+        confirmed_records = self.filtered(lambda r: r.mined_block)
+        
+        # Set unconfirmed to 0
+        for record in unconfirmed_records:
+            record.confirmations = 0
+        
+        if not confirmed_records:
+            return
+            
+        try:
+            # Get Bitcoin settings from config parameters
+            use_local_node = self.env['ir.config_parameter'].sudo().get_param('bitcoin.use_local_node', True)
+            
+            if not use_local_node:
+                # All confirmed records get 0 confirmations if not using local node
+                for record in confirmed_records:
                     record.confirmations = 0
-                    
-            except Exception as e:
-                _logger.warning(f"Failed to compute confirmations for {record.tx_hash}: {str(e)}")
+                return
+            
+            # Get current block height ONCE for all transactions
+            current_height = self._get_cached_current_block_height()
+            if not current_height:
+                _logger.warning("Could not get current block height, setting all confirmations to 0")
+                for record in confirmed_records:
+                    record.confirmations = 0
+                return
+            
+            # Calculate confirmations for all confirmed records using the single block height fetch
+            for record in confirmed_records:
+                record.confirmations = max(0, current_height - record.mined_block + 1)
+                
+        except Exception as e:
+            _logger.warning(f"Failed to compute confirmations: {str(e)}")
+            for record in confirmed_records:
                 record.confirmations = 0
+
+    def _get_cached_current_block_height(self):
+        """Get current block height with caching to avoid multiple Bitcoin node calls"""
+        import time
+        
+        # Use class-level cache with 60 second TTL
+        cache_key = 'current_block_height'
+        current_time = time.time()
+        
+        if not hasattr(self.__class__, '_block_height_cache'):
+            self.__class__._block_height_cache = {}
+        
+        cache_data = self.__class__._block_height_cache.get(cache_key)
+        if cache_data and (current_time - cache_data['timestamp']) < 60:
+            _logger.info(f"Using cached block height: {cache_data['height']}")
+            return cache_data['height']
+        
+        # Cache miss or expired - fetch from Bitcoin node
+        try:
+            connector = self.env['bitcoin.connector'].get_default_connector()
+            if connector:
+                current_height = connector.get_current_block_height()
+                self.__class__._block_height_cache[cache_key] = {
+                    'height': current_height,
+                    'timestamp': current_time
+                }
+                _logger.info(f"Fetched and cached new block height: {current_height}")
+                return current_height
+        except Exception as e:
+            _logger.error(f"Failed to get current block height: {str(e)}")
+        
+        return None
 
     @api.depends('tx_hash')
     def _compute_tx_hash_display(self):
@@ -377,20 +422,57 @@ class CryptoBitcoinTransaction(models.Model):
             update_vals['fee'] = tx_data['fee'] / 100000000  # Convert satoshis to BTC
         if tx_data.get('block_time'):
             from datetime import datetime
-            update_vals['date'] = datetime.fromtimestamp(tx_data['block_time'])
+            import pytz
+            
+            # Bitcoin timestamps are in UTC
+            utc_datetime = datetime.fromtimestamp(tx_data['block_time'], tz=pytz.UTC)
+            # Convert to naive datetime for Odoo (Odoo expects naive datetime in UTC)
+            update_vals['date'] = utc_datetime.replace(tzinfo=None)
+            _logger.info(f"Updating transaction {self.tx_hash[:16]}... - Block time: {tx_data['block_time']}, converted date: {update_vals['date']} UTC")
+        
+        # Update amount with address-specific value (same logic as _prepare_transaction_from_blockchain_data)
+        if tx_data.get('value') is not None:
+            address_specific_value_sats = tx_data['value']
+            address_specific_value_btc = address_specific_value_sats / 100000000 if address_specific_value_sats > 0 else 0
+            update_vals['amount'] = address_specific_value_btc
+            _logger.info(f"Updating transaction {self.tx_hash[:16]}... - Address-specific value: {address_specific_value_sats} sats ({address_specific_value_btc} BTC)")
+        
+        # Update wallet linking if not already set and context provides wallet info
+        if not self.multisig_wallet_id and not self.from_wallet_id:
+            multisig_wallet = self.env.context.get('multisig_wallet')
+            wallet = self.env.context.get('wallet')
+            if multisig_wallet:
+                update_vals['multisig_wallet_id'] = multisig_wallet.id
+                _logger.info(f"Linking existing transaction {self.tx_hash[:16]}... to multisig wallet {multisig_wallet.name}")
+            elif wallet:
+                update_vals['from_wallet_id'] = wallet.id
+                _logger.info(f"Linking existing transaction {self.tx_hash[:16]}... to wallet {wallet.name}")
+        
+        # Update status and block information
+        if tx_data.get('confirmations', 0) > 0:
+            update_vals['status'] = 'confirmed'
+        else:
+            update_vals['status'] = 'pending'
+            
+        # Set block height - same field mapping as create logic
+        if tx_data.get('height') and tx_data['height'] > 0:
+            update_vals['mined_block'] = tx_data['height']
+        elif tx_data.get('block_height'):
+            update_vals['mined_block'] = tx_data['block_height']
         
         # Update confirmation status in notes
         if tx_data.get('confirmations'):
             confirmations = tx_data['confirmations']
-            block_height = tx_data.get('block_height', 'Unknown')
+            block_height = tx_data.get('height') or tx_data.get('block_height', 'Unknown')
             status_note = f"Confirmed in block {block_height} ({confirmations} confirmations)"
             
-            if self.notes:
+            if self.notes and 'Blockchain Status:' not in self.notes:
                 update_vals['notes'] = f"{self.notes}\n\nBlockchain Status: {status_note}"
             else:
                 update_vals['notes'] = f"Blockchain Status: {status_note}"
         
         if update_vals:
+            _logger.info(f"Updating transaction {self.tx_hash[:16]}... with fields: {list(update_vals.keys())}")
             self.write(update_vals)
 
     @api.model
@@ -467,7 +549,8 @@ class CryptoBitcoinTransaction(models.Model):
                             else:
                                 # Create new transaction record
                                 multisig_wallet = self.env.context.get('multisig_wallet')
-                                tx_vals = self._prepare_transaction_from_blockchain_data(tx_data, address, multisig_wallet)
+                                wallet = self.env.context.get('wallet')
+                                tx_vals = self._prepare_transaction_from_blockchain_data(tx_data, address, multisig_wallet, wallet)
                                 new_tx = self.create(tx_vals)
                                 # Create transaction lines for inputs and outputs
                                 self._create_transaction_lines(new_tx, tx_data)
@@ -500,21 +583,21 @@ class CryptoBitcoinTransaction(models.Model):
             raise ValidationError(f"Failed to fetch transactions: {str(e)}")
 
     @api.model
-    def _prepare_transaction_from_blockchain_data(self, tx_data, related_address=None, multisig_wallet=None):
+    def _prepare_transaction_from_blockchain_data(self, tx_data, related_address=None, multisig_wallet=None, wallet=None):
         """Prepare transaction creation values from blockchain data"""
         
-        # Calculate total output amount in BTC
-        total_output = 0
-        if tx_data.get('outputs'):
-            for output in tx_data['outputs']:
-                total_output += output.get('value', 0)
-        total_output_btc = total_output / 100000000 if total_output > 0 else 0  # Convert satoshis to BTC
+        # Use the address-specific value calculated by Electrum parser
+        # This represents only the amount relevant to the address we're importing for
+        address_specific_value_sats = tx_data.get('value', 0)
+        address_specific_value_btc = address_specific_value_sats / 100000000 if address_specific_value_sats > 0 else 0
         
-        # Debug logging for amount calculation
-        outputs_count = len(tx_data.get('outputs', []))
-        _logger.info(f"Transaction {tx_data.get('txid', 'unknown')[:16]}... - {outputs_count} outputs, total_output: {total_output} sats, total_output_btc: {total_output_btc}")
-        if outputs_count > 0:
-            _logger.info(f"First output sample: {tx_data['outputs'][0] if tx_data.get('outputs') else 'None'}")
+        _logger.info(f"Transaction {tx_data.get('txid', 'unknown')[:16]}... - Address-specific value: {address_specific_value_sats} sats ({address_specific_value_btc} BTC)")
+        
+        # Sanity check - Bitcoin amounts should be reasonable for a single address
+        if address_specific_value_btc > 21000000:  # More than total Bitcoin supply
+            _logger.error(f"Invalid amount detected: {address_specific_value_btc} BTC - exceeds total Bitcoin supply")
+            _logger.error(f"Raw tx_data: {tx_data}")
+            raise ValidationError(f"Transaction {tx_data.get('txid', 'unknown')} has invalid amount: {address_specific_value_btc} BTC")
         
         # Determine transaction status
         status = 'confirmed' if tx_data.get('confirmations', 0) > 0 else 'pending'
@@ -524,23 +607,49 @@ class CryptoBitcoinTransaction(models.Model):
             'tx_hash': tx_data.get('txid'),
             'size': tx_data.get('size', 0),
             'fee': (tx_data.get('fee', 0) / 100000000) if tx_data.get('fee') else 0,
-            'amount': total_output_btc,  # Required field
+            'amount': address_specific_value_btc,  # Required field - address-specific amount
             'status': status,  # Required field
             'notes': 'Imported from blockchain',  # Simplified notes
         }
         
-        # Link to multisig wallet if provided
+        # Link to wallets if provided
         if multisig_wallet:
             vals['multisig_wallet_id'] = multisig_wallet.id
+            _logger.info(f"Linking transaction {tx_data.get('txid', 'unknown')[:16]}... to multisig wallet {multisig_wallet.name}")
+        elif wallet:
+            vals['from_wallet_id'] = wallet.id
+            _logger.info(f"Linking transaction {tx_data.get('txid', 'unknown')[:16]}... to wallet {wallet.name}")
         
         # Date from block time
         if tx_data.get('block_time'):
             from datetime import datetime
-            vals['date'] = datetime.fromtimestamp(tx_data['block_time'])
+            import pytz
+            
+            # Bitcoin timestamps are in UTC
+            utc_datetime = datetime.fromtimestamp(tx_data['block_time'], tz=pytz.UTC)
+            # Convert to naive datetime for Odoo (Odoo expects naive datetime in UTC)
+            vals['date'] = utc_datetime.replace(tzinfo=None)
+            _logger.info(f"Transaction {tx_data.get('txid', 'unknown')[:16]}... - Block time: {tx_data['block_time']}, converted date: {vals['date']} UTC")
+        else:
+            # No fallbacks - if we can't get valid block time for confirmed transactions, fail
+            height = tx_data.get('height', 0)
+            if height > 0:
+                # Confirmed transaction must have block time
+                raise ValidationError(f"Transaction {tx_data.get('txid', 'unknown')} confirmed in block {height} but no block timestamp available")
+            else:
+                # Unconfirmed transactions don't have block time yet - leave date field unset
+                _logger.info(f"Transaction {tx_data.get('txid', 'unknown')[:16]}... - Unconfirmed transaction, no date set")
         
-        # Set block height (confirmations will be computed)
-        if tx_data.get('block_height'):
+        # Set block height (confirmations will be computed) 
+        # Electrum uses 'height' field, not 'block_height'
+        if tx_data.get('height') and tx_data['height'] > 0:
+            vals['mined_block'] = tx_data['height']
+            _logger.info(f"Transaction {tx_data.get('txid', 'unknown')[:16]}... - Block height: {tx_data['height']}")
+        elif tx_data.get('block_height'):
             vals['mined_block'] = tx_data['block_height']
+            _logger.info(f"Transaction {tx_data.get('txid', 'unknown')[:16]}... - Block height (alt): {tx_data['block_height']}")
+        else:
+            _logger.warning(f"Transaction {tx_data.get('txid', 'unknown')[:16]}... - No block height available")
         
         return vals
 
@@ -548,19 +657,24 @@ class CryptoBitcoinTransaction(models.Model):
     def _create_transaction_lines(self, transaction, tx_data):
         """Create transaction lines (inputs/outputs) from blockchain data"""
         try:
-            # Create output lines
-            if tx_data.get('outputs'):
-                for i, output in enumerate(tx_data['outputs']):
+            # Create output lines - handle both 'outputs' and 'vout' field names
+            outputs = tx_data.get('outputs') or tx_data.get('vout', [])
+            if outputs:
+                _logger.info(f"Creating {len(outputs)} output lines for transaction {transaction.tx_hash}")
+                for i, output in enumerate(outputs):
                     # Try to find matching address record, create if not found
                     address_record = None
-                    if output.get('scriptpubkey_address'):
+                    # Handle different address field names from different sources
+                    output_address = output.get('scriptpubkey_address') or output.get('address')
+                    
+                    if output_address:
                         address_record = self.env['crypto.bitcoin.address'].search([
-                            ('address', '=', output['scriptpubkey_address'])
+                            ('address', '=', output_address)
                         ], limit=1)
                         if not address_record:
                             # Create address record for transaction tracking
                             address_record = self.env['crypto.bitcoin.address'].create({
-                                'address': output['scriptpubkey_address'],
+                                'address': output_address,
                                 'label': f'Discovered from transaction',
                                 'type': 'external',
                                 'used': True
@@ -576,9 +690,11 @@ class CryptoBitcoinTransaction(models.Model):
                     }
                     self.env['crypto.bitcoin.transaction.line'].create(output_vals)
             
-            # Create input lines
-            if tx_data.get('inputs'):
-                for i, input_data in enumerate(tx_data['inputs']):
+            # Create input lines - handle both 'inputs' and 'vin' field names
+            inputs = tx_data.get('inputs') or tx_data.get('vin', [])
+            if inputs:
+                _logger.info(f"Creating {len(inputs)} input lines for transaction {transaction.tx_hash}")
+                for i, input_data in enumerate(inputs):
                     # For inputs, we have the previous transaction info
                     input_vals = {
                         'transaction_id': transaction.id,

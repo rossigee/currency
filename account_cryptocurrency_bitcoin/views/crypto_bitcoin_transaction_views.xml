@@ -78,13 +78,13 @@
                                 </group>
                             </page>
                             
-                            <page string="Transaction Lines">
+                            <page string="Inputs &amp; Outputs">
                                 <field name="transaction_line_ids" invisible="1"/>
                                 <div class="alert alert-info" role="alert" 
                                      attrs="{'invisible': [('transaction_line_ids', '!=', [])]}">
-                                    <strong>💰 Transaction Lines:</strong><br/>
-                                    This shows the individual inputs and outputs that make up this transaction.
-                                    Outputs show where Bitcoin is being sent and how much.
+                                    <strong>💰 Bitcoin Transaction Structure:</strong><br/>
+                                    This shows the individual inputs and outputs that make up this specific transaction.
+                                    Inputs show where Bitcoin came from, outputs show where it's being sent.
                                 </div>
                                 
                                 <field name="output_line_ids" nolabel="1">

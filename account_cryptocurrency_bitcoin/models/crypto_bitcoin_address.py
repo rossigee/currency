@@ -63,7 +63,27 @@ class CryptoBitcoinAddress(models.Model):
                     for line in tx.input_line_ids
                     if line.address_id.id == record.id
                 )
-                record.balance = received - sent
+                
+                # For imported transactions, we can also use the transaction amount directly
+                # This is more reliable than transaction lines which might not be fully populated
+                total_transaction_amounts = sum(tx.amount for tx in transactions if tx.amount > 0)
+                
+                # Log for debugging
+                import logging
+                _logger = logging.getLogger(__name__)
+                _logger.info(f"Address {record.address} balance calculation:")
+                _logger.info(f"  - Received from output lines: {received} BTC")
+                _logger.info(f"  - Sent from input lines: {sent} BTC") 
+                _logger.info(f"  - Total from transaction amounts: {total_transaction_amounts} BTC")
+                _logger.info(f"  - Transaction count: {len(transactions)}")
+                
+                # Use the more reliable calculation method
+                if received > 0:
+                    # Use transaction line calculation if we have proper output lines
+                    record.balance = received - sent
+                else:
+                    # Fallback to sum of transaction amounts (more reliable for imported transactions)
+                    record.balance = total_transaction_amounts
             else:
                 record.last_transaction_date = False
                 record.balance = 0.0
@@ -130,12 +150,19 @@ class CryptoBitcoinAddress(models.Model):
             
             _logger.info(f"Address validation passed, fetching transactions for: {self.address}")
             
-            # Get Bitcoin services configuration
-            services_config = self.env['bitcoin.settings'].get_services_config()
+            # Get network configuration directly without services config
+            settings = self.env['bitcoin.settings'].get_default_settings()
+            network = settings.network if settings else 'mainnet'
             
-            result = self.env['crypto.bitcoin.transaction'].fetch_address_transactions(
+            # Pass wallet context if available
+            wallet_context = {}
+            if self.wallet_id:
+                wallet_context['wallet'] = self.wallet_id
+                _logger.info(f"Address {self.address} belongs to wallet {self.wallet_id.name}")
+            
+            result = self.env['crypto.bitcoin.transaction'].with_context(**wallet_context).fetch_address_transactions(
                 self.address,
-                network=services_config['network']
+                network=network
             )
             
             _logger.info(f"Transaction fetch completed with result: {result}")
