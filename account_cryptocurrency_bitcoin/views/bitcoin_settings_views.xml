@@ -11,6 +11,9 @@
                     <header>
                         <button name="action_test_connections" string="Test Connections" 
                                 type="object" class="btn-primary"/>
+                        <button name="action_migrate_to_new_models" string="Migrate to New Config Models" 
+                                type="object" class="btn-secondary"
+                                help="Migrate this configuration to the new dedicated Bitcoin Core and Electrum server models"/>
                     </header>
                     <sheet>
                         <div class="oe_title">

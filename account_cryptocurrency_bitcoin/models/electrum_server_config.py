@@ -110,6 +110,53 @@ class ElectrumServerConfig(models.Model):
                 raise ValidationError("Port must be between 1 and 65535")
 
     @api.model
+    def create_default_servers(self, network='mainnet'):
+        """Create default Electrum server configurations"""
+        _logger.info(f"Creating default Electrum servers for {network}")
+        
+        # Define default servers for different networks
+        default_servers = {
+            'mainnet': [
+                {'name': 'Blockstream Electrum', 'host': 'electrum.blockstream.info', 'port': 50002, 'use_ssl': True, 'sequence': 10},
+                {'name': 'Blockstream Electrum (Alt)', 'host': 'electrum.blockstream.info', 'port': 50001, 'use_ssl': False, 'sequence': 20},
+                {'name': 'ElectrumX Public', 'host': 'ecdsa.net', 'port': 50002, 'use_ssl': True, 'sequence': 30},
+                {'name': 'ElectrumX Public (Alt)', 'host': 'ecdsa.net', 'port': 50001, 'use_ssl': False, 'sequence': 40},
+            ],
+            'testnet': [
+                {'name': 'Blockstream Testnet', 'host': 'blockstream.info', 'port': 60002, 'use_ssl': True, 'sequence': 10},
+                {'name': 'ElectrumX Testnet', 'host': 'testnet.qtornado.com', 'port': 51002, 'use_ssl': True, 'sequence': 20},
+            ]
+        }
+        
+        servers_data = default_servers.get(network, default_servers['mainnet'])
+        created_count = 0
+        
+        for server_data in servers_data:
+            # Check if server already exists
+            existing = self.search([
+                ('host', '=', server_data['host']),
+                ('port', '=', server_data['port']),
+                ('network', '=', network)
+            ])
+            
+            if not existing:
+                server_vals = {
+                    'name': server_data['name'],
+                    'host': server_data['host'],
+                    'port': server_data['port'],
+                    'use_ssl': server_data['use_ssl'],
+                    'sequence': server_data['sequence'],
+                    'network': network,
+                    'is_active': True
+                }
+                
+                new_server = self.create(server_vals)
+                created_count += 1
+                _logger.info(f"Created default Electrum server: {new_server.display_name}")
+        
+        return created_count
+
+    @api.model
     def get_active_servers(self, network=None):
         """Get active servers ordered by priority"""
         domain = [('is_active', '=', True)]
