@@ -314,6 +314,11 @@ class BitcoinSettings(models.Model):
         if not self.use_bitcoin_core:
             return None  # Bitcoin Core disabled
             
+        # Check if we have valid credentials
+        if not self.bitcoin_core_rpc_user or not self.bitcoin_core_rpc_password:
+            _logger.warning("Bitcoin Core credentials not configured - skipping connector creation")
+            return None
+            
         # Look for existing connector with matching settings
         existing_connector = self.env['bitcoin.connector'].search([
             ('rpc_host', '=', self.bitcoin_core_rpc_host),
