@@ -8,6 +8,7 @@ from . import crypto_bitcoin_wallet
 from . import crypto_bitcoin_public_key
 from . import crypto_bitcoin_private_key
 from . import crypto_bip32_utils
+from . import crypto_bitcoin_transaction_utils
 from . import electrum_client
 from . import crypto_bitcoin_transaction_fetcher
 from . import bitcoin_connector

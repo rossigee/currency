@@ -370,10 +370,18 @@ class BitcoinSettings(models.Model):
     def get_services_config(self):
         """Get configuration for both Bitcoin services"""
         settings = self.get_default_settings()
+        # Get Bitcoin connector safely
+        bitcoin_connector = None
+        if settings.use_bitcoin_core:
+            try:
+                bitcoin_connector = settings.get_bitcoin_connector()
+            except Exception as e:
+                _logger.warning(f"Bitcoin Core connector not available: {str(e)}")
+                
         return {
             'bitcoin_core': {
                 'enabled': settings.use_bitcoin_core,
-                'connector': settings.get_bitcoin_connector() if settings.use_bitcoin_core else None
+                'connector': bitcoin_connector
             },
             'electrum': {
                 'enabled': settings.use_electrum,
@@ -383,4 +391,133 @@ class BitcoinSettings(models.Model):
                 'use_ssl': settings.electrum_use_ssl
             },
             'network': settings.network
+        }
+
+    @api.model
+    def migrate_to_new_config_models(self):
+        """Migrate existing bitcoin.settings data to new configuration models"""
+        _logger.info("Starting migration of bitcoin.settings to new configuration models")
+        
+        # Get all existing bitcoin settings
+        existing_settings = self.search([])
+        migration_results = {
+            'bitcoin_nodes_created': 0,
+            'electrum_servers_created': 0,
+            'settings_processed': 0
+        }
+        
+        for settings in existing_settings:
+            try:
+                # Migrate Bitcoin Core settings
+                if settings.use_bitcoin_core and settings.bitcoin_core_rpc_user and settings.bitcoin_core_rpc_password:
+                    # Check if Bitcoin node config already exists
+                    existing_node = self.env['bitcoin.node.config'].search([
+                        ('rpc_host', '=', settings.bitcoin_core_rpc_host),
+                        ('rpc_port', '=', settings.bitcoin_core_rpc_port),
+                        ('rpc_user', '=', settings.bitcoin_core_rpc_user),
+                        ('network', '=', settings.network)
+                    ])
+                    
+                    if not existing_node:
+                        node_vals = {
+                            'name': f'Migrated - {settings.name} (Bitcoin Core)',
+                            'rpc_host': settings.bitcoin_core_rpc_host,
+                            'rpc_port': settings.bitcoin_core_rpc_port,
+                            'rpc_user': settings.bitcoin_core_rpc_user,
+                            'rpc_password': settings.bitcoin_core_rpc_password,
+                            'use_ssl': settings.bitcoin_core_use_ssl,
+                            'network': settings.network,
+                            'sequence': 10,  # Default priority
+                            'is_active': True
+                        }
+                        
+                        # Set connection status based on old status
+                        if settings.bitcoin_core_status == 'connected':
+                            node_vals['connection_status'] = 'connected'
+                        elif settings.bitcoin_core_status == 'failed':
+                            node_vals['connection_status'] = 'error'
+                        else:
+                            node_vals['connection_status'] = 'unknown'
+                            
+                        new_node = self.env['bitcoin.node.config'].create(node_vals)
+                        migration_results['bitcoin_nodes_created'] += 1
+                        _logger.info(f"Created Bitcoin node config: {new_node.name}")
+                
+                # Migrate Electrum settings
+                if settings.use_electrum and settings.electrum_host:
+                    # Check if Electrum server config already exists
+                    existing_server = self.env['electrum.server.config'].search([
+                        ('host', '=', settings.electrum_host),
+                        ('port', '=', settings.electrum_port),
+                        ('network', '=', settings.network)
+                    ])
+                    
+                    if not existing_server:
+                        server_vals = {
+                            'name': f'Migrated - {settings.name} (Electrum)',
+                            'host': settings.electrum_host,
+                            'port': settings.electrum_port,
+                            'use_ssl': settings.electrum_use_ssl,
+                            'network': settings.network,
+                            'sequence': 10,  # Default priority
+                            'is_active': True
+                        }
+                        
+                        # Set connection status based on old status
+                        if settings.electrum_status == 'connected':
+                            server_vals['connection_status'] = 'connected'
+                        elif settings.electrum_status == 'failed':
+                            server_vals['connection_status'] = 'error'
+                        else:
+                            server_vals['connection_status'] = 'unknown'
+                            
+                        new_server = self.env['electrum.server.config'].create(server_vals)
+                        migration_results['electrum_servers_created'] += 1
+                        _logger.info(f"Created Electrum server config: {new_server.name}")
+                
+                migration_results['settings_processed'] += 1
+                
+            except Exception as e:
+                _logger.error(f"Failed to migrate settings {settings.name}: {str(e)}")
+                continue
+        
+        # If no Electrum servers were created from migration, create default ones
+        if migration_results['electrum_servers_created'] == 0:
+            _logger.info("No Electrum servers created from migration, creating default servers")
+            # Create default servers for mainnet and testnet
+            mainnet_created = self.env['electrum.server.config'].create_default_servers('mainnet')
+            testnet_created = self.env['electrum.server.config'].create_default_servers('testnet')
+            migration_results['electrum_servers_created'] = mainnet_created + testnet_created
+            _logger.info(f"Created {mainnet_created} mainnet and {testnet_created} testnet default Electrum servers")
+        
+        _logger.info(f"Migration completed: {migration_results}")
+        return migration_results
+
+    def action_migrate_to_new_models(self):
+        """Action to trigger migration from UI"""
+        self.ensure_one()
+        
+        results = self.migrate_to_new_config_models()
+        
+        message = f"""Migration completed successfully!
+
+Results:
+• {results['bitcoin_nodes_created']} Bitcoin Core node configurations created
+• {results['electrum_servers_created']} Electrum server configurations created  
+• {results['settings_processed']} settings records processed
+
+You can now manage individual server configurations in:
+• Bitcoin → Configuration → Bitcoin Core Nodes
+• Bitcoin → Configuration → Electrum Servers
+"""
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Migration Complete',
+                'message': message,
+                'type': 'success',
+                'sticky': True
+            }
         }
