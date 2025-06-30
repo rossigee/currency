@@ -1226,6 +1226,151 @@ class CryptoBip32Utils(models.AbstractModel):
         return hrp + '1' + ''.join([CHARSET[d] for d in combined])
 
     @api.model
+    def bech32_decode(self, address):
+        """
+        Decode bech32 address and convert to script for Electrum protocol
+        
+        Args:
+            address (str): Bech32 address (bc1q... or bc1p...)
+            
+        Returns:
+            bytes: Script bytes for address
+        """
+        try:
+            if not address.startswith('bc1'):
+                raise ValidationError("Invalid bech32 address - must start with bc1")
+            
+            # Bech32 alphabet and decoding
+            bech32_charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+            
+            # Remove prefix and decode
+            data_part = address[3:]  # Remove 'bc1'
+            
+            # Convert bech32 to 5-bit groups
+            data = []
+            for char in data_part:
+                if char not in bech32_charset:
+                    raise ValidationError(f"Invalid bech32 character: {char}")
+                data.append(bech32_charset.index(char))
+            
+            if len(data) < 6:
+                raise ValidationError("Invalid bech32 address - too short")
+                
+            # Extract witness version and program (remove checksum)
+            witness_version = data[0]
+            program_data = data[1:-6]  # Remove 6-character checksum
+            
+            # Convert 5-bit groups back to bytes
+            if len(program_data) == 32:  # P2WPKH: 20 bytes * 8/5 = 32 groups
+                # P2WPKH: OP_0 <20-byte-pubkey-hash>
+                hash_bytes = self._convert_5bit_to_8bit(program_data, 20)
+                return bytes([0x00, 0x14]) + hash_bytes  # OP_0 PUSHDATA(20)
+                
+            elif len(program_data) == 52:  # P2WSH: 32 bytes * 8/5 = 51.2 -> 52 groups  
+                # P2WSH: OP_0 <32-byte-script-hash>
+                hash_bytes = self._convert_5bit_to_8bit(program_data, 32)
+                return bytes([0x00, 0x20]) + hash_bytes  # OP_0 PUSHDATA(32)
+                
+            else:
+                raise ValidationError(f"Unsupported bech32 program length: {len(program_data)}")
+                
+        except Exception as e:
+            raise ValidationError(f"Bech32 decoding failed: {str(e)}")
+    
+    @api.model
+    def _convert_5bit_to_8bit(self, data, target_length):
+        """Convert 5-bit groups to 8-bit bytes for bech32 decoding"""
+        try:
+            acc = 0
+            bits = 0
+            ret = []
+            
+            for value in data:
+                if value < 0 or value >= 32:
+                    raise ValidationError("Invalid 5-bit value")
+                acc = (acc << 5) | value
+                bits += 5
+                while bits >= 8:
+                    bits -= 8
+                    ret.append((acc >> bits) & 255)
+            
+            # Truncate or pad to target length
+            if len(ret) > target_length:
+                ret = ret[:target_length]
+            elif len(ret) < target_length:
+                ret.extend([0] * (target_length - len(ret)))
+                
+            return bytes(ret)
+            
+        except Exception as e:
+            raise ValidationError(f"5-bit to 8-bit conversion failed: {str(e)}")
+
+    @api.model
+    def address_to_script_hash(self, address):
+        """
+        Convert Bitcoin address to script hash for Electrum protocol
+        
+        Args:
+            address (str): Bitcoin address
+            
+        Returns:
+            str: Script hash in hex format (reversed for Electrum)
+        """
+        try:
+            if address.startswith('1'):
+                # P2PKH address
+                decoded = base58.b58decode_check(address)
+                pubkey_hash = decoded[1:]  # Remove version byte
+                script = bytes([0x76, 0xa9, 0x14]) + pubkey_hash + bytes([0x88, 0xac])
+                
+            elif address.startswith('3'):
+                # P2SH address  
+                decoded = base58.b58decode_check(address)
+                script_hash = decoded[1:]  # Remove version byte
+                script = bytes([0xa9, 0x14]) + script_hash + bytes([0x87])
+                
+            elif address.startswith('bc1q'):
+                # P2WPKH or P2WSH bech32 address
+                script = self.bech32_decode(address)
+                
+            elif address.startswith('bc1p'):
+                # P2TR taproot address
+                script = self.taproot_decode(address)
+                
+            else:
+                raise ValidationError(f"Unsupported address format: {address}")
+            
+            # Hash the script and reverse for Electrum format
+            script_hash = hashlib.sha256(script).digest()
+            return script_hash[::-1].hex()  # Reverse and convert to hex
+            
+        except Exception as e:
+            _logger.error(f"Failed to convert address to script hash: {str(e)}")
+            raise ValidationError(f"Address to script hash conversion failed: {str(e)}")
+
+    @api.model
+    def taproot_decode(self, address):
+        """
+        Decode taproot address (bc1p...) to script
+        
+        Args:
+            address (str): Taproot address (bc1p...)
+            
+        Returns:
+            bytes: Script bytes
+        """
+        try:
+            if len(address) != 62:
+                raise ValidationError(f"Invalid taproot address length: {len(address)}")
+            
+            # Use bech32 decoding with witness version 1
+            # For now, raise an error as we need bech32m (different from bech32)
+            raise ValidationError("Taproot address decoding requires bech32m - not yet implemented")
+            
+        except Exception as e:
+            raise ValidationError(f"Taproot decoding failed: {str(e)}")
+
+    @api.model
     def validate_bitcoin_address(self, address):
         """
         Basic Bitcoin address format validation

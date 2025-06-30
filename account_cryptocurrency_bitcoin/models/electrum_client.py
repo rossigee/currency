@@ -115,7 +115,7 @@ class ElectrumClient(models.AbstractModel):
         _logger.info(f"Fetching address history via Electrum for: {address}")
         
         # Convert address to script hash (Electrum protocol requirement)
-        script_hash = self._address_to_script_hash(address)
+        script_hash = self.env['crypto.bip32.utils'].address_to_script_hash(address)
         _logger.info(f"Converted address to script hash: {script_hash}")
         
         # If specific connection parameters provided, use them directly
@@ -449,94 +449,6 @@ class ElectrumClient(models.AbstractModel):
         except Exception:
             return 10  # Safe fallback
 
-    def _address_to_script_hash(self, address):
-        """
-        Convert Bitcoin address to script hash for Electrum protocol
-        
-        Args:
-            address (str): Bitcoin address
-            
-        Returns:
-            str: Script hash in hex format (reversed)
-        """
-        try:
-            if address.startswith('1'):
-                # P2PKH address
-                decoded = base58.b58decode_check(address)
-                pubkey_hash = decoded[1:]  # Remove version byte
-                script = bytes([0x76, 0xa9, 0x14]) + pubkey_hash + bytes([0x88, 0xac])
-                
-            elif address.startswith('3'):
-                # P2SH address  
-                decoded = base58.b58decode_check(address)
-                script_hash = decoded[1:]  # Remove version byte
-                script = bytes([0xa9, 0x14]) + script_hash + bytes([0x87])
-                
-            elif address.startswith('bc1q'):
-                # P2WPKH or P2WSH bech32 address
-                script = self._bech32_to_script(address)
-                
-            elif address.startswith('bc1p'):
-                # P2TR taproot address
-                script = self._taproot_to_script(address)
-                
-            else:
-                raise ValidationError(f"Unsupported address format: {address}")
-            
-            # Hash the script and reverse for Electrum format
-            script_hash = hashlib.sha256(script).digest()
-            return script_hash[::-1].hex()  # Reverse and convert to hex
-            
-        except Exception as e:
-            _logger.error(f"Failed to convert address to script hash: {str(e)}")
-            raise ValidationError(f"Address to script hash conversion failed: {str(e)}")
-
-    def _bech32_to_script(self, address):
-        """
-        Convert bech32 address to script
-        
-        Args:
-            address (str): Bech32 address (bc1q...)
-            
-        Returns:
-            bytes: Script bytes
-        """
-        try:
-            # Use the bech32 utilities from BIP32 utils if available
-            # For now, basic implementation for common cases
-            if len(address) == 42:
-                # P2WPKH (20-byte pubkey hash)
-                # Would need proper bech32 decoding here
-                raise ValidationError("P2WPKH bech32 conversion needs full bech32 decoder")
-            elif len(address) == 62:
-                # P2WSH (32-byte script hash)
-                raise ValidationError("P2WSH bech32 conversion needs full bech32 decoder")
-            else:
-                raise ValidationError(f"Unexpected bech32 address length: {len(address)}")
-                
-        except Exception as e:
-            raise ValidationError(f"Bech32 conversion failed: {str(e)}")
-
-    def _taproot_to_script(self, address):
-        """
-        Convert taproot address to script
-        
-        Args:
-            address (str): Taproot address (bc1p...)
-            
-        Returns:
-            bytes: Script bytes
-        """
-        try:
-            # Taproot addresses are 62 characters
-            if len(address) != 62:
-                raise ValidationError(f"Invalid taproot address length: {len(address)}")
-            
-            # Would need proper bech32m decoding for taproot
-            raise ValidationError("Taproot address conversion needs bech32m decoder")
-            
-        except Exception as e:
-            raise ValidationError(f"Taproot conversion failed: {str(e)}")
 
     def _get_electrum_config(self, host=None, port=None, use_ssl=None):
         """
