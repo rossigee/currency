@@ -44,14 +44,6 @@
                     <attribute name="string">Execution Time</attribute>
                     <attribute name="optional">hide</attribute>
                 </xpath>
-                <xpath expr="//field[@name='exc_info']" position="attributes">
-                    <attribute name="string">Exception Message</attribute>
-                    <attribute name="optional">hide</attribute>
-                </xpath>
-                <xpath expr="//field[@name='result']" position="attributes">
-                    <attribute name="string">Exception</attribute>
-                    <attribute name="optional">hide</attribute>
-                </xpath>
             </field>
         </record>
 
@@ -85,8 +77,8 @@
                         <div>
                             <strong>Failed:</strong> <field name="date_done" readonly="1" nolabel="1"/>
                         </div>
-                        <div attrs="{'invisible': [('exc_info', '=', False)]}">
-                            <strong>Error:</strong> <field name="exc_info" readonly="1" nolabel="1"/>
+                        <div attrs="{'invisible': [('result', '=', False)]}">
+                            <strong>Error:</strong> <field name="result" readonly="1" nolabel="1"/>
                         </div>
                     </div>
                     
@@ -117,11 +109,6 @@
                     <attribute name="invisible">1</attribute>
                 </xpath>
                 
-                <!-- Add result section -->
-                <xpath expr="//field[@name='exc_info']" position="after">
-                    <separator string="Job Result" attrs="{'invisible': [('result', '=', False)]}"/>
-                    <field name="result" readonly="1" attrs="{'invisible': [('result', '=', False)]}"/>
-                </xpath>
             </field>
         </record>
 
