@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Multisig Workflow Tree View -->
+        <record id="crypto_bitcoin_multisig_workflow_tree_view" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.multisig.workflow.tree</field>
+            <field name="model">crypto.bitcoin.multisig.workflow</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="wallet_name"/>
+                    <field name="use_case"/>
+                    <field name="m_threshold" string="M"/>
+                    <field name="n_total" string="N"/>
+                    <field name="signatures_collected" string="Signed"/>
+                    <field name="signatures_required" string="Required"/>
+                    <field name="state" widget="badge" decoration-success="state == 'wallet_created'" decoration-warning="state == 'collecting_signatures'" decoration-danger="state == 'cancelled'"/>
+                    <field name="initiated_date"/>
+                    <field name="expiry_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Multisig Workflow Form View -->
+        <record id="crypto_bitcoin_multisig_workflow_form_view" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.multisig.workflow.form</field>
+            <field name="model">crypto.bitcoin.multisig.workflow</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_start_collection" string="Start Signature Collection" 
+                                type="object" class="btn-primary" 
+                                invisible="state != \"draft\""/>
+                        <button name="action_create_wallet" string="Create Wallet" 
+                                type="object" class="btn-primary" 
+                                invisible="state != \"signatures_complete\""/>
+                        <button name="action_cancel" string="Cancel" 
+                                type="object" class="btn-secondary" 
+                                attrs="{'invisible': [('state', 'in', ['wallet_created', 'cancelled'])]}"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,collecting_signatures,signatures_complete,wallet_created"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="%(crypto_bitcoin_multisig_wallet_action)d" 
+                                    type="action" class="oe_stat_button" 
+                                    icon="fa-shield"
+                                    invisible="multisig_wallet_id == false"
+                                    context="{'form_view_ref': 'account_cryptocurrency_bitcoin.crypto_bitcoin_multisig_wallet_form_view'}">
+                                <field name="multisig_wallet_id" invisible="1"/>
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">View Wallet</span>
+                                </div>
+                            </button>
+                            <button name="action_download_pdf" type="object" class="oe_stat_button" 
+                                    icon="fa-file-pdf-o"
+                                    invisible="setup_form_pdf == false">
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">Download PDF</span>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Workflow Name"/></h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Wallet Configuration">
+                                <field name="wallet_name"/>
+                                <field name="use_case"/>
+                                <field name="wallet_type" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="m_threshold" invisible="wallet_type != "custom""/>
+                                <field name="n_total" invisible="wallet_type != "custom""/>
+                                <field name="script_type" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="derivation_path" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                            <group string="Workflow Settings">
+                                <field name="initiated_by"/>
+                                <field name="initiated_date"/>
+                                <field name="expiry_date"/>
+                                <field name="completed_date" invisible="completed_date == false"/>
+                                <field name="require_all_signatures"/>
+                                <field name="signature_deadline_days" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            </group>
+                        </group>
+                        
+                         <group string="Security">
+                            <field name="form_data_hash" widget="CopyClipboardChar"/>
+                            <field name="setup_form_pdf" invisible="1"/>
+                            <field name="signatures_collected" string="Signatures Collected"/>
+                            <field name="signatures_required" string="Signatures Required"/>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Cosigner Signatures">
+                                <field name="signature_ids" nolabel="1">
+                                    <tree create="false" delete="false" editable="bottom">
+                                        <field name="cosigner_index"/>
+                                        <field name="name"/>
+                                        <field name="signer_email"/>
+                                        <field name="state" widget="badge"/>
+                                        <field name="hardware_wallet_model"/>
+                                        <field name="master_fingerprint"/>
+                                        <field name="xpub_verified" widget="boolean"/>
+                                        <field name="signed_date"/>
+                                        <field name="verification_method"/>
+                                        <button name="action_sign" string="Sign" type="object" 
+                                                class="btn-sm btn-primary"
+                                                invisible="state != \"pending\""/>
+                                        <button name="action_reject" string="Reject" type="object" 
+                                                class="btn-sm btn-danger"
+                                                invisible="state != \"pending\""/>
+                                        <button name="get_portal_url" string="Copy Portal Link" type="object" 
+                                                class="btn-sm btn-secondary"
+                                                invisible="state != \"pending\""/>
+                                    </tree>
+                                    <form>
+                                        <header>
+                                            <field name="state" widget="statusbar"/>
+                                        </header>
+                                        <sheet>
+                                            <group>
+                                                <group string="Cosigner Information">
+                                                    <field name="cosigner_index"/>
+                                                    <field name="name"/>
+                                                    <field name="signer_id"/>
+                                                    <field name="signer_email"/>
+                                                </group>
+                                                <group string="Hardware Wallet">
+                                                    <field name="hardware_wallet_model"/>
+                                                    <field name="wallet_serial_last4"/>
+                                                    <field name="firmware_version"/>
+                                                    <field name="master_fingerprint"/>
+                                                </group>
+                                            </group>
+                                            <group string="Extended Public Key">
+                                                <field name="xpub" widget="text" style="font-family: monospace;"/>
+                                                <field name="xpub_verified"/>
+                                            </group>
+                                            <group string="Verification">
+                                                <field name="verification_method"/>
+                                                <field name="verified_by_id"/>
+                                                <field name="signed_date"/>
+                                                <field name="signature_method"/>
+                                            </group>
+                                            <group string="Notes">
+                                                <field name="notes" nolabel="1"/>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                </field>
+                            </page>
+                            
+                            <page string="Instructions">
+                                <div class="alert alert-info" role="alert">
+                                    <h4 class="alert-heading">Multisig Wallet Setup Instructions</h4>
+                                    <hr/>
+                                    <ol>
+                                        <li><strong>Configure Wallet:</strong> Set the wallet parameters (M-of-N, script type, etc.)</li>
+                                        <li><strong>Start Collection:</strong> Click "Start Signature Collection" to begin the process</li>
+                                        <li><strong>Gather Signatures:</strong> Each cosigner receives an email with instructions to provide their xPub and sign</li>
+                                        <li><strong>Verify Data:</strong> Review all cosigner information for accuracy</li>
+                                        <li><strong>Create Wallet:</strong> Once all signatures are collected, create the actual multisig wallet</li>
+                                    </ol>
+                                    
+                                    <h5 class="mt-3">Security Best Practices:</h5>
+                                    <ul>
+                                        <li>Verify cosigner identities through secure channels</li>
+                                        <li>Use hardware wallets for key generation</li>
+                                        <li>Never share private keys or seed phrases</li>
+                                        <li>Test with small amounts first</li>
+                                        <li>Keep multiple secure backups of wallet configuration</li>
+                                    </ul>
+                                </div>
+                            </page>
+                            
+                            <page string="Notes">
+                                <field name="notes" placeholder="Add any additional notes about this wallet setup..."/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Multisig Workflow Kanban View -->
+        <record id="crypto_bitcoin_multisig_workflow_kanban_view" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.multisig.workflow.kanban</field>
+            <field name="model">crypto.bitcoin.multisig.workflow</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" class="o_kanban_mobile">
+                    <field name="name"/>
+                    <field name="wallet_name"/>
+                    <field name="use_case"/>
+                    <field name="m_threshold"/>
+                    <field name="n_total"/>
+                    <field name="signatures_collected"/>
+                    <field name="signatures_required"/>
+                    <field name="state"/>
+                    <field name="expiry_date"/>
+                    <progressbar field="state" colors='{"wallet_created": "success", "cancelled": "danger", "collecting_signatures": "warning"}'/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                    <field name="state" widget="label_selection" options="{'classes': {'draft': 'default', 'collecting_signatures': 'warning', 'signatures_complete': 'info', 'wallet_created': 'success', 'cancelled': 'danger'}}"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div><strong>Wallet:</strong> <field name="wallet_name"/></div>
+                                    <div><strong>Type:</strong> <field name="m_threshold"/>-of-<field name="n_total"/></div>
+                                    <div><strong>Use Case:</strong> <field name="use_case"/></div>
+                                    <div class="mt-2">
+                                        <span class="badge badge-pill badge-info">
+                                            <field name="signatures_collected"/> / <field name="signatures_required"/> signatures
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="initiated_date" widget="date"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Multisig Workflow Search View -->
+        <record id="crypto_bitcoin_multisig_workflow_search_view" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.multisig.workflow.search</field>
+            <field name="model">crypto.bitcoin.multisig.workflow</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="wallet_name"/>
+                    <field name="initiated_by"/>
+                    <filter string="My Workflows" name="my_workflows" domain="[('initiated_by', '=', uid)]"/>
+                    <separator/>
+                    <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                    <filter string="Collecting Signatures" name="collecting" domain="[('state', '=', 'collecting_signatures')]"/>
+                    <filter string="Ready to Create" name="ready" domain="[('state', '=', 'signatures_complete')]"/>
+                    <filter string="Completed" name="completed" domain="[('state', '=', 'wallet_created')]"/>
+                    <separator/>
+                    <filter string="Expiring Soon" name="expiring" domain="[('expiry_date', '&lt;=', (context_today() + relativedelta(days=2)).strftime('%Y-%m-%d'))]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Use Case" name="group_use_case" context="{'group_by': 'use_case'}"/>
+                        <filter string="Initiated By" name="group_initiated_by" context="{'group_by': 'initiated_by'}"/>
+                        <filter string="Initiated Date" name="group_date" context="{'group_by': 'initiated_date:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Multisig Workflow Action -->
+        <record id="crypto_bitcoin_multisig_workflow_action" model="ir.actions.act_window">
+            <field name="name">Multisig Setup Workflows</field>
+            <field name="res_model">crypto.bitcoin.multisig.workflow</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="search_view_id" ref="crypto_bitcoin_multisig_workflow_search_view"/>
+            <field name="context">{'search_default_my_workflows': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new multisig wallet setup workflow
+                </p>
+                <p>
+                    Use workflows to coordinate multisig wallet creation between multiple cosigners.
+                    Each cosigner can digitally sign and provide their extended public key (xPub).
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Item -->
+        <menuitem id="menu_crypto_bitcoin_multisig_workflow"
+                  name="Setup Workflows"
+                  parent="menu_crypto_bitcoin_multisig"
+                  action="crypto_bitcoin_multisig_workflow_action"
+                  sequence="20"/>
+
+    </data>
+</odoo>

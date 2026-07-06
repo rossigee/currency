@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="crypto_bitcoin_transaction_view_form" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.transaction.form</field>
+            <field name="model">crypto.bitcoin.transaction</field>
+            <field name="arch" type="xml">
+                <form string="Bitcoin Transaction">
+                    <header>
+                        <button name="action_create_psbt" string="Create PSBT" 
+                                type="object" class="btn-primary"
+                                invisible="multisig_wallet_id == false"/>
+                        <button name="action_fetch_from_blockchain" string="Fetch from Blockchain" 
+                                type="object" class="btn-secondary"
+                                attrs="{'invisible': ['|', ('tx_hash', '=', False), ('tx_hash', '=', '[Pending]')]}"/>
+                        <field name="status" widget="statusbar" 
+                               statusbar_visible="draft,unsigned_psbt,partial_psbt,signed_psbt,pending,confirmed"/>
+                    </header>
+                    <sheet>
+                        <!-- Hidden fields for view logic -->
+                        <field name="psbt_base64" invisible="1"/>
+                        <field name="signatures_complete" invisible="1"/>
+                        
+                        <div class="oe_title">
+                            <h1>
+                                <field name="tx_hash" placeholder="Transaction Hash (will be set when broadcast)" readonly="1"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <group string="Basic Information">
+                                <field name="date"/>
+                                <field name="imported_date"/>
+                                <field name="amount"/>
+                                <field name="fee"/>
+                                <field name="target_fee_rate" attrs="{'invisible': [('target_fee_rate', '=', 0)]}"/>
+                            </group>
+                            <group string="Status">
+                                <field name="multisig_wallet_id" readonly="1"/>
+                                <field name="created_by_id" readonly="1"/>
+                                <field name="mined_block" readonly="1" attrs="{'invisible': [('mined_block', '=', 0)]}"/>
+                                <field name="confirmations" readonly="1" attrs="{'invisible': [('mined_block', '=', 0)]}"/>
+                                <field name="rbf_enabled" readonly="1" invisible="rbf_enabled == false"/>
+                                <field name="lock_time" readonly="1" attrs="{'invisible': [('lock_time', '=', 0)]}"/>
+                            </group>
+                        </group>
+                        
+                        <!-- PSBT-specific fields -->
+                        <group string="PSBT Signing Status" invisible="multisig_wallet_id == false">
+                            <group>
+                                <field name="required_signatures" readonly="1"/>
+                                <field name="current_signatures" readonly="1"/>
+                                <field name="signatures_complete" readonly="1" widget="boolean"/>
+                            </group>
+                        </group>
+                        
+                        <notebook>
+                            <page string="PSBT" invisible="psbt_base64 == false">
+                                <div class="oe_button_box" style="margin-bottom: 15px;">
+                                    <button name="action_export_psbt" string="Download PSBT" 
+                                            type="object" class="btn-primary"
+                                            invisible="psbt_base64 == false"/>
+                                </div>
+                                
+                                <field name="psbt_summary" widget="text" readonly="1"
+                                       style="white-space: pre-wrap; font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 5px;"/>
+                            </page>
+                            
+                            <page string="Raw Transaction" invisible="raw_transaction == false">
+                                <div class="alert alert-success" role="alert">
+                                    <strong>✅ Signed Transaction:</strong><br/>
+                                    This transaction has been fully signed and is ready to broadcast.
+                                </div>
+                                
+                                <group>
+                                    <field name="raw_transaction" widget="text" readonly="1"
+                                           style="font-family: monospace; font-size: 11px;"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Inputs &amp; Outputs">
+                                <field name="transaction_line_ids" invisible="1"/>
+                                <div class="alert alert-info" role="alert" 
+                                     attrs="{'invisible': [('transaction_line_ids', '!=', [])]}">
+                                    <strong>💰 Bitcoin Transaction Structure:</strong><br/>
+                                    This shows the individual inputs and outputs that make up this specific transaction.
+                                    Inputs show where Bitcoin came from, outputs show where it's being sent.
+                                </div>
+                                
+                                <field name="output_line_ids" nolabel="1">
+                                    <tree create="false" delete="false" edit="false">
+                                        <field name="sequence"/>
+                                        <field name="address" readonly="1"/>
+                                        <field name="amount"/>
+                                        <field name="description"/>
+                                    </tree>
+                                </field>
+                                
+                                <div attrs="{'invisible': [('input_line_ids', '=', [])]}">
+                                    <separator string="Inputs (for reference)"/>
+                                    <field name="input_line_ids" nolabel="1">
+                                        <tree create="false" delete="false" edit="false">
+                                            <field name="sequence"/>
+                                            <field name="prev_tx_hash"/>
+                                            <field name="prev_output_index"/>
+                                            <field name="amount"/>
+                                            <field name="description"/>
+                                        </tree>
+                                    </field>
+                                </div>
+                            </page>
+                            
+                            <page string="Notes" invisible="notes == false">
+                                <field name="notes" nolabel="1" readonly="1" widget="text"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="crypto_bitcoin_transaction_view_tree" model="ir.ui.view">
+            <field name="name">crypto.bitcoin.transaction.tree</field>
+            <field name="model">crypto.bitcoin.transaction</field>
+            <field name="arch" type="xml">
+                <tree string="Bitcoin Transactions" create="false">
+                    <field name="date"/>
+                    <field name="imported_date" optional="hide"/>
+                    <field name="multisig_wallet_id"/>
+                    <field name="amount"/>
+                    <field name="fee"/>
+                    <field name="mined_block" optional="hide"/>
+                    <field name="confirmations" optional="show"/>
+                    <field name="current_signatures" invisible="multisig_wallet_id == false"/>
+                    <field name="required_signatures" invisible="multisig_wallet_id == false"/>
+                    <field name="status" widget="badge" 
+                           decoration-info="status in ('draft', 'unsigned_psbt')" 
+                           decoration-warning="status in ('partial_psbt')"
+                           decoration-success="status in ('signed_psbt', 'confirmed')"
+                           decoration-muted="status in ('pending')"/>
+                    <field name="tx_hash_display" string="Transaction Hash"/>
+                    <field name="tx_hash" invisible="1"/>
+                    <field name="created_by_id"/>
+                </tree>
+            </field>
+        </record>
+        <record id="crypto_bitcoin_transaction_action" model="ir.actions.act_window">
+            <field name="name">Bitcoin Transactions</field>
+            <field name="res_model">crypto.bitcoin.transaction</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>
