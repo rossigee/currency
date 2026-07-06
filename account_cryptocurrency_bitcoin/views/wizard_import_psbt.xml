@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Import PSBT Wizard Form View -->
+        <record id="wizard_import_psbt_form_view" model="ir.ui.view">
+            <field name="name">wizard.import.psbt.form</field>
+            <field name="model">wizard.import.psbt</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>Import PSBT</h1>
+                        </div>
+                        
+                        <div class="alert alert-info" role="alert">
+                            <strong>📥 Import PSBT:</strong><br/>
+                            Import a PSBT file that has been created externally or signed by one or more cosigners.
+                            Optionally select an existing transaction to update, or leave blank to create a new transaction.
+                        </div>
+                        
+                        <group>
+                            <field name="transaction_id" placeholder="Leave blank to create new transaction"/>
+                        </group>
+                        
+                        <!-- Upload PSBT File -->
+                        <group string="Upload PSBT File">
+                            <field name="psbt_file" filename="psbt_filename"/>
+                            <field name="psbt_filename" invisible="1"/>
+                        </group>
+                        
+                        <!-- Validation results -->
+                        <group string="Validation Results" invisible="validation_message == false">
+                            <!-- Success message -->
+                            <div class="alert alert-success" role="alert" 
+                                 invisible="psbt_valid == false">
+                                <field name="validation_message" nolabel="1" readonly="1"/>
+                            </div>
+                            
+                            <!-- Error message -->
+                            <div class="alert alert-danger" role="alert" 
+                                 invisible="psbt_valid == true">
+                                <field name="validation_message" nolabel="1" readonly="1"/>
+                            </div>
+                            
+                            <group invisible="psbt_valid == false">
+                                <field name="signature_count" readonly="1"/>
+                                <field name="is_complete" readonly="1" widget="boolean"/>
+                            </group>
+                        </group>
+                        
+                        <!-- Hidden fields -->
+                        <field name="psbt_valid" invisible="1"/>
+                    </sheet>
+                    <footer>
+                        <button name="action_import_psbt" string="Save" type="object" 
+                                class="btn-primary" invisible="psbt_valid == false"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Import PSBT Action -->
+        <record id="action_wizard_import_psbt" model="ir.actions.act_window">
+            <field name="name">Import Signed PSBT</field>
+            <field name="res_model">wizard.import.psbt</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="wizard_import_psbt_form_view"/>
+        </record>
+
+    </data>
+</odoo>
