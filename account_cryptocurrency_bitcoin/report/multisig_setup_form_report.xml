@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Report Definition -->
+        <record id="report_multisig_setup_form" model="ir.actions.report">
+            <field name="name">Multisig Setup Form</field>
+            <field name="model">crypto.bitcoin.multisig.workflow</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">account_cryptocurrency_bitcoin.report_multisig_setup_form_document</field>
+            <field name="report_file">account_cryptocurrency_bitcoin.report_multisig_setup_form_document</field>
+            <field name="print_report_name">'Multisig_Setup_' + object.wallet_name.replace(' ', '_') + '.pdf'</field>
+            <field name="binding_model_id" ref="model_crypto_bitcoin_multisig_workflow"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <!-- Report Template -->
+        <template id="report_multisig_setup_form_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <style>
+                                .form-box {
+                                    border: 1px solid #ddd;
+                                    padding: 10px;
+                                    margin-bottom: 10px;
+                                    background-color: #f9f9f9;
+                                }
+                                .form-field {
+                                    margin-bottom: 8px;
+                                }
+                                .field-label {
+                                    font-weight: bold;
+                                    display: inline-block;
+                                    width: 200px;
+                                }
+                                .field-value {
+                                    display: inline-block;
+                                    border-bottom: 1px solid #333;
+                                    min-width: 300px;
+                                    padding-left: 5px;
+                                }
+                                .checkbox {
+                                    width: 15px;
+                                    height: 15px;
+                                    border: 1px solid #333;
+                                    display: inline-block;
+                                    margin-right: 5px;
+                                    vertical-align: middle;
+                                }
+                                .checkbox.checked::after {
+                                    content: "✓";
+                                    display: block;
+                                    text-align: center;
+                                    line-height: 15px;
+                                }
+                                .section-header {
+                                    background-color: #e0e0e0;
+                                    padding: 8px;
+                                    margin: 15px 0 10px 0;
+                                    font-weight: bold;
+                                    font-size: 16px;
+                                }
+                                .signature-box {
+                                    border: 1px solid #333;
+                                    height: 60px;
+                                    margin-top: 10px;
+                                }
+                                .monospace {
+                                    font-family: monospace;
+                                    font-size: 10px;
+                                    word-break: break-all;
+                                }
+                            </style>
+
+                            <h1 class="text-center">BITCOIN MULTI-SIGNATURE WALLET SETUP FORM</h1>
+                            
+                            <div class="form-box">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-field">
+                                            <span class="field-label">Form ID:</span>
+                                            <span class="field-value" t-esc="o.name"/>
+                                        </div>
+                                        <div class="form-field">
+                                            <span class="field-label">Date:</span>
+                                            <span class="field-value" t-esc="o.initiated_date.strftime('%Y-%m-%d')"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-field">
+                                            <span class="field-label">Time Started:</span>
+                                            <span class="field-value" t-esc="o.initiated_date.strftime('%H:%M')"/>
+                                        </div>
+                                        <div class="form-field">
+                                            <span class="field-label">Time Completed:</span>
+                                            <span class="field-value" t-esc="o.completed_date.strftime('%H:%M') if o.completed_date else '___:___'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section-header">SECTION 1: WALLET CONFIGURATION</div>
+                            <div class="form-box">
+                                <div class="form-field">
+                                    <span class="field-label">Wallet Name:</span>
+                                    <span class="field-value" t-esc="o.wallet_name"/>
+                                </div>
+                                <div class="form-field">
+                                    <span class="field-label">Use Case:</span>
+                                    <span class="field-value" t-esc="dict(o._fields['use_case'].selection).get(o.use_case)"/>
+                                </div>
+                                <div class="form-field">
+                                    <span class="field-label">Wallet Type:</span>
+                                    <t t-if="o.wallet_type == 'custom'">
+                                        <span class="checkbox"></span> 2-of-3
+                                        <span class="checkbox"></span> 3-of-5
+                                        <span class="checkbox"></span> 4-of-7
+                                        <span class="checkbox checked"></span> Other: <span t-esc="o.m_threshold"/>-of-<span t-esc="o.n_total"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span t-attf-class="checkbox #{o.wallet_type == '2-3' and 'checked' or ''}"></span> 2-of-3
+                                        <span t-attf-class="checkbox #{o.wallet_type == '3-5' and 'checked' or ''}"></span> 3-of-5
+                                        <span t-attf-class="checkbox #{o.wallet_type == '4-7' and 'checked' or ''}"></span> 4-of-7
+                                        <span class="checkbox"></span> Other: ___-of-___
+                                    </t>
+                                </div>
+                                <div class="form-field">
+                                    <span class="field-label">Script Type:</span>
+                                    <span t-attf-class="checkbox #{o.script_type == 'p2wsh' and 'checked' or ''}"></span> P2WSH (Native SegWit) - Recommended<br/>
+                                    <span style="margin-left: 200px;">
+                                        <span t-attf-class="checkbox #{o.script_type == 'p2sh_p2wsh' and 'checked' or ''}"></span> P2SH-P2WSH (Nested SegWit)<br/>
+                                    </span>
+                                    <span style="margin-left: 200px;">
+                                        <span t-attf-class="checkbox #{o.script_type == 'p2sh' and 'checked' or ''}"></span> P2SH (Legacy)
+                                    </span>
+                                </div>
+                                <div class="form-field">
+                                    <span class="field-label">Derivation Path:</span>
+                                    <span class="field-value" t-esc="o.derivation_path"/>
+                                </div>
+                            </div>
+
+                            <div class="section-header">SECTION 2: COSIGNER INFORMATION</div>
+                            <t t-foreach="o.signature_ids" t-as="sig">
+                                <div class="form-box">
+                                    <h5>Cosigner <t t-esc="sig.cosigner_index"/></h5>
+                                    <div class="form-field">
+                                        <span class="field-label">Name:</span>
+                                        <span class="field-value" t-esc="sig.name"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">Email:</span>
+                                        <span class="field-value" t-esc="sig.signer_email or '_________________________'"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">Hardware Wallet Model:</span>
+                                        <span class="field-value" t-esc="sig.hardware_wallet_model or '_________________________'"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">Serial Number (last 4):</span>
+                                        <span class="field-value" t-esc="sig.wallet_serial_last4 or '____'"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">Firmware Version:</span>
+                                        <span class="field-value" t-esc="sig.firmware_version or '_________________________'"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">Master Fingerprint:</span>
+                                        <span class="field-value monospace" t-esc="sig.master_fingerprint or '________'"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">xPub (first 8 chars):</span>
+                                        <span class="field-value monospace" t-esc="sig.xpub[:8] if sig.xpub else '________'"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">xPub (last 8 chars):</span>
+                                        <span class="field-value monospace" t-esc="sig.xpub[-8:] if sig.xpub else '________'"/>
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">Verification Method:</span>
+                                        <span t-attf-class="checkbox #{sig.verification_method == 'in_person' and 'checked' or ''}"></span> In Person
+                                        <span t-attf-class="checkbox #{sig.verification_method == 'video_call' and 'checked' or ''}"></span> Video Call
+                                        <span t-attf-class="checkbox #{sig.verification_method == 'phone' and 'checked' or ''}"></span> Phone
+                                    </div>
+                                    <div class="form-field">
+                                        <span class="field-label">Verified By:</span>
+                                        <span class="field-value" t-esc="sig.verified_by_id.name if sig.verified_by_id else '_________________________'"/>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <div class="section-header">SECTION 3: SECURITY VERIFICATION</div>
+                            <div class="form-box">
+                                <div class="form-field">
+                                    <span class="field-label">Form Data Hash (SHA256):</span><br/>
+                                    <span class="monospace" t-esc="o.form_data_hash"/>
+                                </div>
+                                <div class="form-field mt-3">
+                                    <span class="field-label">Workflow State:</span>
+                                    <span class="field-value" t-esc="dict(o._fields['state'].selection).get(o.state)"/>
+                                </div>
+                                <div class="form-field">
+                                    <span class="field-label">Signatures Collected:</span>
+                                    <span class="field-value"><t t-esc="o.signatures_collected"/> of <t t-esc="o.signatures_required"/> required</span>
+                                </div>
+                            </div>
+
+                            <div class="section-header">SECTION 4: SECURITY CHECKLIST</div>
+                            <div class="form-box">
+                                <h5>Physical Security:</h5>
+                                <div><span class="checkbox"></span> All hardware wallets returned to secure storage</div>
+                                <div><span class="checkbox"></span> Seed phrases secured in separate locations</div>
+                                <div><span class="checkbox"></span> No digital copies of sensitive data created</div>
+                                <div><span class="checkbox"></span> Room checked for recording devices</div>
+                                <div><span class="checkbox"></span> All papers to be filed/destroyed properly marked</div>
+                                
+                                <h5 class="mt-3">Digital Security:</h5>
+                                <div><span class="checkbox"></span> All devices used were malware-free</div>
+                                <div><span class="checkbox"></span> No sensitive data saved to devices</div>
+                                <div><span class="checkbox"></span> Clipboard cleared on all devices</div>
+                                <div><span class="checkbox"></span> Browser history cleared</div>
+                                <div><span class="checkbox"></span> Temporary files deleted</div>
+                                
+                                <h5 class="mt-3">Operational Security:</h5>
+                                <div><span class="checkbox"></span> All participants verified identity</div>
+                                <div><span class="checkbox"></span> Communication channels were secure</div>
+                                <div><span class="checkbox"></span> No discussion of wallet in public areas</div>
+                                <div><span class="checkbox"></span> Cover story prepared if needed</div>
+                                <div><span class="checkbox"></span> Next meeting scheduled</div>
+                            </div>
+
+                            <div class="section-header">SECTION 5: FINAL ATTESTATION</div>
+                            <div class="form-box">
+                                <p><strong>We, the undersigned, attest that:</strong></p>
+                                <ol>
+                                    <li>The wallet was created according to security procedures</li>
+                                    <li>All information above is accurate and complete</li>
+                                    <li>Each cosigner has verified the wallet configuration</li>
+                                    <li>Test transaction was successful</li>
+                                    <li>All security measures were followed</li>
+                                </ol>
+                                
+                                <t t-foreach="o.signature_ids" t-as="sig">
+                                    <div class="mt-4">
+                                        <h5>Cosigner <t t-esc="sig.cosigner_index"/>:</h5>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div>Name: <span t-esc="sig.name"/></div>
+                                                <div>Date: <span t-esc="sig.signed_date.strftime('%Y-%m-%d') if sig.signed_date else '____-__-__'"/></div>
+                                                <div>Time: <span t-esc="sig.signed_date.strftime('%H:%M') if sig.signed_date else '__:__'"/></div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div>Signature:</div>
+                                                <div class="signature-box"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <div class="text-center mt-5">
+                                <p><strong>END OF FORM - RETAIN FOR AUDIT PURPOSES</strong></p>
+                                <p>Generated from Odoo Workflow: <t t-esc="o.name"/></p>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
