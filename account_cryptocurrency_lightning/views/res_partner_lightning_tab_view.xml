@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_form_inherit_lightning_tab" model="ir.ui.view">
+            <field name="name">res.partner.form.inherit.lightning</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Lightning">
+                        <separator string="Lightning Addresses"/>
+                        <field name="lightning_address_ids">
+                            <tree>
+                                <field name="address"/>
+                                <field name="owner_id"/>
+                                <field name="active"/>
+                                <field name="notes"/>
+                            </tree>
+                        </field>
+
+                        <separator string="Lightning Payments"/>
+                        <field name="lightning_payment_ids">
+                            <tree>
+                                <field name="creation_date"/>
+                                <field name="address_id"/>
+                                <field name="amount"/>
+                                <field name="currency_id"/>
+                                <field name="satoshis"/>
+                                <field name="payment_status"/>
+                                <field name="lsp_id"/>
+                                <field name="completion_date"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+    </data>
+</odoo>

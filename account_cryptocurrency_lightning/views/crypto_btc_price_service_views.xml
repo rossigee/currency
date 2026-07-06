@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Tree View -->
+        <record id="crypto_btc_price_service_view_tree" model="ir.ui.view">
+            <field name="name">crypto.btc.price.service.tree</field>
+            <field name="model">crypto.btc.price.service</field>
+            <field name="arch" type="xml">
+                <tree string="BTC Price Services" decoration-muted="not active">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="service_type"/>
+                    <field name="active"/>
+                    <field name="success_count"/>
+                    <field name="error_count"/>
+                    <field name="last_update"/>
+                    <field name="cache_duration_minutes"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="crypto_btc_price_service_view_form" model="ir.ui.view">
+            <field name="name">crypto.btc.price.service.form</field>
+            <field name="model">crypto.btc.price.service</field>
+            <field name="arch" type="xml">
+                <form string="BTC Price Service">
+                    <header>
+                        <button name="action_test_service" string="Test Service" type="object" class="btn-primary"/>
+                        <button name="action_clear_cache" string="Clear Cache" type="object"/>
+                    </header>
+
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" icon="fa-check-circle" attrs="{'invisible': [('success_count', '=', 0)]}">
+                                <field name="success_count" widget="statinfo" string="Successful"/>
+                            </button>
+
+                            <button class="oe_stat_button" icon="fa-times-circle" attrs="{'invisible': [('error_count', '=', 0)]}">
+                                <field name="error_count" widget="statinfo" string="Failed"/>
+                            </button>
+                        </div>
+
+                        <group>
+                            <group string="Service Configuration">
+                                <field name="name"/>
+                                <field name="service_type"/>
+                                <field name="sequence"/>
+                                <field name="active"/>
+                            </group>
+                            <group string="API Configuration">
+                                <field name="api_url" attrs="{'required': [('service_type', '=', 'coingecko')]}"/>
+                                <field name="api_key" password="True"/>
+                                <field name="timeout_seconds"/>
+                                <field name="rate_limit_seconds"/>
+                            </group>
+                        </group>
+
+                        <group>
+                            <group string="Caching">
+                                <field name="cache_duration_minutes"/>
+                                <field name="last_update" readonly="1"/>
+                            </group>
+                            <group string="Statistics">
+                                <field name="success_count" readonly="1"/>
+                                <field name="error_count" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <group string="Last Error" invisible="last_error == false">
+                            <field name="last_error" widget="text" readonly="1" nolabel="1"/>
+                        </group>
+
+                        <group string="Cached Data" invisible="cached_prices == false">
+                            <field name="cached_prices" widget="text" readonly="1" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="crypto_btc_price_service_action" model="ir.actions.act_window">
+            <field name="name">BTC Price Services</field>
+            <field name="res_model">crypto.btc.price.service</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="crypto_btc_price_service_view_tree"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configure BTC Price Services
+                </p>
+                <p>
+                    Set up multiple BTC price sources with priority ordering.
+                    The system will try each service in order until one succeeds.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

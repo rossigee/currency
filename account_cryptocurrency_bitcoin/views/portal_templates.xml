@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Multisig Signature Form Template -->
+        <template id="multisig_signature_form" name="Multisig Signature Form">
+            <t t-call="website.layout">
+                <div id="wrap" class="container mt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h3 class="mb-0">Bitcoin Multisig Wallet Setup - Cosigner Signature</h3>
+                                </div>
+                                <div class="card-body">
+                                    <t t-if="error">
+                                        <div class="alert alert-danger" role="alert">
+                                            <t t-esc="error"/>
+                                        </div>
+                                    </t>
+                                    
+                                    <t t-if="success">
+                                        <div class="alert alert-success" role="alert">
+                                            Your signature has been submitted successfully!
+                                        </div>
+                                    </t>
+                                    
+                                    <div class="mb-4">
+                                        <h4>Wallet Details</h4>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><strong>Wallet Name:</strong></td>
+                                                <td><t t-esc="workflow.wallet_name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Configuration:</strong></td>
+                                                <td><t t-esc="workflow.m_threshold"/>-of-<t t-esc="workflow.n_total"/> multisig</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Script Type:</strong></td>
+                                                <td><t t-esc="workflow.script_type"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Derivation Path:</strong></td>
+                                                <td><code><t t-esc="workflow.derivation_path"/></code></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Your Role:</strong></td>
+                                                <td>Cosigner #<t t-esc="signature.cosigner_index"/> - <t t-esc="signature.name"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    
+                                    <t t-if="not success">
+                                        <form t-attf-action="/my/multisig/signature/#{signature.id}/submit?access_token=#{signature.access_token}" method="post">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            
+                                            <h4>Cosigner Information</h4>
+                                            
+                                            <div class="form-group">
+                                                <label for="xpub">Extended Public Key (xPub) *</label>
+                                                <textarea name="xpub" id="xpub" class="form-control" rows="3" required="required" 
+                                                          placeholder="xpub..." style="font-family: monospace; font-size: 12px;"></textarea>
+                                                <small class="form-text text-muted">
+                                                    Your hardware wallet's extended public key for path <code><t t-esc="workflow.derivation_path"/></code>
+                                                </small>
+                                            </div>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="hardware_wallet_model">Hardware Wallet Model *</label>
+                                                    <input type="text" name="hardware_wallet_model" id="hardware_wallet_model" 
+                                                           class="form-control" required="required"
+                                                           placeholder="e.g., Ledger Nano X, Trezor Model T"/>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="firmware_version">Firmware Version</label>
+                                                    <input type="text" name="firmware_version" id="firmware_version" 
+                                                           class="form-control" placeholder="e.g., 2.1.0"/>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="master_fingerprint">Master Fingerprint (8 chars) *</label>
+                                                    <input type="text" name="master_fingerprint" id="master_fingerprint" 
+                                                           class="form-control" required="required" maxlength="8"
+                                                           placeholder="e.g., a1b2c3d4" style="font-family: monospace;"/>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="wallet_serial_last4">Device Serial (Last 4)</label>
+                                                    <input type="text" name="wallet_serial_last4" id="wallet_serial_last4" 
+                                                           class="form-control" maxlength="4" placeholder="e.g., 1234"/>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="verification_method">Verification Method</label>
+                                                <select name="verification_method" id="verification_method" class="form-control">
+                                                    <option value="email">Email</option>
+                                                    <option value="phone">Phone</option>
+                                                    <option value="video_call">Video Call</option>
+                                                    <option value="in_person">In Person</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="notes">Additional Notes</label>
+                                                <textarea name="notes" id="notes" class="form-control" rows="3"
+                                                          placeholder="Any additional information..."></textarea>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <div class="form-check">
+                                                    <input type="checkbox" name="xpub_verified" id="xpub_verified" class="form-check-input"/>
+                                                    <label class="form-check-label" for="xpub_verified">
+                                                        I have verified that the xPub above matches what is displayed on my hardware wallet
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="alert alert-warning" role="alert">
+                                                <h5 class="alert-heading">⚠️ Security Reminder</h5>
+                                                <ul class="mb-0">
+                                                    <li>Never share your seed phrase or private keys</li>
+                                                    <li>Only provide your extended PUBLIC key (xPub)</li>
+                                                    <li>Verify the wallet configuration matches what was agreed upon</li>
+                                                    <li>Ensure you're on a secure connection (check for HTTPS)</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                                    Submit Signature
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </t>
+                                    
+                                    <hr/>
+                                    
+                                    <div class="text-muted small">
+                                        <p><strong>Form Data Hash:</strong> <code><t t-esc="workflow.form_data_hash"/></code></p>
+                                        <p>Workflow ID: <t t-esc="workflow.name"/></p>
+                                        <p>Expires: <t t-esc="workflow.expiry_date" t-options='{"widget": "datetime"}'/></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+        
+        <!-- Signature Already Complete Template -->
+        <template id="multisig_signature_complete" name="Multisig Signature Complete">
+            <t t-call="website.layout">
+                <div id="wrap" class="container mt-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <t t-if="signature.state == 'signed'">
+                                        <i class="fa fa-check-circle text-success" style="font-size: 60px;"/>
+                                        <h3 class="mt-3">Signature Already Submitted</h3>
+                                        <p>Your signature for this multisig wallet setup was already submitted on:</p>
+                                        <p><strong><t t-esc="signature.signed_date" t-options='{"widget": "datetime"}'/></strong></p>
+                                    </t>
+                                    <t t-elif="signature.state == 'rejected'">
+                                        <i class="fa fa-times-circle text-danger" style="font-size: 60px;"/>
+                                        <h3 class="mt-3">Signature Request Rejected</h3>
+                                        <p>This signature request was rejected.</p>
+                                    </t>
+                                    <t t-elif="signature.state == 'cancelled'">
+                                        <i class="fa fa-ban text-warning" style="font-size: 60px;"/>
+                                        <h3 class="mt-3">Workflow Cancelled</h3>
+                                        <p>This multisig wallet setup workflow has been cancelled.</p>
+                                    </t>
+                                    
+                                    <hr/>
+                                    <p class="text-muted">
+                                        Wallet: <strong><t t-esc="signature.workflow_id.wallet_name"/></strong><br/>
+                                        Cosigner #<t t-esc="signature.cosigner_index"/>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

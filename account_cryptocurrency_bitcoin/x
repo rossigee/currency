@@ -1,0 +1,83 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      cnpg.io/nodeSerial: "13"
+      cnpg.io/operatorVersion: 1.26.0
+      cnpg.io/pvcStatus: initializing
+      volume.beta.kubernetes.io/storage-provisioner: lvm.csi.metal-stack.io
+      volume.kubernetes.io/selected-node: golder-production-workernode-6
+      volume.kubernetes.io/storage-provisioner: lvm.csi.metal-stack.io
+    creationTimestamp: "2025-07-01T13:25:11Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      cnpg.io/cluster: odoo-db
+      cnpg.io/instanceName: odoo-db-13
+      cnpg.io/instanceRole: replica
+      cnpg.io/pvcRole: PG_DATA
+      role: replica
+    name: odoo-db-13
+    namespace: family
+    ownerReferences:
+    - apiVersion: postgresql.cnpg.io/v1
+      controller: true
+      kind: Cluster
+      name: odoo-db
+      uid: 89f0d1e4-56aa-4ff1-87f8-709d4888feac
+    resourceVersion: "269360619"
+    uid: 25f8fd5d-4bb5-4e94-9aa1-5e196f11ad08
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: csi-driver-lvm-linear
+    volumeMode: Filesystem
+  status:
+    phase: Pending
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      cnpg.io/nodeSerial: "13"
+      cnpg.io/operatorVersion: 1.26.0
+      cnpg.io/pvcStatus: ready
+      volume.beta.kubernetes.io/storage-provisioner: lvm.csi.metal-stack.io
+      volume.kubernetes.io/selected-node: golder-production-workernode-6
+      volume.kubernetes.io/storage-provisioner: lvm.csi.metal-stack.io
+    creationTimestamp: "2025-07-01T13:25:11Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      cnpg.io/cluster: odoo-db
+      cnpg.io/instanceName: odoo-db-13
+      cnpg.io/instanceRole: replica
+      cnpg.io/pvcRole: PG_WAL
+      role: replica
+    name: odoo-db-13-wal
+    namespace: family
+    ownerReferences:
+    - apiVersion: postgresql.cnpg.io/v1
+      controller: true
+      kind: Cluster
+      name: odoo-db
+      uid: 89f0d1e4-56aa-4ff1-87f8-709d4888feac
+    resourceVersion: "269360621"
+    uid: d5ad0177-895b-430c-a48f-53d203efe7ea
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: csi-driver-lvm-linear
+    volumeMode: Filesystem
+  status:
+    phase: Pending
+kind: List
+metadata:
+  resourceVersion: ""

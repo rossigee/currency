@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Lightning Operations Security Groups -->
+
+        <!-- Basic Lightning Operations Group -->
+        <record id="group_lightning_user" model="res.groups">
+            <field name="name">Lightning Operations / User</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="comment">Access to basic Lightning functionality.</field>
+        </record>
+
+        <!-- Advanced Lightning Operations Group -->
+        <record id="group_lightning_advanced" model="res.groups">
+            <field name="name">Lightning Operations / Advanced</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="implied_ids" eval="[(4, ref('group_lightning_user'))]"/>
+            <field name="comment">Access to advanced Lightning functionality.</field>
+        </record>
+
+        <!-- Lightning Manager Group -->
+        <record id="group_lightning_manager" model="res.groups">
+            <field name="name">Lightning Operations / Manager</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="implied_ids" eval="[(4, ref('group_lightning_advanced'))]"/>
+            <field name="comment">Full access to all Lightning functionality.</field>
+        </record>
+
+        <!-- Add default users to basic group (optional - can be commented out) -->
+        <record id="base.user_admin" model="res.users">
+            <field name="groups_id" eval="[(4, ref('group_lightning_manager'))]"/>
+        </record>
+
+    </data>
+</odoo>
