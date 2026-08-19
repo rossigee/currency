@@ -78,7 +78,7 @@
                                     </div>
                                 </div>
 
-                                <div attrs="{'invisible': [('lnd_status_error', '!=', False)]}">
+                                <div invisible="lnd_status_error != False">
                                     <group>
                                         <group string="Node Information">
                                             <field name="lnd_node_alias" readonly="1"/>
@@ -117,7 +117,7 @@
                                     </div>
                                 </div>
 
-                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('rest_url', '!=', False)]}">
+                                <div class="alert alert-info" role="alert" invisible="rest_url != False">
                                     <strong>💡 Transaction Data:</strong>
                                     Configure a REST URL and macaroon to fetch transaction history from your LND node.
                                 </div>
