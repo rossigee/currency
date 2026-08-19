@@ -29,13 +29,13 @@
                             </button>
                         </div>
 
-                        <div class="alert alert-warning" role="alert" invisible="payment_status != \"pending\"">
+                        <div class="alert alert-warning" role="alert" invisible="payment_status != 'pending'">
                             <strong>⏳ Payment Processing:</strong> Your Lightning payment is being processed in the background. Please wait...
                         </div>
-                        <div class="alert alert-success" role="alert" invisible="payment_status != \"success\"">
+                        <div class="alert alert-success" role="alert" invisible="payment_status != 'success'">
                             <strong>✅ Payment Successful:</strong> Your Lightning payment has been completed successfully!
                         </div>
-                        <div class="alert alert-danger" role="alert" invisible="payment_status != \"failed\"">
+                        <div class="alert alert-danger" role="alert" invisible="payment_status != 'failed'">
                             <strong>❌ Payment Failed:</strong> Your Lightning payment could not be completed.
                         </div>
 
@@ -64,7 +64,7 @@
                             <i>QR code will appear after entering payment details</i>
                         </div>
 
-                        <notebook invisible="payment_status == \"draft\"">
+                        <notebook invisible="payment_status == 'draft'">
                             <page string="Transaction Details">
                                 <group>
                                     <group string="Payment Information">
