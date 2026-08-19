@@ -10,7 +10,7 @@
                     <header>
                         <button name="action_refresh_vault_status" string="Refresh Vault Status"
                                 type="object" class="btn-secondary"
-                                invisible="id == false"/>
+                                invisible="not id"/>
                     </header>
                     <sheet>
                         <group>
@@ -42,7 +42,7 @@
                                 </group>
 
                                 <!-- Basic Information Section -->
-                                <group invisible="macaroon == false">
+                                <group invisible="not macaroon">
                                     <group string="Macaroon Information">
                                         <field name="macaroon_format" readonly="1"/>
                                         <field name="macaroon_location" readonly="1"/>
@@ -72,7 +72,7 @@
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <button name="action_get_lnd_status" string="🔄 Get Status" type="object" class="btn btn-primary" title="Fetch current status from LND node"/>
-                                        <span class="text-muted ml-3" invisible="lnd_status_last_updated == false">
+                                        <span class="text-muted ml-3" invisible="not lnd_status_last_updated">
                                             Last updated: <field name="lnd_status_last_updated" readonly="1" nolabel="1"/>
                                         </span>
                                     </div>
@@ -102,16 +102,16 @@
                                     </group>
                                 </div>
 
-                                <div class="alert alert-danger" role="alert" invisible="lnd_status_error == false">
+                                <div class="alert alert-danger" role="alert" invisible="not lnd_status_error">
                                     <strong>Error:</strong>
                                     <field name="lnd_status_error" readonly="1" nolabel="1"/>
                                 </div>
                             </page>
-                            <page string="Transactions" invisible="rest_url == false">
+                            <page string="Transactions" invisible="not rest_url">
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <button name="action_fetch_transactions" string="🔄 Fetch Transactions" type="object" class="btn btn-primary" title="Fetch transaction history from LND node"/>
-                                        <span class="text-muted ml-3" invisible="last_transaction_fetch == false">
+                                        <span class="text-muted ml-3" invisible="not last_transaction_fetch">
                                             Last updated: <field name="last_transaction_fetch" readonly="1" nolabel="1"/>
                                         </span>
                                     </div>
@@ -122,7 +122,7 @@
                                     Configure a REST URL and macaroon to fetch transaction history from your LND node.
                                 </div>
 
-                                <div invisible="rest_url == false">
+                                <div invisible="not rest_url">
                                     <p><strong>Recent Transactions (Latest 100):</strong></p>
                                     <field name="transaction_html" nolabel="1" readonly="1"/>
                                 </div>
