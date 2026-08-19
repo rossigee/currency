@@ -67,11 +67,11 @@
                             </group>
                         </group>
 
-                        <group string="Last Error" invisible="last_error == false">
+                        <group string="Last Error" invisible="not last_error">
                             <field name="last_error" widget="text" readonly="1" nolabel="1"/>
                         </group>
 
-                        <group string="Cached Data" invisible="cached_prices == false">
+                        <group string="Cached Data" invisible="not cached_prices">
                             <field name="cached_prices" widget="text" readonly="1" nolabel="1"/>
                         </group>
                     </sheet>

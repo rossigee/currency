@@ -37,7 +37,7 @@
                         <div class="oe_button_box" name="button_box">
                             <!-- Pay Now button for draft payments -->
                             <button class="oe_stat_button" type="object" name="action_pay_now"
-                                    invisible="address_id == false" icon="fa-bolt">
+                                    invisible="not address_id" icon="fa-bolt">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Pay Now</span>
                                 </div>
@@ -70,17 +70,17 @@
                             </group>
                             <group string="Timing and State">
                                 <field name="creation_date"/>
-                                <field name="payment_creation_date" invisible="payment_creation_date == false"/>
-                                <field name="completion_date" invisible="completion_date == false"/>
-                                <field name="payment_completion_date" invisible="payment_completion_date == false"/>
+                                <field name="payment_creation_date" invisible="not payment_creation_date"/>
+                                <field name="completion_date" invisible="not completion_date"/>
+                                <field name="payment_completion_date" invisible="not payment_completion_date"/>
                                 <field name="last_state_change"/>
                                 <field name="state_change_user_id"/>
                                 <separator string="Payment QR Code"/>
                                 <field name="ln_payment_qrcode_current" widget="image" nolabel="1"
-                                       invisible="ln_payment_qrcode_current == false"
+                                       invisible="not ln_payment_qrcode_current"
                                        options="{'size': [150, 150]}"/>
                                 <field name="ln_payment_qrcode" widget="image" nolabel="1"
-                                       invisible="ln_payment_qrcode == false"
+                                       invisible="not ln_payment_qrcode"
                                        options="{'size': [150, 150]}"/>
                                 <div invisible="payment_status == 'draft' or ln_payment_qrcode != False" class="alert alert-warning" style="font-size: 12px;">
                                     <strong>⚠️ No QR Code Available:</strong> This payment was created before QR code storage was implemented.
@@ -95,8 +95,8 @@
                             <page string="Transaction Details">
                                 <group>
                                     <group string="Payment Information">
-                                        <field name="payment_hash" invisible="payment_hash == false"/>
-                                        <field name="payment_preimage" invisible="payment_preimage == false"/>
+                                        <field name="payment_hash" invisible="not payment_hash"/>
+                                        <field name="payment_preimage" invisible="not payment_preimage"/>
                                     </group>
                                     <group string="Route Information">
                                         <field name="payment_route_hops" invisible="payment_route_hops == 0"/>
@@ -105,15 +105,15 @@
                                     </group>
                                 </group>
 
-                                <group string="Invoice Details" invisible="decoded_invoice_details == false">
+                                <group string="Invoice Details" invisible="not decoded_invoice_details">
                                     <field name="decoded_invoice_details" widget="text" nolabel="1"/>
                                 </group>
 
-                                <group string="Error Details" invisible="payment_error == false">
+                                <group string="Error Details" invisible="not payment_error">
                                     <field name="payment_error" widget="text" nolabel="1"/>
                                 </group>
 
-                                <group string="Technical Details" invisible="ln_payment_ref == false">
+                                <group string="Technical Details" invisible="not ln_payment_ref">
                                     <field name="ln_payment_ref" widget="text"/>
                                 </group>
                             </page>

@@ -14,7 +14,7 @@
                         <div class="oe_button_box" name="button_box">
                             <!-- Status indicator buttons -->
                             <button class="oe_stat_button" type="object" name="action_pay_now"
-                                    invisible="address_id == false" icon="fa-bolt">
+                                    invisible="not address_id" icon="fa-bolt">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Pay Now</span>
                                 </div>
@@ -59,7 +59,7 @@
                         </group>
 
                         <separator string="Payment QR Code"/>
-                        <field name="ln_payment_qrcode" widget="image" invisible="ln_payment_qrcode == false" nolabel="1"/>
+                        <field name="ln_payment_qrcode" widget="image" invisible="not ln_payment_qrcode" nolabel="1"/>
                         <div invisible="ln_payment_qrcode != False" class="text-muted" style="width: 100%; margin: 10px 0; text-align: center;">
                             <i>QR code will appear after entering payment details</i>
                         </div>
@@ -68,10 +68,10 @@
                             <page string="Transaction Details">
                                 <group>
                                     <group string="Payment Information">
-                                        <field name="payment_hash" readonly="1" invisible="payment_hash == false"/>
-                                        <field name="payment_preimage" readonly="1" invisible="payment_preimage == false"/>
+                                        <field name="payment_hash" readonly="1" invisible="not payment_hash"/>
+                                        <field name="payment_preimage" readonly="1" invisible="not payment_preimage"/>
                                         <field name="payment_creation_date" readonly="1"/>
-                                        <field name="payment_completion_date" readonly="1" invisible="payment_completion_date == false"/>
+                                        <field name="payment_completion_date" readonly="1" invisible="not payment_completion_date"/>
                                     </group>
                                     <group string="Route Information">
                                         <field name="payment_route_hops" readonly="1" invisible="payment_route_hops == 0"/>
@@ -80,15 +80,15 @@
                                     </group>
                                 </group>
 
-                                <group string="Invoice Details" invisible="decoded_invoice_details == false">
+                                <group string="Invoice Details" invisible="not decoded_invoice_details">
                                     <field name="decoded_invoice_details" readonly="1" widget="text" nolabel="1"/>
                                 </group>
 
-                                <group string="Error Details" invisible="payment_error == false">
+                                <group string="Error Details" invisible="not payment_error">
                                     <field name="payment_error" readonly="1" widget="text" nolabel="1"/>
                                 </group>
 
-                                <group string="Job Information" invisible="payment_job_uuid == false">
+                                <group string="Job Information" invisible="not payment_job_uuid">
                                     <field name="payment_job_uuid" readonly="1"/>
                                 </group>
                             </page>
@@ -97,7 +97,6 @@
                         <group invisible="1">
                             <field name="callback_url"/>
                             <field name="ln_payment_ref"/>
-                            <field name="payment_job_uuid"/>
                         </group>
 
                         <footer>
