@@ -32,11 +32,11 @@
 
                     <sheet>
                         <div class="oe_button_box" name="button_box">
-                            <button class="oe_stat_button" icon="fa-check-circle" attrs="{'invisible': [('success_count', '=', 0)]}">
+                            <button class="oe_stat_button" icon="fa-check-circle" invisible="success_count == 0">
                                 <field name="success_count" widget="statinfo" string="Successful"/>
                             </button>
 
-                            <button class="oe_stat_button" icon="fa-times-circle" attrs="{'invisible': [('error_count', '=', 0)]}">
+                            <button class="oe_stat_button" icon="fa-times-circle" invisible="error_count == 0">
                                 <field name="error_count" widget="statinfo" string="Failed"/>
                             </button>
                         </div>
@@ -49,7 +49,7 @@
                                 <field name="active"/>
                             </group>
                             <group string="API Configuration">
-                                <field name="api_url" attrs="{'required': [('service_type', '=', 'coingecko')]}"/>
+                                <field name="api_url" required="service_type == 'coingecko'"/>
                                 <field name="api_key" password="True"/>
                                 <field name="timeout_seconds"/>
                                 <field name="rate_limit_seconds"/>

@@ -20,11 +20,11 @@
                                 </div>
                             </button>
 
-                            <button class="oe_stat_button" attrs="{'invisible': [('payment_route_hops', '=', 0)]}" icon="fa-route">
+                            <button class="oe_stat_button" invisible="payment_route_hops == 0" icon="fa-route">
                                 <field name="payment_route_hops" widget="statinfo" string="Route Hops"/>
                             </button>
 
-                            <button class="oe_stat_button" attrs="{'invisible': [('fee_paid_sat', '=', 0)]}" icon="fa-coins">
+                            <button class="oe_stat_button" invisible="fee_paid_sat == 0" icon="fa-coins">
                                 <field name="fee_paid_sat" widget="statinfo" string="Fee Paid (sats)"/>
                             </button>
                         </div>
@@ -39,28 +39,28 @@
                             <strong>❌ Payment Failed:</strong> Your Lightning payment could not be completed.
                         </div>
 
-                        <div class="alert alert-info" role="alert" attrs="{'invisible': [('address_id', '!=', False)]}">
+                        <div class="alert alert-info" role="alert" invisible="address_id != False">
                             <strong>📍 Select Lightning Address:</strong> Please choose a Lightning address to create a payment for.
                         </div>
 
                         <group>
                             <group string="Payment Details">
-                                <field name="address_id" attrs="{'readonly': [('payment_status', '!=', 'draft')]}"
+                                <field name="address_id" readonly="payment_status != 'draft'"
                                        options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}"
                                        context="{'force_detailed_view': True}"/>
-                                <field name="amount" attrs="{'readonly': [('payment_status', '!=', 'draft')]}"/>
-                                <field name="currency_id" attrs="{'readonly': [('payment_status', '!=', 'draft')]}"/>
+                                <field name="amount" readonly="payment_status != 'draft'"/>
+                                <field name="currency_id" readonly="payment_status != 'draft'"/>
                                 <field name="btc_price" readonly="1"/>
                                 <field name="satoshis" string="Amount (satoshis)" readonly="1"/>
                             </group>
                             <group string="Service Provider">
-                                <field name="lsp_id" attrs="{'readonly': [('payment_status', '!=', 'draft')]}"/>
+                                <field name="lsp_id" readonly="payment_status != 'draft'"/>
                             </group>
                         </group>
 
                         <separator string="Payment QR Code"/>
                         <field name="ln_payment_qrcode" widget="image" invisible="ln_payment_qrcode == false" nolabel="1"/>
-                        <div attrs="{'invisible': [('ln_payment_qrcode', '!=', False)]}" class="text-muted" style="width: 100%; margin: 10px 0; text-align: center;">
+                        <div invisible="ln_payment_qrcode != False" class="text-muted" style="width: 100%; margin: 10px 0; text-align: center;">
                             <i>QR code will appear after entering payment details</i>
                         </div>
 
@@ -74,9 +74,9 @@
                                         <field name="payment_completion_date" readonly="1" invisible="payment_completion_date == false"/>
                                     </group>
                                     <group string="Route Information">
-                                        <field name="payment_route_hops" readonly="1" attrs="{'invisible': [('payment_route_hops', '=', 0)]}"/>
-                                        <field name="payment_total_time_lock" readonly="1" attrs="{'invisible': [('payment_total_time_lock', '=', 0)]}"/>
-                                        <field name="fee_paid_sat" readonly="1" attrs="{'invisible': [('fee_paid_sat', '=', 0)]}"/>
+                                        <field name="payment_route_hops" readonly="1" invisible="payment_route_hops == 0"/>
+                                        <field name="payment_total_time_lock" readonly="1" invisible="payment_total_time_lock == 0"/>
+                                        <field name="fee_paid_sat" readonly="1" invisible="fee_paid_sat == 0"/>
                                     </group>
                                 </group>
 

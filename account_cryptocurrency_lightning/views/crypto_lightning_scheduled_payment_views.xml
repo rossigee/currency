@@ -44,11 +44,11 @@
                         <button name="action_resume" string="Resume" type="object"
                                 class="btn-primary" invisible="state != \"paused\""/>
                         <button name="action_execute_now" string="Execute Now" type="object"
-                                class="btn-secondary" attrs="{'invisible': [('state', 'not in', ['active', 'paused'])]}"/>
+                                class="btn-secondary" invisible="state not in ('active', 'paused')"/>
                         <button name="action_cancel" string="Cancel" type="object"
-                                attrs="{'invisible': [('state', 'in', ['completed', 'cancelled'])]}"/>
+                                invisible="state in ('completed', 'cancelled')"/>
                         <button name="action_reset_to_draft" string="Reset to Draft" type="object"
-                                class="btn-secondary" attrs="{'invisible': [('state', 'not in', ['cancelled', 'completed'])]}"/>
+                                class="btn-secondary" invisible="state not in ('cancelled', 'completed')"/>
 
                         <field name="state" widget="statusbar"
                                statusbar_visible="draft,active,paused,completed,cancelled"
@@ -61,11 +61,11 @@
                                 <field name="payment_count" widget="statinfo" string="Payments"/>
                             </button>
 
-                            <button class="oe_stat_button" icon="fa-check-circle" attrs="{'invisible': [('successful_executions', '=', 0)]}">
+                            <button class="oe_stat_button" icon="fa-check-circle" invisible="successful_executions == 0">
                                 <field name="successful_executions" widget="statinfo" string="Successful"/>
                             </button>
 
-                            <button class="oe_stat_button" icon="fa-times-circle" attrs="{'invisible': [('failed_executions', '=', 0)]}">
+                            <button class="oe_stat_button" icon="fa-times-circle" invisible="failed_executions == 0">
                                 <field name="failed_executions" widget="statinfo" string="Failed"/>
                             </button>
                         </div>
@@ -100,7 +100,7 @@
                         </group>
 
                         <notebook>
-                            <page string="Execution History" attrs="{'invisible': [('payment_count', '=', 0)]}">
+                            <page string="Execution History" invisible="payment_count == 0">
                                 <field name="payment_ids" readonly="1">
                                     <tree string="Generated Payments" create="false" edit="false">
                                         <field name="creation_date"/>

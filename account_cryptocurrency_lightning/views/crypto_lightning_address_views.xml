@@ -11,7 +11,7 @@
                 </header>
                 <sheet>
                   <div class="oe_button_box" name="button_box">
-                    <button class="oe_stat_button" type="object" name="action_view_payments" icon="fa-money" attrs="{'invisible': [('payment_count', '=', 0)]}">
+                    <button class="oe_stat_button" type="object" name="action_view_payments" icon="fa-money" invisible="payment_count == 0">
                       <field string="Payments" name="payment_count" widget="statinfo"/>
                     </button>
                     <button class="oe_stat_button" type="object" name="action_view_attachments" icon="fa-paperclip">
@@ -31,7 +31,7 @@
                     </group>
                   </group>
                   <notebook>
-                    <page string="Payments" attrs="{'invisible': [('payment_count', '=', 0)]}">
+                    <page string="Payments" invisible="payment_count == 0">
                       <field name="payment_ids" readonly="1">
                         <tree string="Lightning Payments" create="false" edit="false">
                           <field name="creation_date"/>

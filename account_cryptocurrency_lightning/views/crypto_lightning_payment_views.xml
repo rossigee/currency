@@ -43,11 +43,11 @@
                                 </div>
                             </button>
 
-                            <button class="oe_stat_button" attrs="{'invisible': [('payment_route_hops', '=', 0)]}" icon="fa-route">
+                            <button class="oe_stat_button" invisible="payment_route_hops == 0" icon="fa-route">
                                 <field name="payment_route_hops" widget="statinfo" string="Route Hops"/>
                             </button>
 
-                            <button class="oe_stat_button" attrs="{'invisible': [('fee_paid_sat', '=', 0)]}" icon="fa-coins">
+                            <button class="oe_stat_button" invisible="fee_paid_sat == 0" icon="fa-coins">
                                 <field name="fee_paid_sat" widget="statinfo" string="Fee Paid (sats)"/>
                             </button>
 
@@ -82,10 +82,10 @@
                                 <field name="ln_payment_qrcode" widget="image" nolabel="1"
                                        invisible="ln_payment_qrcode == false"
                                        options="{'size': [150, 150]}"/>
-                                <div attrs="{'invisible': ['|', ('payment_status', '=', 'draft'), ('ln_payment_qrcode', '!=', False)]}" class="alert alert-warning" style="font-size: 12px;">
+                                <div invisible="payment_status == 'draft' or ln_payment_qrcode != False" class="alert alert-warning" style="font-size: 12px;">
                                     <strong>⚠️ No QR Code Available:</strong> This payment was created before QR code storage was implemented.
                                 </div>
-                                <div attrs="{'invisible': ['|', ('payment_status', '!=', 'draft'), ('ln_payment_qrcode_current', '!=', False)]}" class="alert alert-info" style="font-size: 12px;">
+                                <div invisible="payment_status != 'draft' or ln_payment_qrcode_current != False" class="alert alert-info" style="font-size: 12px;">
                                     <strong>💡 QR Code for Mobile Payment:</strong> Enter payment details above to generate a QR code for out-of-band payment.
                                 </div>
                             </group>
@@ -99,9 +99,9 @@
                                         <field name="payment_preimage" invisible="payment_preimage == false"/>
                                     </group>
                                     <group string="Route Information">
-                                        <field name="payment_route_hops" attrs="{'invisible': [('payment_route_hops', '=', 0)]}"/>
-                                        <field name="payment_total_time_lock" attrs="{'invisible': [('payment_total_time_lock', '=', 0)]}"/>
-                                        <field name="fee_paid_sat" attrs="{'invisible': [('fee_paid_sat', '=', 0)]}"/>
+                                        <field name="payment_route_hops" invisible="payment_route_hops == 0"/>
+                                        <field name="payment_total_time_lock" invisible="payment_total_time_lock == 0"/>
+                                        <field name="fee_paid_sat" invisible="fee_paid_sat == 0"/>
                                     </group>
                                 </group>
 
