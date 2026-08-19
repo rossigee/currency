@@ -11,9 +11,9 @@
                     <field name="name"/>
                     <field name="address_id"/>
                     <field name="amount_type"/>
-                    <field name="amount_fiat" invisible="amount_type != \"fiat\""/>
-                    <field name="currency_id" invisible="amount_type != \"fiat\""/>
-                    <field name="amount_satoshi" invisible="amount_type != \"satoshi\""/>
+                    <field name="amount_fiat" invisible="amount_type != 'fiat'"/>
+                    <field name="currency_id" invisible="amount_type != 'fiat'"/>
+                    <field name="amount_satoshi" invisible="amount_type != 'satoshi'"/>
                     <field name="cron_expression"/>
                     <field name="cron_description"/>
                     <field name="next_execution_date"/>
@@ -38,11 +38,11 @@
                 <form string="Scheduled Lightning Payment">
                     <header>
                         <button name="action_activate" string="Activate" type="object"
-                                class="btn-primary" invisible="state != \"draft\""/>
+                                class="btn-primary" invisible="state != 'draft'"/>
                         <button name="action_pause" string="Pause" type="object"
-                                invisible="state != \"active\""/>
+                                invisible="state != 'active'"/>
                         <button name="action_resume" string="Resume" type="object"
-                                class="btn-primary" invisible="state != \"paused\""/>
+                                class="btn-primary" invisible="state != 'paused'"/>
                         <button name="action_execute_now" string="Execute Now" type="object"
                                 class="btn-secondary" invisible="state not in ('active', 'paused')"/>
                         <button name="action_cancel" string="Cancel" type="object"
@@ -78,9 +78,9 @@
                             </group>
                             <group string="Amount Configuration">
                                 <field name="amount_type" widget="radio"/>
-                                <field name="amount_fiat" invisible="amount_type != "fiat""/>
-                                <field name="currency_id" invisible="amount_type != "fiat""/>
-                                <field name="amount_satoshi" invisible="amount_type != "satoshi""/>
+                                <field name="amount_fiat" invisible="amount_type != 'fiat'"/>
+                                <field name="currency_id" invisible="amount_type != 'fiat'"/>
+                                <field name="amount_satoshi" invisible="amount_type != 'satoshi'"/>
                             </group>
                         </group>
 
