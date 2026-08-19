@@ -133,7 +133,7 @@
             <field name="model">crypto.lightning.scheduled.payment</field>
             <field name="arch" type="xml">
                 <calendar string="Scheduled Payments" date_start="next_execution_date"
-                         color="state" mode="month" quick_add="False">
+                         color="state" mode="month">
                     <field name="name"/>
                     <field name="address_id"/>
                     <field name="amount_fiat"/>
