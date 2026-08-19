@@ -97,6 +97,7 @@
                         <group invisible="1">
                             <field name="callback_url"/>
                             <field name="ln_payment_ref"/>
+                            <field name="payment_job_uuid"/>
                         </group>
 
                         <footer>
