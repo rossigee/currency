@@ -34,7 +34,7 @@
                         <notebook>
                             <page string="Transaction Outputs">
                                 <div class="alert alert-info" role="alert" 
-                                     attrs="{'invisible': [('output_line_ids', '!=', [])]}">
+                                     invisible="output_line_ids not in []">
                                     <strong>📤 Transaction Outputs:</strong><br/>
                                     Add one or more outputs to specify where to send Bitcoin.
                                     Each output requires a recipient address and amount.
@@ -50,7 +50,7 @@
                             </page>
                             
                             <page string="Transaction Summary" 
-                                  attrs="{'invisible': [('output_line_ids', '=', [])]}">
+                                  invisible="output_line_ids in []">
                                 <div class="alert alert-success" role="alert">
                                     <strong>💰 Transaction Summary:</strong><br/>
                                     Review the transaction details before creating the PSBT.
