@@ -22,7 +22,7 @@
                         <group>
                             <field name="name" placeholder="e.g., Hardware Wallet #1"/>
                             <field name="key_type"/>
-                            <field name="derivation_path" attrs="{'readonly': [('key_type', '!=', 'master')]}"/>
+                            <field name="derivation_path" readonly="key_type != 'master'"/>
                         </group>
                         <group>
                             <field name="owner_id"/>
@@ -37,9 +37,9 @@
                     </group>
                     
                     <!-- Key-specific settings -->
-                    <group string="Key Settings" attrs="{'invisible': [('key_type', 'not in', ['account', 'multisig'])]}">
+                    <group string="Key Settings" invisible="key_type not in ['account', 'multisig']">
                         <group>
-                            <field name="account_index" attrs="{'invisible': [('key_type', 'not in', ['account', 'multisig'])]}"/>
+                            <field name="account_index" invisible="key_type not in ['account', 'multisig']"/>
                             <field name="script_type" invisible="key_type != \"multisig\""/>
                         </group>
                         <group>

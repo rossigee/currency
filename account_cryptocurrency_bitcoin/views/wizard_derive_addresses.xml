@@ -6,7 +6,7 @@
             <field name="model">wizard.derive.addresses</field>
             <field name="arch" type="xml">
                 <form string="Derive Addresses from XPUB">
-                    <group attrs="{'invisible': [('derived_addresses_display', '!=', False)]}">
+                    <group invisible="derived_addresses_display">
                         <group string="Derivation Parameters">
                             <field name="public_key_id" readonly="context.get('default_public_key_id', False)"/>
                             <field name="start_index"/>
@@ -23,7 +23,7 @@
                     
                     <footer>
                         <button string="Derive Addresses" name="action_derive_addresses" type="object" 
-                                class="btn-primary" attrs="{'invisible': [('derived_addresses_display', '!=', False)]}"/>
+                                class="btn-primary" invisible="derived_addresses_display"/>
                         <button string="Export JSON" name="action_export_addresses" type="object" 
                                 class="btn-secondary" invisible="derived_addresses_display == false"/>
                         <button string="Close" class="btn-secondary" special="cancel"/>

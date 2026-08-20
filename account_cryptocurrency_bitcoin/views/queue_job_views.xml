@@ -65,7 +65,7 @@
                         <div invisible="result == false">
                             <strong>Result:</strong> <field name="result" readonly="1" nolabel="1"/>
                         </div>
-                        <div attrs="{'invisible': [('result', '!=', False)]}">
+                        <div invisible="result">
                             <strong>⚠️ No result returned</strong> - Job may have failed silently or returned early
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                     
                     <!-- Pending/In Progress status -->
                     <div class="alert alert-info" role="alert" 
-                         attrs="{'invisible': [('state', 'not in', ['pending', 'enqueued', 'started'])]}">
+                         invisible="state not in ['pending', 'enqueued', 'started']">
                         <strong>🔄 Job Status:</strong> <field name="state" readonly="1" nolabel="1" widget="badge"/>
                         <div invisible="date_enqueued == false">
                             <strong>Enqueued:</strong> <field name="date_enqueued" readonly="1" nolabel="1"/>

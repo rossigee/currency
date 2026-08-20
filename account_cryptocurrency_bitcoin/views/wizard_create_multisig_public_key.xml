@@ -21,7 +21,7 @@
                     <sheet>
                         <div class="oe_title">
                             <h1>
-                                <span attrs="{'invisible': [('created_public_key_id', '!=', False)]}">
+                                <span invisible="created_public_key_id">
                                     Create Cosigner Key
                                 </span>
                                 <span invisible="created_public_key_id == false">
@@ -31,7 +31,7 @@
                         </div>
 
                         <!-- Input Form (shown before creation) -->
-                        <group attrs="{'invisible': [('created_public_key_id', '!=', False)]}">
+                        <group invisible="created_public_key_id">
                             <group>
                                 <field name="private_key_id" readonly="1"/>
                                 <field name="private_key_name" readonly="1"/>
@@ -44,7 +44,7 @@
                             </group>
                         </group>
 
-                        <notebook attrs="{'invisible': [('created_public_key_id', '!=', False)]}">
+                        <notebook invisible="created_public_key_id">
                             <page string="Cosigner Details">
                                 <group>
                                     <group>

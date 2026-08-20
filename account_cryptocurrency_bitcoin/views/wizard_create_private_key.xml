@@ -12,7 +12,7 @@
                     <field name="success_message" invisible="1"/>
                     
                     <!-- Input Phase -->
-                    <group attrs="{'invisible': [('created_private_key_id', '!=', False)]}">
+                    <group invisible="created_private_key_id">
                         <group string="Basic Information">
                             <field name="name"/>
                             <field name="owner_id"/>
@@ -22,7 +22,7 @@
                     </group>
                     
                     <!-- Generate New Key -->
-                    <div attrs="{'invisible': ['|', ('created_private_key_id', '!=', False), ('creation_method', '!=', 'generate')]}" class="row">
+                    <div invisible="(created_private_key_id) or (creation_method != 'generate')" class="row">
                         <div class="col-md-6">
                             <group string="Generation Options">
                                 <field name="word_count" widget="radio"/>
@@ -38,7 +38,7 @@
                     </div>
                     
                     <!-- Import from Mnemonic -->
-                    <div attrs="{'invisible': ['|', ('created_private_key_id', '!=', False), ('creation_method', '!=', 'import_mnemonic')]}" class="row">
+                    <div invisible="(created_private_key_id) or (creation_method != 'import_mnemonic')" class="row">
                         <div class="col-md-6">
                             <group string="Mnemonic Import">
                                 <field name="mnemonic_phrase" widget="text" placeholder="word1 word2 word3 ... word24"/>
@@ -55,7 +55,7 @@
                     </div>
                     
                     <!-- Import from XPRV -->
-                    <div attrs="{'invisible': ['|', ('created_private_key_id', '!=', False), ('creation_method', '!=', 'import_xprv')]}" class="row">
+                    <div invisible="(created_private_key_id) or (creation_method != 'import_xprv')" class="row">
                         <div class="col-md-6">
                             <group string="Extended Private Key Import">
                                 <field name="xprv_key" placeholder="xprv9s21ZrQH143K..."/>
@@ -102,9 +102,9 @@
                     <footer>
                         <!-- Input phase buttons -->
                         <button string="Create Private Key" name="action_create_private_key" type="object" 
-                                class="btn-primary" attrs="{'invisible': [('created_private_key_id', '!=', False)]}"/>
+                                class="btn-primary" invisible="created_private_key_id"/>
                         <button string="Cancel" class="btn-secondary" special="cancel" 
-                                attrs="{'invisible': [('created_private_key_id', '!=', False)]}"/>
+                                invisible="created_private_key_id"/>
                         
                         <!-- Results phase buttons -->
                         <button string="Create Public Key" name="action_create_public_key" type="object" 

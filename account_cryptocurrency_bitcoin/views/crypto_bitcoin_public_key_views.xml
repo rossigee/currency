@@ -21,7 +21,7 @@
                         <div class="oe_button_box" name="button_box">
                             <button name="action_view_private_key" type="object" 
                                     class="oe_stat_button" icon="fa-lock"
-                                    attrs="{'invisible': [('private_key_id', '=', [])]}">
+                                    invisible="private_key_id in []">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Private Key</span>
                                 </div>
@@ -31,7 +31,7 @@
                             <group>
                                 <field name="name" required="1"/>
                                 <field name="owner_id"/>
-                                <field name="key_type" attrs="{'readonly': [('id', '!=', False)]}"/>
+                                <field name="key_type" readonly="id"/>
                                 <field name="derivation_path" readonly="1" invisible="derivation_path == false"/>
                                 <field name="account_index" readonly="1" invisible="key_type != \"account\""/>
                             </group>
@@ -49,13 +49,13 @@
                                            invisible="xpub == false"/>
                                 </group>
                                 
-                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('id', '!=', False)]}">
+                                <div class="alert alert-info" role="alert" invisible="id">
                                     <strong>📖 Import XPUB:</strong><br/>
                                     Paste the extended public key (XPUB) from your hardware wallet, Electrum, or other Bitcoin software.
                                     Set the key type and other details above first.
                                 </div>
                                 
-                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('xpub', '!=', False)]}">
+                                <div class="alert alert-info" role="alert" invisible="xpub">
                                     <strong>ℹ️ XPUB Not Available:</strong><br/>
                                     The XPUB cannot be retrieved from Vault. Check vault status and try refreshing.
                                 </div>

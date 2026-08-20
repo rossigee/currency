@@ -12,7 +12,7 @@
                                 invisible="multisig_wallet_id == false"/>
                         <button name="action_fetch_from_blockchain" string="Fetch from Blockchain" 
                                 type="object" class="btn-secondary"
-                                attrs="{'invisible': ['|', ('tx_hash', '=', False), ('tx_hash', '=', '[Pending]')]}"/>
+                                invisible="(tx_hash == False) or (tx_hash == '[Pending]')"/>
                         <field name="status" widget="statusbar" 
                                statusbar_visible="draft,unsigned_psbt,partial_psbt,signed_psbt,pending,confirmed"/>
                     </header>
@@ -33,15 +33,15 @@
                                 <field name="imported_date"/>
                                 <field name="amount"/>
                                 <field name="fee"/>
-                                <field name="target_fee_rate" attrs="{'invisible': [('target_fee_rate', '=', 0)]}"/>
+                                <field name="target_fee_rate" invisible="target_fee_rate == 0"/>
                             </group>
                             <group string="Status">
                                 <field name="multisig_wallet_id" readonly="1"/>
                                 <field name="created_by_id" readonly="1"/>
-                                <field name="mined_block" readonly="1" attrs="{'invisible': [('mined_block', '=', 0)]}"/>
-                                <field name="confirmations" readonly="1" attrs="{'invisible': [('mined_block', '=', 0)]}"/>
+                                <field name="mined_block" readonly="1" invisible="mined_block == 0"/>
+                                <field name="confirmations" readonly="1" invisible="mined_block == 0"/>
                                 <field name="rbf_enabled" readonly="1" invisible="rbf_enabled == false"/>
-                                <field name="lock_time" readonly="1" attrs="{'invisible': [('lock_time', '=', 0)]}"/>
+                                <field name="lock_time" readonly="1" invisible="lock_time == 0"/>
                             </group>
                         </group>
                         
@@ -81,7 +81,7 @@
                             <page string="Inputs &amp; Outputs">
                                 <field name="transaction_line_ids" invisible="1"/>
                                 <div class="alert alert-info" role="alert" 
-                                     attrs="{'invisible': [('transaction_line_ids', '!=', [])]}">
+                                     invisible="transaction_line_ids not in []">
                                     <strong>💰 Bitcoin Transaction Structure:</strong><br/>
                                     This shows the individual inputs and outputs that make up this specific transaction.
                                     Inputs show where Bitcoin came from, outputs show where it's being sent.
@@ -96,7 +96,7 @@
                                     </tree>
                                 </field>
                                 
-                                <div attrs="{'invisible': [('input_line_ids', '=', [])]}">
+                                <div invisible="input_line_ids in []">
                                     <separator string="Inputs (for reference)"/>
                                     <field name="input_line_ids" nolabel="1">
                                         <tree create="false" delete="false" edit="false">

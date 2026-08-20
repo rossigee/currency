@@ -9,7 +9,7 @@
                     <header>
                         <button name="action_import_transactions" string="Import Transactions" 
                                 type="object" class="btn-primary"
-                                attrs="{'invisible': [('address_ids', '=', [])]}"/>
+                                invisible="address_ids in []"/>
                     </header>
                     <sheet>
                     <group>
