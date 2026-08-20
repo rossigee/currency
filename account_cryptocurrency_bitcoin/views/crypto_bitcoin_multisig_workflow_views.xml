@@ -36,7 +36,7 @@
                                 invisible="state != \"signatures_complete\""/>
                         <button name="action_cancel" string="Cancel" 
                                 type="object" class="btn-secondary" 
-                                attrs="{'invisible': [('state', 'in', ['wallet_created', 'cancelled'])]}"/>
+                                invisible="state in ['wallet_created', 'cancelled']"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,collecting_signatures,signatures_complete,wallet_created"/>
                     </header>
                     <sheet>
@@ -68,11 +68,11 @@
                             <group string="Wallet Configuration">
                                 <field name="wallet_name"/>
                                 <field name="use_case"/>
-                                <field name="wallet_type" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="wallet_type" readonly="state != 'draft'"/>
                                 <field name="m_threshold" invisible="wallet_type != "custom""/>
                                 <field name="n_total" invisible="wallet_type != "custom""/>
-                                <field name="script_type" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
-                                <field name="derivation_path" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="script_type" readonly="state != 'draft'"/>
+                                <field name="derivation_path" readonly="state != 'draft'"/>
                             </group>
                             <group string="Workflow Settings">
                                 <field name="initiated_by"/>
@@ -80,7 +80,7 @@
                                 <field name="expiry_date"/>
                                 <field name="completed_date" invisible="completed_date == false"/>
                                 <field name="require_all_signatures"/>
-                                <field name="signature_deadline_days" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="signature_deadline_days" readonly="state != 'draft'"/>
                             </group>
                         </group>
                         

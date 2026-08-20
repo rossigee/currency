@@ -87,7 +87,7 @@
                         
                         <notebook>
                             <page string="Cosigner Public Keys">
-                                <div class="alert alert-info" role="alert" attrs="{'invisible': [('cosigner_public_key_ids', '!=', [])]}">
+                                <div class="alert alert-info" role="alert" invisible="cosigner_public_key_ids not in []">
                                     <strong>📖 Multisig Setup:</strong><br/>
                                     Add cosigner public keys to create the multisig wallet.
                                     Each cosigner should provide their XPUB for the same derivation path.
@@ -205,7 +205,7 @@
                                 </div>
                             </page>
                             
-                            <page string="Legacy Wallets" attrs="{'invisible': [('wallet_ids', '=', [])]}">
+                            <page string="Legacy Wallets" invisible="wallet_ids in []">
                                 <field name="wallet_ids">
                                     <tree>
                                         <field name="name"/>
