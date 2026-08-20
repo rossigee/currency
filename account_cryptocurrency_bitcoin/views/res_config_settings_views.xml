@@ -79,7 +79,7 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                                         <div class="row" invisible="bitcoin_external_api_provider != \"custom\"">
                                             <label for="bitcoin_custom_api_base_url" class="col-3 o_light_label"/>
                                             <field name="bitcoin_custom_api_base_url" class="col-9" 
-                                                   attrs="{'required': [('bitcoin_external_api_provider', '=', 'custom')]}"/>
+                                                   required="bitcoin_external_api_provider == 'custom'"/>
                                         </div>
                                         
                                         <div class="alert alert-warning mt8" role="alert">
