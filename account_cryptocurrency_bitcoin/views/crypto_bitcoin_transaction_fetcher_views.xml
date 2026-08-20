@@ -33,11 +33,11 @@
                             <page string="Connection Settings">
                                 <group>
                                     <group string="API Settings" invisible="service_type == \"electrum\"">
-                                        <field name="base_url" attrs="{'required': [('service_type', '!=', 'electrum')]}"/>
+                                        <field name="base_url" required="service_type != 'electrum'"/>
                                     </group>
                                     <group string="Electrum Settings" invisible="service_type != \"electrum\"">
-                                        <field name="electrum_host" attrs="{'required': [('service_type', '=', 'electrum')]}"/>
-                                        <field name="electrum_port" attrs="{'required': [('service_type', '=', 'electrum')]}"/>
+                                        <field name="electrum_host" required="service_type == 'electrum'"/>
+                                        <field name="electrum_port" required="service_type == 'electrum'"/>
                                         <field name="use_ssl"/>
                                     </group>
                                 </group>
