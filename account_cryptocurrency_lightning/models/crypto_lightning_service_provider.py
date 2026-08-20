@@ -26,7 +26,7 @@ class CryptoLightningServiceProvider(models.Model):
     tor_url = fields.Char(string='TOR URL')
     active = fields.Boolean(string='Active', default=True)
     notes = fields.Text(string='Notes')
-    mail_channel_id = fields.Many2one('mail.channel', string='Notification Channel',
+    mail_channel_id = fields.Many2one('discuss.channel', string='Notification Channel',
                                      help='Mail channel for payment notifications')
     token_uuid = fields.Char(string='Token UUID', required=True, default=lambda self: str(uuid.uuid4()),
                             copy=False, index=True)
