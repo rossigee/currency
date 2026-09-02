@@ -3,7 +3,7 @@
 
 {
     "name": "Account Management Tools for Lightning",
-    "version": "17.0.2.0.1",
+    "version": "17.0.2.0.2",
     "category": "Account",
     "author": "Ross Golder, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/currency",
