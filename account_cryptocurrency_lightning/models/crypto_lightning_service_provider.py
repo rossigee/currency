@@ -131,11 +131,11 @@ class CryptoLightningServiceProvider(models.Model):
             }
 
     @api.model
-    def create(self, vals):
+    def create(self, vals_list):
         """Enhanced create method with vault storage"""
-        record = super(CryptoLightningServiceProvider, self).create(vals)
-        record._inverse_vault_values()
-        return record
+        records = super(CryptoLightningServiceProvider, self).create(vals_list)
+        records._inverse_vault_values()
+        return records
 
     def _validate_macaroon(self, macaroon_str):
         """Validate macaroon format and structure"""
