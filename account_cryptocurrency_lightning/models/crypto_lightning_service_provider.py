@@ -130,7 +130,7 @@ class CryptoLightningServiceProvider(models.Model):
                 'status': status
             }
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
         """Enhanced create method with vault storage"""
         records = super(CryptoLightningServiceProvider, self).create(vals_list)
