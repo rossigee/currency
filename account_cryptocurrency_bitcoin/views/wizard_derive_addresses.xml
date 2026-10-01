@@ -6,6 +6,7 @@
             <field name="model">wizard.derive.addresses</field>
             <field name="arch" type="xml">
                 <form string="Derive Addresses from XPUB">
+                    <field name="derived_addresses_display" invisible="1"/>
                     <group invisible="derived_addresses_display">
                         <group string="Derivation Parameters">
                             <field name="public_key_id" readonly="context.get('default_public_key_id', False)"/>
