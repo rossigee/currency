@@ -71,7 +71,7 @@
                     </div>
                     
                     <!-- Results Phase -->
-                    <div invisible="created_private_key_id == false">
+                    <div invisible="not created_private_key_id">
                         <div class="row">
                             <div class="col-md-12">
                                 <field name="success_message" widget="text" readonly="1" nolabel="1"/>
@@ -79,7 +79,7 @@
                         </div>
                         
                         <!-- Show generated mnemonic -->
-                        <div invisible="generated_mnemonic == false" class="mt16">
+                        <div invisible="not generated_mnemonic" class="mt16">
                             <div class="row">
                                 <div class="col-md-12">
                                     <h3>🔒 Your Mnemonic Phrase (WRITE THIS DOWN!)</h3>
@@ -108,11 +108,11 @@
                         
                         <!-- Results phase buttons -->
                         <button string="Create Public Key" name="action_create_public_key" type="object" 
-                                class="btn-primary" invisible="created_private_key_id == false"/>
+                                class="btn-primary" invisible="not created_private_key_id"/>
                         <button string="View Private Key" name="action_view_private_key" type="object" 
-                                class="btn-secondary" invisible="created_private_key_id == false"/>
+                                class="btn-secondary" invisible="not created_private_key_id"/>
                         <button string="Done" class="btn-secondary" special="cancel" 
-                                invisible="created_private_key_id == false"/>
+                                invisible="not created_private_key_id"/>
                     </footer>
                 </form>
             </field>

@@ -181,7 +181,7 @@
                                         <field name="acknowledged_by"/>
                                         <button name="action_acknowledge" string="Acknowledge" type="object" 
                                                 class="btn-sm btn-secondary"
-                                                invisible="acknowledged == true"/>
+                                                invisible="acknowledged"/>
                                     </tree>
                                 </field>
                             </page>
@@ -326,7 +326,7 @@
                     <field name="acknowledged_by"/>
                     <button name="action_acknowledge" string="Acknowledge" type="object" 
                             class="btn-sm btn-secondary"
-                            invisible="acknowledged == true"/>
+                            invisible="acknowledged"/>
                 </tree>
             </field>
         </record>

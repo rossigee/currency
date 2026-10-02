@@ -9,10 +9,10 @@
                     <header>
                         <button name="action_create_psbt" string="Create PSBT" 
                                 type="object" class="btn-primary"
-                                invisible="multisig_wallet_id == false"/>
+                                invisible="not multisig_wallet_id"/>
                         <button name="action_fetch_from_blockchain" string="Fetch from Blockchain" 
                                 type="object" class="btn-secondary"
-                                invisible="(tx_hash == False) or (tx_hash == '[Pending]')"/>
+                                invisible="(not tx_hash) or (tx_hash == '[Pending]')"/>
                         <field name="status" widget="statusbar" 
                                statusbar_visible="draft,unsigned_psbt,partial_psbt,signed_psbt,pending,confirmed"/>
                     </header>
@@ -40,13 +40,13 @@
                                 <field name="created_by_id" readonly="1"/>
                                 <field name="mined_block" readonly="1" invisible="mined_block == 0"/>
                                 <field name="confirmations" readonly="1" invisible="mined_block == 0"/>
-                                <field name="rbf_enabled" readonly="1" invisible="rbf_enabled == false"/>
+                                <field name="rbf_enabled" readonly="1" invisible="not rbf_enabled"/>
                                 <field name="lock_time" readonly="1" invisible="lock_time == 0"/>
                             </group>
                         </group>
                         
                         <!-- PSBT-specific fields -->
-                        <group string="PSBT Signing Status" invisible="multisig_wallet_id == false">
+                        <group string="PSBT Signing Status" invisible="not multisig_wallet_id">
                             <group>
                                 <field name="required_signatures" readonly="1"/>
                                 <field name="current_signatures" readonly="1"/>
@@ -55,18 +55,18 @@
                         </group>
                         
                         <notebook>
-                            <page string="PSBT" invisible="psbt_base64 == false">
+                            <page string="PSBT" invisible="not psbt_base64">
                                 <div class="oe_button_box" style="margin-bottom: 15px;">
                                     <button name="action_export_psbt" string="Download PSBT" 
                                             type="object" class="btn-primary"
-                                            invisible="psbt_base64 == false"/>
+                                            invisible="not psbt_base64"/>
                                 </div>
                                 
                                 <field name="psbt_summary" widget="text" readonly="1"
                                        style="white-space: pre-wrap; font-family: monospace; background: #f8f9fa; padding: 15px; border-radius: 5px;"/>
                             </page>
                             
-                            <page string="Raw Transaction" invisible="raw_transaction == false">
+                            <page string="Raw Transaction" invisible="not raw_transaction">
                                 <div class="alert alert-success" role="alert">
                                     <strong>✅ Signed Transaction:</strong><br/>
                                     This transaction has been fully signed and is ready to broadcast.
@@ -110,7 +110,7 @@
                                 </div>
                             </page>
                             
-                            <page string="Notes" invisible="notes == false">
+                            <page string="Notes" invisible="not notes">
                                 <field name="notes" nolabel="1" readonly="1" widget="text"/>
                             </page>
                         </notebook>
@@ -130,8 +130,8 @@
                     <field name="fee"/>
                     <field name="mined_block" optional="hide"/>
                     <field name="confirmations" optional="show"/>
-                    <field name="current_signatures" invisible="multisig_wallet_id == false"/>
-                    <field name="required_signatures" invisible="multisig_wallet_id == false"/>
+                    <field name="current_signatures" invisible="not multisig_wallet_id"/>
+                    <field name="required_signatures" invisible="not multisig_wallet_id"/>
                     <field name="status" widget="badge" 
                            decoration-info="status in ('draft', 'unsigned_psbt')" 
                            decoration-warning="status in ('partial_psbt')"

@@ -49,12 +49,12 @@
                     </group>
                     
                     <!-- Validation Results -->
-                    <group string="Validation Results" invisible="xpub == false">
+                    <group string="Validation Results" invisible="not xpub">
                         <field name="fingerprint_match" widget="boolean_button" readonly="1" string="Master Fingerprint Match"/>
                     </group>
                     
                     <!-- XPUB Validation -->
-                    <group string="XPUB Validation" invisible="xpub == false">
+                    <group string="XPUB Validation" invisible="not xpub">
                         <div class="row">
                             <div class="col-2">
                                 <field name="xpub_valid" widget="boolean_button" readonly="1"/>
