@@ -76,7 +76,7 @@
                             </group>
                         </group>
                         
-                        <group string="Node Information" invisible="connection_status != \"connected\"">
+                        <group string="Node Information" invisible="connection_status != &quot;connected&quot;">
                             <group>
                                 <field name="node_version" readonly="1"/>
                                 <field name="current_block_height" readonly="1"/>
@@ -172,7 +172,7 @@
                             </group>
                         </group>
                         
-                        <group string="Server Information" invisible="connection_status != \"connected\"">
+                        <group string="Server Information" invisible="connection_status != &quot;connected&quot;">
                             <group>
                                 <field name="server_version" readonly="1"/>
                                 <field name="protocol_version" readonly="1"/>
