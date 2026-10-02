@@ -12,10 +12,10 @@
                     <header>
                         <button name="action_derive_addresses_wizard" string="Derive Addresses" 
                                 type="object" class="btn-primary" 
-                                invisible="xpub == false"/>
+                                invisible="not xpub"/>
                         <button name="action_refresh_vault_status" string="Refresh Vault Status" 
                                 type="object" class="btn-secondary" 
-                                invisible="id == false"/>
+                                invisible="not id"/>
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
@@ -32,21 +32,21 @@
                                 <field name="name" required="1"/>
                                 <field name="owner_id"/>
                                 <field name="key_type" readonly="id"/>
-                                <field name="derivation_path" readonly="1" invisible="derivation_path == false"/>
+                                <field name="derivation_path" readonly="1" invisible="not derivation_path"/>
                                 <field name="account_index" readonly="1" invisible="key_type != \"account\""/>
                             </group>
                             <group>
                                 <field name="partner_id" invisible="key_type != \"account\""/>
-                                <field name="fingerprint" readonly="1" invisible="fingerprint == false"/>
-                                <field name="token_uuid" readonly="1" invisible="id == false"/>
-                                <field name="vault_status" readonly="1" invisible="id == false"/>
+                                <field name="fingerprint" readonly="1" invisible="not fingerprint"/>
+                                <field name="token_uuid" readonly="1" invisible="not id"/>
+                                <field name="vault_status" readonly="1" invisible="not id"/>
                             </group>
                         </group>
                         <notebook>
                             <page string="XPUB">
                                 <group string="Extended Public Key">
                                     <field name="xpub" widget="CopyClipboardChar" 
-                                           invisible="xpub == false"/>
+                                           invisible="not xpub"/>
                                 </group>
                                 
                                 <div class="alert alert-info" role="alert" invisible="id">
@@ -60,7 +60,7 @@
                                     The XPUB cannot be retrieved from Vault. Check vault status and try refreshing.
                                 </div>
 
-                                <group string="Key Fingerprints" invisible="xpub == false">
+                                <group string="Key Fingerprints" invisible="not xpub">
                                     <group>
                                         <field name="master_fingerprint" string="Master Key Fingerprint"/>
                                         <field name="fingerprint" string="This Key Fingerprint"/>
@@ -70,7 +70,7 @@
                                     </group>
                                 </group>
 
-                                <group string="XPUB Technical Details" invisible="xpub == false">
+                                <group string="XPUB Technical Details" invisible="not xpub">
                                     <group>
                                         <field name="xpub_version"/>
                                         <field name="xpub_depth"/>
@@ -110,7 +110,7 @@
                                 <field name="notes" widget="text"/>
                             </page>
                             
-                            <page string="Derived Addresses" invisible="xpub == false">
+                            <page string="Derived Addresses" invisible="not xpub">
                             <group>
                                 <group string="Derivation Settings">
                                     <field name="max_derivation_count"/>
@@ -118,11 +118,11 @@
                             </group>
                             <separator string="Receive Addresses (m/0/x)"/>
                             <field name="derived_receive_addresses" widget="text" readonly="1" 
-                                   invisible="derived_receive_addresses == false"
+                                   invisible="not derived_receive_addresses"
                                    options="{'resizable': true}"/>
                             <separator string="Change Addresses (m/1/x)"/>
                             <field name="derived_change_addresses" widget="text" readonly="1"
-                                   invisible="derived_change_addresses == false"
+                                   invisible="not derived_change_addresses"
                                    options="{'resizable': true}"/>
                         </page>
                     </notebook>
