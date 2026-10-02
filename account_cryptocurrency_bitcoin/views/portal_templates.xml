@@ -14,7 +14,7 @@
                                 <div class="card-body">
                                     <t t-if="error">
                                         <div class="alert alert-danger" role="alert">
-                                            <t t-out="error"/>
+                                            <t t-esc="error"/>
                                         </div>
                                     </t>
                                     
@@ -29,23 +29,23 @@
                                         <table class="table table-sm">
                                             <tr>
                                                 <td><strong>Wallet Name:</strong></td>
-                                                <td><t t-out="workflow.wallet_name"/></td>
+                                                <td><t t-esc="workflow.wallet_name"/></td>
                                             </tr>
                                             <tr>
                                                 <td><strong>Configuration:</strong></td>
-                                                <td><t t-out="workflow.m_threshold"/>-of-<t t-out="workflow.n_total"/> multisig</td>
+                                                <td><t t-esc="workflow.m_threshold"/>-of-<t t-esc="workflow.n_total"/> multisig</td>
                                             </tr>
                                             <tr>
                                                 <td><strong>Script Type:</strong></td>
-                                                <td><t t-out="workflow.script_type"/></td>
+                                                <td><t t-esc="workflow.script_type"/></td>
                                             </tr>
                                             <tr>
                                                 <td><strong>Derivation Path:</strong></td>
-                                                <td><code><t t-out="workflow.derivation_path"/></code></td>
+                                                <td><code><t t-esc="workflow.derivation_path"/></code></td>
                                             </tr>
                                             <tr>
                                                 <td><strong>Your Role:</strong></td>
-                                                <td>Cosigner #<t t-out="signature.cosigner_index"/> - <t t-out="signature.name"/></td>
+                                                <td>Cosigner #<t t-esc="signature.cosigner_index"/> - <t t-esc="signature.name"/></td>
                                             </tr>
                                         </table>
                                     </div>
@@ -61,7 +61,7 @@
                                                 <textarea name="xpub" id="xpub" class="form-control" rows="3" required="required" 
                                                           placeholder="xpub..." style="font-family: monospace; font-size: 12px;"></textarea>
                                                 <small class="form-text text-muted">
-                                                    Your hardware wallet's extended public key for path <code><t t-out="workflow.derivation_path"/></code>
+                                                    Your hardware wallet's extended public key for path <code><t t-esc="workflow.derivation_path"/></code>
                                                 </small>
                                             </div>
                                             
@@ -139,9 +139,9 @@
                                     <hr/>
                                     
                                     <div class="text-muted small">
-                                        <p><strong>Form Data Hash:</strong> <code><t t-out="workflow.form_data_hash"/></code></p>
-                                        <p>Workflow ID: <t t-out="workflow.name"/></p>
-                                        <p>Expires: <t t-out="workflow.expiry_date" t-options='{"widget": "datetime"}'/></p>
+                                        <p><strong>Form Data Hash:</strong> <code><t t-esc="workflow.form_data_hash"/></code></p>
+                                        <p>Workflow ID: <t t-esc="workflow.name"/></p>
+                                        <p>Expires: <t t-esc="workflow.expiry_date" t-options='{"widget": "datetime"}'/></p>
                                     </div>
                                 </div>
                             </div>
@@ -163,7 +163,7 @@
                                         <i class="fa fa-check-circle text-success" style="font-size: 60px;"/>
                                         <h3 class="mt-3">Signature Already Submitted</h3>
                                         <p>Your signature for this multisig wallet setup was already submitted on:</p>
-                                        <p><strong><t t-out="signature.signed_date" t-options='{"widget": "datetime"}'/></strong></p>
+                                        <p><strong><t t-esc="signature.signed_date" t-options='{"widget": "datetime"}'/></strong></p>
                                     </t>
                                     <t t-elif="signature.state == 'rejected'">
                                         <i class="fa fa-times-circle text-danger" style="font-size: 60px;"/>
@@ -178,8 +178,8 @@
                                     
                                     <hr/>
                                     <p class="text-muted">
-                                        Wallet: <strong><t t-out="signature.workflow_id.wallet_name"/></strong><br/>
-                                        Cosigner #<t t-out="signature.cosigner_index"/>
+                                        Wallet: <strong><t t-esc="signature.workflow_id.wallet_name"/></strong><br/>
+                                        Cosigner #<t t-esc="signature.cosigner_index"/>
                                     </p>
                                 </div>
                             </div>
