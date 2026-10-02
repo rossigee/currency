@@ -62,7 +62,7 @@
                         <div>
                             <strong>Completed:</strong> <field name="date_done" readonly="1" nolabel="1"/>
                         </div>
-                        <div invisible="result == false">
+                        <div invisible="not result">
                             <strong>Result:</strong> <field name="result" readonly="1" nolabel="1"/>
                         </div>
                         <div invisible="result">
@@ -77,7 +77,7 @@
                         <div>
                             <strong>Failed:</strong> <field name="date_done" readonly="1" nolabel="1"/>
                         </div>
-                        <div invisible="result == false">
+                        <div invisible="not result">
                             <strong>Error:</strong> <field name="result" readonly="1" nolabel="1"/>
                         </div>
                     </div>
@@ -86,10 +86,10 @@
                     <div class="alert alert-info" role="alert" 
                          invisible="state not in ['pending', 'enqueued', 'started']">
                         <strong>🔄 Job Status:</strong> <field name="state" readonly="1" nolabel="1" widget="badge"/>
-                        <div invisible="date_enqueued == false">
+                        <div invisible="not date_enqueued">
                             <strong>Enqueued:</strong> <field name="date_enqueued" readonly="1" nolabel="1"/>
                         </div>
-                        <div invisible="date_started == false">
+                        <div invisible="not date_started">
                             <strong>Started:</strong> <field name="date_started" readonly="1" nolabel="1"/>
                         </div>
                     </div>
