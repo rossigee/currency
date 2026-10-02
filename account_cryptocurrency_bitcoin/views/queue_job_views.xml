@@ -57,7 +57,7 @@
                 <xpath expr="//sheet" position="before">
                     <!-- Success status -->
                     <div class="alert alert-success" role="alert" 
-                         invisible="state != \"done\"">
+                         invisible="state != &quot;done&quot;">
                         <strong>✅ Job Completed Successfully</strong>
                         <div>
                             <strong>Completed:</strong> <field name="date_done" readonly="1" nolabel="1"/>
@@ -72,7 +72,7 @@
                     
                     <!-- Failed status -->
                     <div class="alert alert-danger" role="alert" 
-                         invisible="state != \"failed\"">
+                         invisible="state != &quot;failed&quot;">
                         <strong>❌ Job Failed</strong>
                         <div>
                             <strong>Failed:</strong> <field name="date_done" readonly="1" nolabel="1"/>

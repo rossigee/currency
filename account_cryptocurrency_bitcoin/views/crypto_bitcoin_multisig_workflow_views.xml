@@ -30,10 +30,10 @@
                     <header>
                         <button name="action_start_collection" string="Start Signature Collection" 
                                 type="object" class="btn-primary" 
-                                invisible="state != \"draft\""/>
+                                invisible="state != &quot;draft&quot;"/>
                         <button name="action_create_wallet" string="Create Wallet" 
                                 type="object" class="btn-primary" 
-                                invisible="state != \"signatures_complete\""/>
+                                invisible="state != &quot;signatures_complete&quot;"/>
                         <button name="action_cancel" string="Cancel" 
                                 type="object" class="btn-secondary" 
                                 invisible="state in ['wallet_created', 'cancelled']"/>
@@ -69,8 +69,8 @@
                                 <field name="wallet_name"/>
                                 <field name="use_case"/>
                                 <field name="wallet_type" readonly="state != 'draft'"/>
-                                <field name="m_threshold" invisible="wallet_type != "custom""/>
-                                <field name="n_total" invisible="wallet_type != "custom""/>
+                                <field name="m_threshold" invisible="wallet_type != &quot;custom&quot;"/>
+                                <field name="n_total" invisible="wallet_type != &quot;custom&quot;"/>
                                 <field name="script_type" readonly="state != 'draft'"/>
                                 <field name="derivation_path" readonly="state != 'draft'"/>
                             </group>
@@ -106,13 +106,13 @@
                                         <field name="verification_method"/>
                                         <button name="action_sign" string="Sign" type="object" 
                                                 class="btn-sm btn-primary"
-                                                invisible="state != \"pending\""/>
+                                                invisible="state != &quot;pending&quot;"/>
                                         <button name="action_reject" string="Reject" type="object" 
                                                 class="btn-sm btn-danger"
-                                                invisible="state != \"pending\""/>
+                                                invisible="state != &quot;pending&quot;"/>
                                         <button name="get_portal_url" string="Copy Portal Link" type="object" 
                                                 class="btn-sm btn-secondary"
-                                                invisible="state != \"pending\""/>
+                                                invisible="state != &quot;pending&quot;"/>
                                     </tree>
                                     <form>
                                         <header>

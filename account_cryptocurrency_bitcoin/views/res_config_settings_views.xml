@@ -76,7 +76,7 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                                             <label for="bitcoin_external_api_provider" class="col-3 o_light_label"/>
                                             <field name="bitcoin_external_api_provider" class="col-9"/>
                                         </div>
-                                        <div class="row" invisible="bitcoin_external_api_provider != \"custom\"">
+                                        <div class="row" invisible="bitcoin_external_api_provider != &quot;custom&quot;">
                                             <label for="bitcoin_custom_api_base_url" class="col-3 o_light_label"/>
                                             <field name="bitcoin_custom_api_base_url" class="col-9" 
                                                    required="bitcoin_external_api_provider == 'custom'"/>

@@ -33,10 +33,10 @@
                                 <field name="owner_id"/>
                                 <field name="key_type" readonly="id"/>
                                 <field name="derivation_path" readonly="1" invisible="not derivation_path"/>
-                                <field name="account_index" readonly="1" invisible="key_type != \"account\""/>
+                                <field name="account_index" readonly="1" invisible="key_type != &quot;account&quot;"/>
                             </group>
                             <group>
-                                <field name="partner_id" invisible="key_type != \"account\""/>
+                                <field name="partner_id" invisible="key_type != &quot;account&quot;"/>
                                 <field name="fingerprint" readonly="1" invisible="not fingerprint"/>
                                 <field name="token_uuid" readonly="1" invisible="not id"/>
                                 <field name="vault_status" readonly="1" invisible="not id"/>
@@ -83,7 +83,7 @@
                                 </group>
                             </page>
                             
-                            <page string="Multisig Setup Guide" invisible="key_type != \"multisig\"">
+                            <page string="Multisig Setup Guide" invisible="key_type != &quot;multisig&quot;">
                                 <div class="alert alert-info" role="alert">
                                     <h4>🔑 Cosigner Key Created</h4>
                                     <p>This is <strong>your contribution</strong> to a multisig wallet. To create actual multisig addresses, you need XPUBs from all other cosigners.</p>

@@ -32,10 +32,10 @@
                         <notebook>
                             <page string="Connection Settings">
                                 <group>
-                                    <group string="API Settings" invisible="service_type == \"electrum\"">
+                                    <group string="API Settings" invisible="service_type == &quot;electrum&quot;">
                                         <field name="base_url" required="service_type != 'electrum'"/>
                                     </group>
-                                    <group string="Electrum Settings" invisible="service_type != \"electrum\"">
+                                    <group string="Electrum Settings" invisible="service_type != &quot;electrum&quot;">
                                         <field name="electrum_host" required="service_type == 'electrum'"/>
                                         <field name="electrum_port" required="service_type == 'electrum'"/>
                                         <field name="use_ssl"/>
