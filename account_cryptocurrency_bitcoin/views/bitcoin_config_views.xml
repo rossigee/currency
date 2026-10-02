@@ -72,7 +72,7 @@
                             </group>
                             <group string="Environment Variables">
                                 <field name="use_env_variables"/>
-                                <field name="env_prefix" invisible="use_env_variables == false"/>
+                                <field name="env_prefix" invisible="not use_env_variables"/>
                             </group>
                         </group>
                         
@@ -89,7 +89,7 @@
                             </group>
                         </group>
                         
-                        <group string="Status" invisible="status_message == false">
+                        <group string="Status" invisible="not status_message">
                             <field name="status_message" widget="text" readonly="1" nolabel="1"/>
                         </group>
                     </sheet>
@@ -168,7 +168,7 @@
                             </group>
                             <group string="Environment Variables">
                                 <field name="use_env_variables"/>
-                                <field name="env_prefix" invisible="use_env_variables == false"/>
+                                <field name="env_prefix" invisible="not use_env_variables"/>
                             </group>
                         </group>
                         
@@ -183,7 +183,7 @@
                             </group>
                         </group>
                         
-                        <group string="Status" invisible="status_message == false">
+                        <group string="Status" invisible="not status_message">
                             <field name="status_message" widget="text" readonly="1" nolabel="1"/>
                         </group>
                     </sheet>
