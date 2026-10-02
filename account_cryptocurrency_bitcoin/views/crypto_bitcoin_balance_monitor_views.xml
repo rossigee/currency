@@ -74,7 +74,7 @@
                         </group>
 
                         <notebook>
-                            <page string="Threshold Settings" invisible="monitor_type != \"threshold\"">
+                            <page string="Threshold Settings" invisible="monitor_type != &quot;threshold&quot;">
                                 <group>
                                     <group string="Balance Thresholds (BTC)">
                                         <field name="critical_threshold"/>
@@ -106,7 +106,7 @@
                                 </group>
                             </page>
 
-                            <page string="Change Settings" invisible="monitor_type != \"change\"">
+                            <page string="Change Settings" invisible="monitor_type != &quot;change&quot;">
                                 <group>
                                     <group string="Change Thresholds">
                                         <field name="change_threshold_percent" suffix="%"/>
@@ -126,7 +126,7 @@
                                 </group>
                             </page>
 
-                            <page string="Velocity Settings" invisible="monitor_type != \"velocity\"">
+                            <page string="Velocity Settings" invisible="monitor_type != &quot;velocity&quot;">
                                 <group>
                                     <group string="Spending Velocity Limits">
                                         <field name="velocity_period_hours" suffix="hours"/>
