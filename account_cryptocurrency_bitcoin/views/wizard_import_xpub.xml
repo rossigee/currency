@@ -26,7 +26,7 @@
                         </group>
                         <group>
                             <field name="owner_id"/>
-                            <field name="partner_id" invisible="key_type != \"account\""/>
+                            <field name="partner_id" invisible="key_type != &quot;account&quot;"/>
                         </group>
                     </group>
                     
@@ -40,11 +40,11 @@
                     <group string="Key Settings" invisible="key_type not in ['account', 'multisig']">
                         <group>
                             <field name="account_index" invisible="key_type not in ['account', 'multisig']"/>
-                            <field name="script_type" invisible="key_type != \"multisig\""/>
+                            <field name="script_type" invisible="key_type != &quot;multisig&quot;"/>
                         </group>
                         <group>
-                            <field name="cosigner_index" invisible="key_type != \"multisig\""/>
-                            <field name="multisig_wallet_id" invisible="key_type != \"multisig\""/>
+                            <field name="cosigner_index" invisible="key_type != &quot;multisig&quot;"/>
+                            <field name="multisig_wallet_id" invisible="key_type != &quot;multisig&quot;"/>
                         </group>
                     </group>
                     
