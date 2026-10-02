@@ -17,7 +17,7 @@
                         </group>
                     </group>
 
-                    <group invisible="derived_addresses_display == false">
+                    <group invisible="not derived_addresses_display">
                         <separator string="Derived Addresses"/>
                     </group>
                     
@@ -25,7 +25,7 @@
                         <button string="Derive Addresses" name="action_derive_addresses" type="object" 
                                 class="btn-primary" invisible="derived_addresses_display"/>
                         <button string="Export JSON" name="action_export_addresses" type="object" 
-                                class="btn-secondary" invisible="derived_addresses_display == false"/>
+                                class="btn-secondary" invisible="not derived_addresses_display"/>
                         <button string="Close" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>
