@@ -30,18 +30,18 @@
                     <header>
                         <button name="%(action_create_multisig_workflow)d" string="Create Setup Workflow" 
                                 type="action" class="btn-primary" 
-                                invisible="is_complete == true"
+                                invisible="is_complete"
                                 context="{'default_name': name, 'default_m_of_n_threshold': m_of_n_threshold, 'default_total_cosigners': total_cosigners, 'default_script_type': script_type}"/>
                         <button name="action_add_cosigner" string="Add Cosigner" 
                                 type="object" class="btn-primary" 
-                                invisible="is_complete == true"/>
+                                invisible="is_complete"/>
                         <button name="%(action_wizard_create_transaction)d" string="Create Transaction" 
                                 type="action" class="btn-primary" 
-                                invisible="is_complete == false"
+                                invisible="not is_complete"
                                 context="{'default_multisig_wallet_id': active_id}"/>
                         <button name="action_import_transactions" string="Import Transactions" 
                                 type="object" class="btn-secondary" 
-                                invisible="is_complete == false"/>
+                                invisible="not is_complete"/>
                         <field name="is_complete" widget="statusbar" statusbar_visible="false,true"/>
                     </header>
                     <sheet>
@@ -79,7 +79,7 @@
                         
                         <!-- Vault Status Alert -->
                         <div class="alert alert-warning" role="alert" 
-                             invisible="has_vault_issues == false">
+                             invisible="not has_vault_issues">
                             <strong>⚠️ Vault Connectivity Issues:</strong><br/>
                             <field name="vault_status_summary" nolabel="1" readonly="1" widget="text" 
                                    style="font-family: monospace; font-size: 12px; white-space: pre-line;"/>
@@ -105,15 +105,15 @@
                                 </field>
                             </page>
                             
-                            <page string="BSMS File" invisible="is_complete == false">
+                            <page string="BSMS File" invisible="not is_complete">
                                 <div class="alert alert-success" role="alert" 
-                                     invisible="has_vault_issues == true">
+                                     invisible="has_vault_issues">
                                     <strong>✅ Multisig Configuration Complete!</strong><br/>
                                     You can now download the BSMS file to import this multisig wallet into other Bitcoin software.
                                 </div>
                                 
                                 <div class="alert alert-warning" role="alert" 
-                                     invisible="has_vault_issues == false">
+                                     invisible="not has_vault_issues">
                                     <strong>⚠️ Vault Issues Detected!</strong><br/>
                                     BSMS file generation requires all cosigner XPUBs to be accessible. Please resolve vault connectivity issues first.
                                 </div>
@@ -131,9 +131,9 @@
                                 </group>
                             </page>
                             
-                            <page string="Derived Addresses" invisible="is_complete == false">
+                            <page string="Derived Addresses" invisible="not is_complete">
                                 <div class="alert alert-warning" role="alert" 
-                                     invisible="has_vault_issues == false">
+                                     invisible="not has_vault_issues">
                                     <strong>⚠️ Cannot Generate Addresses</strong><br/>
                                     Address generation requires all cosigner XPUBs to be accessible from vault. Please resolve connectivity issues first.
                                 </div>
@@ -145,12 +145,12 @@
                                 
                                 <separator string="Receive Addresses (m/0/x)"/>
                                 <field name="derived_receive_addresses" widget="text" readonly="1" 
-                                       invisible="derived_receive_addresses == false"
+                                       invisible="not derived_receive_addresses"
                                        options="{'resizable': true}" style="font-family: monospace; font-size: 12px;"/>
                                        
                                 <separator string="Change Addresses (m/1/x)"/>
                                 <field name="derived_change_addresses" widget="text" readonly="1"
-                                       invisible="derived_change_addresses == false"
+                                       invisible="not derived_change_addresses"
                                        options="{'resizable': true}" style="font-family: monospace; font-size: 12px;"/>
                             </page>
                             
@@ -174,7 +174,7 @@
                                 </field>
                             </page>
                             
-                            <page string="Balance Monitoring" invisible="is_complete == false">
+                            <page string="Balance Monitoring" invisible="not is_complete">
                                 <div class="alert alert-info" role="alert">
                                     <strong>📊 Balance Monitoring:</strong><br/>
                                     Set up automated monitoring for this wallet's balance with customizable alerts.

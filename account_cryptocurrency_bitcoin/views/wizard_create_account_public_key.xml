@@ -7,7 +7,7 @@
             <field name="model">wizard.create.account.public.key</field>
             <field name="arch" type="xml">
                 <form string="Create Account Public Key">
-                    <header invisible="created_public_key_id == false">
+                    <header invisible="not created_public_key_id">
                         <button name="action_view_public_key" 
                                 string="View Public Key" 
                                 class="btn-primary" 
@@ -24,7 +24,7 @@
                                 <span invisible="created_public_key_id">
                                     Create Account Public Key
                                 </span>
-                                <span invisible="created_public_key_id == false">
+                                <span invisible="not created_public_key_id">
                                     Public Key Created Successfully
                                 </span>
                             </h1>
@@ -40,7 +40,7 @@
                                 <field name="account_index"/>
                                 <field name="suggest_next_account"/>
                                 <field name="next_available_account" readonly="1" 
-                                       invisible="suggest_next_account == false"/>
+                                       invisible="not suggest_next_account"/>
                             </group>
                         </group>
 
@@ -62,13 +62,13 @@
                                     <field name="notes"/>
                                     <field name="create_sample_addresses"/>
                                     <field name="sample_address_count" 
-                                           invisible="create_sample_addresses == false"/>
+                                           invisible="not create_sample_addresses"/>
                                 </group>
                             </page>
                         </notebook>
 
                         <!-- Results Display (shown after creation) -->
-                        <div invisible="created_public_key_id == false">
+                        <div invisible="not created_public_key_id">
                             <group>
                                 <field name="success_message" readonly="1" nolabel="1" 
                                        widget="html" class="oe_read_only"/>
@@ -83,7 +83,7 @@
                                 </page>
                                 
                                 <page string="Sample Addresses" 
-                                      invisible="sample_addresses == false">
+                                      invisible="not sample_addresses">
                                     <field name="sample_addresses" readonly="1" nolabel="1" 
                                            widget="text" class="font-monospace small"/>
                                 </page>

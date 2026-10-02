@@ -24,7 +24,7 @@
                                         Connect to your local Bitcoin Core node for real-time data and better privacy
                                     </div>
                                     
-                                    <div class="content-group mt16" invisible="bitcoin_use_local_node == false">
+                                    <div class="content-group mt16" invisible="not bitcoin_use_local_node">
                                         <div class="row">
                                             <label for="bitcoin_node_rpc_host" class="col-3 o_light_label"/>
                                             <field name="bitcoin_node_rpc_host" class="col-9"/>
@@ -71,7 +71,7 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                                     </div>
                                     
                                     <!-- External API Settings -->
-                                    <div class="content-group mt16" invisible="bitcoin_use_local_node == true">
+                                    <div class="content-group mt16" invisible="bitcoin_use_local_node">
                                         <div class="row">
                                             <label for="bitcoin_external_api_provider" class="col-3 o_light_label"/>
                                             <field name="bitcoin_external_api_provider" class="col-9"/>

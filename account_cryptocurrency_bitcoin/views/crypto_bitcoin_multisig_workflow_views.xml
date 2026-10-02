@@ -44,7 +44,7 @@
                             <button name="%(crypto_bitcoin_multisig_wallet_action)d" 
                                     type="action" class="oe_stat_button" 
                                     icon="fa-shield"
-                                    invisible="multisig_wallet_id == false"
+                                    invisible="not multisig_wallet_id"
                                     context="{'form_view_ref': 'account_cryptocurrency_bitcoin.crypto_bitcoin_multisig_wallet_form_view'}">
                                 <field name="multisig_wallet_id" invisible="1"/>
                                 <div class="o_stat_info">
@@ -53,7 +53,7 @@
                             </button>
                             <button name="action_download_pdf" type="object" class="oe_stat_button" 
                                     icon="fa-file-pdf-o"
-                                    invisible="setup_form_pdf == false">
+                                    invisible="not setup_form_pdf">
                                 <div class="o_stat_info">
                                     <span class="o_stat_text">Download PDF</span>
                                 </div>
@@ -78,7 +78,7 @@
                                 <field name="initiated_by"/>
                                 <field name="initiated_date"/>
                                 <field name="expiry_date"/>
-                                <field name="completed_date" invisible="completed_date == false"/>
+                                <field name="completed_date" invisible="not completed_date"/>
                                 <field name="require_all_signatures"/>
                                 <field name="signature_deadline_days" readonly="state != 'draft'"/>
                             </group>

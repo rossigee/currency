@@ -30,20 +30,20 @@
                         </group>
                         
                         <!-- Validation results -->
-                        <group string="Validation Results" invisible="validation_message == false">
+                        <group string="Validation Results" invisible="not validation_message">
                             <!-- Success message -->
                             <div class="alert alert-success" role="alert" 
-                                 invisible="psbt_valid == false">
+                                 invisible="not psbt_valid">
                                 <field name="validation_message" nolabel="1" readonly="1"/>
                             </div>
                             
                             <!-- Error message -->
                             <div class="alert alert-danger" role="alert" 
-                                 invisible="psbt_valid == true">
+                                 invisible="psbt_valid">
                                 <field name="validation_message" nolabel="1" readonly="1"/>
                             </div>
                             
-                            <group invisible="psbt_valid == false">
+                            <group invisible="not psbt_valid">
                                 <field name="signature_count" readonly="1"/>
                                 <field name="is_complete" readonly="1" widget="boolean"/>
                             </group>
@@ -54,7 +54,7 @@
                     </sheet>
                     <footer>
                         <button name="action_import_psbt" string="Save" type="object" 
-                                class="btn-primary" invisible="psbt_valid == false"/>
+                                class="btn-primary" invisible="not psbt_valid"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>

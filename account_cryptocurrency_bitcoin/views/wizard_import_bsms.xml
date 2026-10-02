@@ -26,22 +26,22 @@
                         </group>
                         
                         <!-- Validation results -->
-                        <group string="Validation Results" invisible="validation_message == false">
+                        <group string="Validation Results" invisible="not validation_message">
                             <!-- Success message -->
                             <div class="alert alert-success" role="alert" 
-                                 invisible="bsms_valid == false">
+                                 invisible="not bsms_valid">
                                 <field name="validation_message" nolabel="1" readonly="1"/>
                             </div>
                             
                             <!-- Error message -->
                             <div class="alert alert-danger" role="alert" 
-                                 invisible="bsms_valid == true">
+                                 invisible="bsms_valid">
                                 <field name="validation_message" nolabel="1" readonly="1"/>
                             </div>
                         </group>
                         
                         <!-- Parsed BSMS Details -->
-                        <group string="BSMS Details" invisible="bsms_valid == false" col="4">
+                        <group string="BSMS Details" invisible="not bsms_valid" col="4">
                             <field name="wallet_name" readonly="1"/>
                             <field name="script_type" readonly="1"/>
                             <field name="m_threshold" readonly="1"/>
@@ -49,7 +49,7 @@
                         </group>
                         
                         <!-- Parsed Data (for debugging) -->
-                        <group string="Parsed Data" invisible="parsed_data == false" col="1">
+                        <group string="Parsed Data" invisible="not parsed_data" col="1">
                             <field name="parsed_data" nolabel="1" readonly="1" widget="text"
                                    style="font-family: monospace; font-size: 11px; max-height: 200px;"/>
                         </group>
@@ -59,7 +59,7 @@
                     </sheet>
                     <footer>
                         <button name="action_import_bsms" string="Save" type="object" 
-                                class="btn-primary" invisible="bsms_valid == false"/>
+                                class="btn-primary" invisible="not bsms_valid"/>
                         <button string="Cancel" class="btn-secondary" special="cancel"/>
                     </footer>
                 </form>
