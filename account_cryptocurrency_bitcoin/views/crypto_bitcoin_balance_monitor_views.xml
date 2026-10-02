@@ -86,19 +86,19 @@
                                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
                                                 <div style="margin-bottom: 10px;">
                                                     <span style="color: #dc3545; font-weight: bold;">🔴 Critical:</span>
-                                                    <span t-out="critical_threshold or 'Not set'" style="font-family: monospace;"/> BTC
+                                                    <field name="critical_threshold" nolabel="1" readonly="1" class="text-monospace"/> BTC
                                                 </div>
                                                 <div style="margin-bottom: 10px;">
                                                     <span style="color: #fd7e14; font-weight: bold;">🟠 Low:</span>
-                                                    <span t-out="low_threshold or 'Not set'" style="font-family: monospace;"/> BTC
+                                                    <field name="low_threshold" nolabel="1" readonly="1" class="text-monospace"/> BTC
                                                 </div>
                                                 <div style="margin-bottom: 10px; border: 2px solid #007bff; padding: 5px; border-radius: 3px;">
                                                     <span style="color: #007bff; font-weight: bold;">📊 Current:</span>
-                                                    <span t-out="current_balance" style="font-family: monospace; font-size: 16px;"/> BTC
+                                                    <field name="current_balance" nolabel="1" readonly="1" class="text-monospace"/> BTC
                                                 </div>
                                                 <div>
                                                     <span style="color: #28a745; font-weight: bold;">🟢 High:</span>
-                                                    <span t-out="high_threshold or 'Not set'" style="font-family: monospace;"/> BTC
+                                                    <field name="high_threshold" nolabel="1" readonly="1" class="text-monospace"/> BTC
                                                 </div>
                                             </div>
                                         </div>
