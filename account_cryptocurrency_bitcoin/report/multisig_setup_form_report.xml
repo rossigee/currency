@@ -80,21 +80,21 @@
                                     <div class="col-6">
                                         <div class="form-field">
                                             <span class="field-label">Form ID:</span>
-                                            <span class="field-value" t-esc="o.name"/>
+                                            <span class="field-value" t-out="o.name"/>
                                         </div>
                                         <div class="form-field">
                                             <span class="field-label">Date:</span>
-                                            <span class="field-value" t-esc="o.initiated_date.strftime('%Y-%m-%d')"/>
+                                            <span class="field-value" t-out="o.initiated_date.strftime('%Y-%m-%d')"/>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="form-field">
                                             <span class="field-label">Time Started:</span>
-                                            <span class="field-value" t-esc="o.initiated_date.strftime('%H:%M')"/>
+                                            <span class="field-value" t-out="o.initiated_date.strftime('%H:%M')"/>
                                         </div>
                                         <div class="form-field">
                                             <span class="field-label">Time Completed:</span>
-                                            <span class="field-value" t-esc="o.completed_date.strftime('%H:%M') if o.completed_date else '___:___'"/>
+                                            <span class="field-value" t-out="o.completed_date.strftime('%H:%M') if o.completed_date else '___:___'"/>
                                         </div>
                                     </div>
                                 </div>
@@ -104,11 +104,11 @@
                             <div class="form-box">
                                 <div class="form-field">
                                     <span class="field-label">Wallet Name:</span>
-                                    <span class="field-value" t-esc="o.wallet_name"/>
+                                    <span class="field-value" t-out="o.wallet_name"/>
                                 </div>
                                 <div class="form-field">
                                     <span class="field-label">Use Case:</span>
-                                    <span class="field-value" t-esc="dict(o._fields['use_case'].selection).get(o.use_case)"/>
+                                    <span class="field-value" t-out="dict(o._fields['use_case'].selection).get(o.use_case)"/>
                                 </div>
                                 <div class="form-field">
                                     <span class="field-label">Wallet Type:</span>
@@ -116,7 +116,7 @@
                                         <span class="checkbox"></span> 2-of-3
                                         <span class="checkbox"></span> 3-of-5
                                         <span class="checkbox"></span> 4-of-7
-                                        <span class="checkbox checked"></span> Other: <span t-esc="o.m_threshold"/>-of-<span t-esc="o.n_total"/>
+                                        <span class="checkbox checked"></span> Other: <span t-out="o.m_threshold"/>-of-<span t-out="o.n_total"/>
                                     </t>
                                     <t t-else="">
                                         <span t-attf-class="checkbox #{o.wallet_type == '2-3' and 'checked' or ''}"></span> 2-of-3
@@ -137,45 +137,45 @@
                                 </div>
                                 <div class="form-field">
                                     <span class="field-label">Derivation Path:</span>
-                                    <span class="field-value" t-esc="o.derivation_path"/>
+                                    <span class="field-value" t-out="o.derivation_path"/>
                                 </div>
                             </div>
 
                             <div class="section-header">SECTION 2: COSIGNER INFORMATION</div>
                             <t t-foreach="o.signature_ids" t-as="sig">
                                 <div class="form-box">
-                                    <h5>Cosigner <t t-esc="sig.cosigner_index"/></h5>
+                                    <h5>Cosigner <t t-out="sig.cosigner_index"/></h5>
                                     <div class="form-field">
                                         <span class="field-label">Name:</span>
-                                        <span class="field-value" t-esc="sig.name"/>
+                                        <span class="field-value" t-out="sig.name"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">Email:</span>
-                                        <span class="field-value" t-esc="sig.signer_email or '_________________________'"/>
+                                        <span class="field-value" t-out="sig.signer_email or '_________________________'"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">Hardware Wallet Model:</span>
-                                        <span class="field-value" t-esc="sig.hardware_wallet_model or '_________________________'"/>
+                                        <span class="field-value" t-out="sig.hardware_wallet_model or '_________________________'"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">Serial Number (last 4):</span>
-                                        <span class="field-value" t-esc="sig.wallet_serial_last4 or '____'"/>
+                                        <span class="field-value" t-out="sig.wallet_serial_last4 or '____'"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">Firmware Version:</span>
-                                        <span class="field-value" t-esc="sig.firmware_version or '_________________________'"/>
+                                        <span class="field-value" t-out="sig.firmware_version or '_________________________'"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">Master Fingerprint:</span>
-                                        <span class="field-value monospace" t-esc="sig.master_fingerprint or '________'"/>
+                                        <span class="field-value monospace" t-out="sig.master_fingerprint or '________'"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">xPub (first 8 chars):</span>
-                                        <span class="field-value monospace" t-esc="sig.xpub[:8] if sig.xpub else '________'"/>
+                                        <span class="field-value monospace" t-out="sig.xpub[:8] if sig.xpub else '________'"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">xPub (last 8 chars):</span>
-                                        <span class="field-value monospace" t-esc="sig.xpub[-8:] if sig.xpub else '________'"/>
+                                        <span class="field-value monospace" t-out="sig.xpub[-8:] if sig.xpub else '________'"/>
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">Verification Method:</span>
@@ -185,7 +185,7 @@
                                     </div>
                                     <div class="form-field">
                                         <span class="field-label">Verified By:</span>
-                                        <span class="field-value" t-esc="sig.verified_by_id.name if sig.verified_by_id else '_________________________'"/>
+                                        <span class="field-value" t-out="sig.verified_by_id.name if sig.verified_by_id else '_________________________'"/>
                                     </div>
                                 </div>
                             </t>
@@ -194,15 +194,15 @@
                             <div class="form-box">
                                 <div class="form-field">
                                     <span class="field-label">Form Data Hash (SHA256):</span><br/>
-                                    <span class="monospace" t-esc="o.form_data_hash"/>
+                                    <span class="monospace" t-out="o.form_data_hash"/>
                                 </div>
                                 <div class="form-field mt-3">
                                     <span class="field-label">Workflow State:</span>
-                                    <span class="field-value" t-esc="dict(o._fields['state'].selection).get(o.state)"/>
+                                    <span class="field-value" t-out="dict(o._fields['state'].selection).get(o.state)"/>
                                 </div>
                                 <div class="form-field">
                                     <span class="field-label">Signatures Collected:</span>
-                                    <span class="field-value"><t t-esc="o.signatures_collected"/> of <t t-esc="o.signatures_required"/> required</span>
+                                    <span class="field-value"><t t-out="o.signatures_collected"/> of <t t-out="o.signatures_required"/> required</span>
                                 </div>
                             </div>
 
@@ -243,12 +243,12 @@
                                 
                                 <t t-foreach="o.signature_ids" t-as="sig">
                                     <div class="mt-4">
-                                        <h5>Cosigner <t t-esc="sig.cosigner_index"/>:</h5>
+                                        <h5>Cosigner <t t-out="sig.cosigner_index"/>:</h5>
                                         <div class="row">
                                             <div class="col-6">
-                                                <div>Name: <span t-esc="sig.name"/></div>
-                                                <div>Date: <span t-esc="sig.signed_date.strftime('%Y-%m-%d') if sig.signed_date else '____-__-__'"/></div>
-                                                <div>Time: <span t-esc="sig.signed_date.strftime('%H:%M') if sig.signed_date else '__:__'"/></div>
+                                                <div>Name: <span t-out="sig.name"/></div>
+                                                <div>Date: <span t-out="sig.signed_date.strftime('%Y-%m-%d') if sig.signed_date else '____-__-__'"/></div>
+                                                <div>Time: <span t-out="sig.signed_date.strftime('%H:%M') if sig.signed_date else '__:__'"/></div>
                                             </div>
                                             <div class="col-6">
                                                 <div>Signature:</div>
@@ -261,7 +261,7 @@
 
                             <div class="text-center mt-5">
                                 <p><strong>END OF FORM - RETAIN FOR AUDIT PURPOSES</strong></p>
-                                <p>Generated from Odoo Workflow: <t t-esc="o.name"/></p>
+                                <p>Generated from Odoo Workflow: <t t-out="o.name"/></p>
                             </div>
                         </div>
                     </t>
