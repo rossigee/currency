@@ -37,23 +37,15 @@ class CryptoLightningAddress(models.Model):
     attachment_count = fields.Integer(string='Attachment Count', compute='_compute_attachment_count')
 
 
+    @api.depends('address', 'owner_id', 'owner_id.name')
     def _compute_display_name(self):
         for address in self:
-            if address.owner_id:
+            if not address.address:
+                address.display_name = 'Unnamed Address'
+            elif address.owner_id:
                 address.display_name = f'{address.address} ({address.owner_id.name})'
             else:
                 address.display_name = address.address
-
-    def name_get(self):
-        """Custom name_get for better display in selection fields"""
-        result = []
-        for record in self:
-            if record.owner_id:
-                name = f'{record.address} ({record.owner_id.name})'
-            else:
-                name = record.address or 'Unnamed Address'
-            result.append((record.id, name))
-        return result
 
     @api.depends('payment_ids')
     def _compute_payment_count(self):
