@@ -34,33 +34,33 @@
                                     <group string="Bitcoin Core Settings">
                                         <field name="use_bitcoin_core"/>
                                         <field name="bitcoin_core_rpc_host" 
-                                               required="use_bitcoin_core == true" invisible="use_bitcoin_core == false"/>
+                                               required="use_bitcoin_core" invisible="not use_bitcoin_core"/>
                                         <field name="bitcoin_core_rpc_port" 
-                                               required="use_bitcoin_core == true" invisible="use_bitcoin_core == false"/>
+                                               required="use_bitcoin_core" invisible="not use_bitcoin_core"/>
                                         <field name="bitcoin_core_use_ssl" 
-                                               invisible="use_bitcoin_core == false"/>
+                                               invisible="not use_bitcoin_core"/>
                                     </group>
                                     <group string="Authentication" 
-                                           invisible="use_bitcoin_core == false">
+                                           invisible="not use_bitcoin_core">
                                         <field name="bitcoin_core_rpc_user" 
-                                               required="use_bitcoin_core == true"/>
+                                               required="use_bitcoin_core"/>
                                         <field name="bitcoin_core_rpc_password" password="True" 
-                                               required="use_bitcoin_core == true"/>
+                                               required="use_bitcoin_core"/>
                                     </group>
                                 </group>
                                 
                                 <group string="Bitcoin Core Status" 
-                                       invisible="use_bitcoin_core == false">
+                                       invisible="not use_bitcoin_core">
                                     <field name="bitcoin_core_status" widget="badge" 
                                            decoration-success="bitcoin_core_status == 'connected'"
                                            decoration-danger="bitcoin_core_status == 'failed'"
                                            decoration-muted="bitcoin_core_status == 'untested'"/>
                                     <field name="bitcoin_core_status_message" widget="text" readonly="1" 
-                                           invisible="bitcoin_core_status_message == false"/>
+                                           invisible="not bitcoin_core_status_message"/>
                                 </group>
                                 
                                 <div class="alert alert-info" role="alert" 
-                                     invisible="use_bitcoin_core == false">
+                                     invisible="not use_bitcoin_core">
                                     <strong>🔧 Bitcoin Core Setup:</strong><br/>
                                     <ul>
                                         <li>Used for transaction broadcasting, fee estimation, and network statistics</li>
@@ -81,25 +81,25 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                                     <group string="Electrum Settings">
                                         <field name="use_electrum"/>
                                         <field name="electrum_host" 
-                                               required="use_electrum == true" invisible="use_electrum == false"/>
+                                               required="use_electrum" invisible="not use_electrum"/>
                                         <field name="electrum_port" 
-                                               required="use_electrum == true" invisible="use_electrum == false"/>
+                                               required="use_electrum" invisible="not use_electrum"/>
                                         <field name="electrum_use_ssl" 
-                                               invisible="use_electrum == false"/>
+                                               invisible="not use_electrum"/>
                                     </group>
                                     <group string="Electrum Status" 
-                                           invisible="use_electrum == false">
+                                           invisible="not use_electrum">
                                         <field name="electrum_status" widget="badge" 
                                                decoration-success="electrum_status == 'connected'"
                                                decoration-danger="electrum_status == 'failed'"
                                                decoration-muted="electrum_status == 'untested'"/>
                                         <field name="electrum_status_message" widget="text" readonly="1" 
-                                               invisible="electrum_status_message == false"/>
+                                               invisible="not electrum_status_message"/>
                                     </group>
                                 </group>
                                 
                                 <div class="alert alert-info" role="alert" 
-                                     invisible="use_electrum == false">
+                                     invisible="not use_electrum">
                                     <strong>⚡ Electrum Server Setup:</strong><br/>
                                     <ul>
                                         <li>Used for transaction history and address monitoring</li>
@@ -222,11 +222,11 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                             </group>
                         </group>
                         
-                        <group string="Status" invisible="status_message == false">
+                        <group string="Status" invisible="not status_message">
                             <field name="status_message" widget="text" readonly="1" nolabel="1"/>
                         </group>
                         
-                        <group string="Advanced" invisible="best_block_hash == false">
+                        <group string="Advanced" invisible="not best_block_hash">
                             <field name="best_block_hash" readonly="1"/>
                             <field name="last_block_time" readonly="1"/>
                         </group>
