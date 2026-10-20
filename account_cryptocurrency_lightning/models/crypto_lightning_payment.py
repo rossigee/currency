@@ -465,7 +465,8 @@ class CryptoLightningPayment(models.Model):
 
         # Record the final outcome on the schedule that created this payment
         if self.scheduled_payment_id:
-            self.scheduled_payment_id._record_execution_outcome(self.payment_status == 'success')
+            succeeded = self.payment_status == 'success'
+            self.scheduled_payment_id._record_execution_outcome(succeeded)
 
         # Clear job UUID when done
         self.write({'payment_job_uuid': False})
