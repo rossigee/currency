@@ -6,8 +6,11 @@ from odoo.exceptions import ValidationError
 import uuid
 import base64
 import json
+import logging
 from .macaroon_utils import MacaroonUtils, MacaroonValidationError
 from .lnd_rest_client import LndRestClient
+
+_logger = logging.getLogger(__name__)
 
 
 class CryptoLightningServiceProvider(models.Model):
