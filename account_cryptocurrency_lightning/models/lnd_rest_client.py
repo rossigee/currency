@@ -1,9 +1,8 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+
 import requests
-import base64
-from typing import Dict, Optional
 
 
 class LndRestClient:
@@ -22,10 +21,10 @@ class LndRestClient:
             macaroon_hex: Macaroon in hex format
         """
         # Ensure URL has protocol
-        if not rest_url.startswith(('http://', 'https://')):
+        if not rest_url.startswith(("http://", "https://")):
             rest_url = f"https://{rest_url}"
 
-        self.rest_url = rest_url.rstrip('/')  # Remove trailing slash
+        self.rest_url = rest_url.rstrip("/")  # Remove trailing slash
         self.macaroon_hex = macaroon_hex
         self.session = None
 
@@ -34,12 +33,14 @@ class LndRestClient:
         try:
             # Create requests session with macaroon authentication
             self.session = requests.Session()
-            self.session.headers.update({
-                'Grpc-Metadata-macaroon': self.macaroon_hex,
-                'Content-Type': 'application/json'
-            })
+            self.session.headers.update(
+                {
+                    "Grpc-Metadata-macaroon": self.macaroon_hex,
+                    "Content-Type": "application/json",
+                }
+            )
 
-            # SSL verification enabled for security (use proper certificates in production)
+            # SSL verification stays on; use proper certificates in production
             self.session.verify = True
 
             # Test connection with a simple getinfo call
@@ -49,9 +50,9 @@ class LndRestClient:
             return True
 
         except Exception as e:
-            raise Exception(f"Failed to connect to LND: {str(e)}")
+            raise Exception(f"Failed to connect to LND: {str(e)}") from e
 
-    def get_info(self) -> Dict:
+    def get_info(self) -> dict:
         """
         Get basic node information (equivalent to GetInfo RPC).
 
@@ -67,9 +68,9 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to get node info: {str(e)}")
+            raise Exception(f"Failed to get node info: {str(e)}") from e
 
-    def get_wallet_balance(self) -> Dict:
+    def get_wallet_balance(self) -> dict:
         """
         Get wallet balance (equivalent to WalletBalance RPC).
 
@@ -85,9 +86,9 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to get wallet balance: {str(e)}")
+            raise Exception(f"Failed to get wallet balance: {str(e)}") from e
 
-    def get_channel_balance(self) -> Dict:
+    def get_channel_balance(self) -> dict:
         """
         Get channel balance (equivalent to ChannelBalance RPC).
 
@@ -103,9 +104,9 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to get channel balance: {str(e)}")
+            raise Exception(f"Failed to get channel balance: {str(e)}") from e
 
-    def list_channels(self) -> Dict:
+    def list_channels(self) -> dict:
         """
         List channels (equivalent to ListChannels RPC).
 
@@ -121,9 +122,9 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list channels: {str(e)}")
+            raise Exception(f"Failed to list channels: {str(e)}") from e
 
-    def list_peers(self) -> Dict:
+    def list_peers(self) -> dict:
         """
         List peers (equivalent to ListPeers RPC).
 
@@ -139,9 +140,9 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list peers: {str(e)}")
+            raise Exception(f"Failed to list peers: {str(e)}") from e
 
-    def list_invoices(self, num_max_invoices: int = 100) -> Dict:
+    def list_invoices(self, num_max_invoices: int = 100) -> dict:
         """
         List invoices (equivalent to ListInvoices RPC).
 
@@ -155,15 +156,15 @@ class LndRestClient:
             if not self.session:
                 raise Exception("Not connected to LND. Call connect() first.")
 
-            params = {'num_max_invoices': num_max_invoices}
+            params = {"num_max_invoices": num_max_invoices}
             response = self.session.get(f"{self.rest_url}/v1/invoices", params=params)
             response.raise_for_status()
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list invoices: {str(e)}")
+            raise Exception(f"Failed to list invoices: {str(e)}") from e
 
-    def list_payments(self, max_payments: int = 100) -> Dict:
+    def list_payments(self, max_payments: int = 100) -> dict:
         """
         List payments (equivalent to ListPayments RPC).
 
@@ -177,15 +178,15 @@ class LndRestClient:
             if not self.session:
                 raise Exception("Not connected to LND. Call connect() first.")
 
-            params = {'max_payments': max_payments}
+            params = {"max_payments": max_payments}
             response = self.session.get(f"{self.rest_url}/v1/payments", params=params)
             response.raise_for_status()
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list payments: {str(e)}")
+            raise Exception(f"Failed to list payments: {str(e)}") from e
 
-    def lookup_invoice(self, payment_hash: str) -> Dict:
+    def lookup_invoice(self, payment_hash: str) -> dict:
         """
         Lookup a specific invoice by payment hash.
 
@@ -204,9 +205,11 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to lookup invoice: {str(e)}")
+            raise Exception(f"Failed to lookup invoice: {str(e)}") from e
 
-    def pay_invoice(self, payment_request: str, fee_limit_sat: Optional[int] = None) -> Dict:
+    def pay_invoice(
+        self, payment_request: str, fee_limit_sat: int | None = None
+    ) -> dict:
         """
         Pay a Lightning invoice (equivalent to SendPaymentSync RPC).
 
@@ -221,21 +224,21 @@ class LndRestClient:
             if not self.session:
                 raise Exception("Not connected to LND. Call connect() first.")
 
-            payload = {
-                "payment_request": payment_request
-            }
+            payload = {"payment_request": payment_request}
 
             if fee_limit_sat is not None:
                 payload["fee_limit"] = {"fixed": str(fee_limit_sat)}
 
-            response = self.session.post(f"{self.rest_url}/v1/channels/transactions", json=payload)
+            response = self.session.post(
+                f"{self.rest_url}/v1/channels/transactions", json=payload
+            )
             response.raise_for_status()
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to pay invoice: {str(e)}")
+            raise Exception(f"Failed to pay invoice: {str(e)}") from e
 
-    def decode_payment_request(self, payment_request: str) -> Dict:
+    def decode_payment_request(self, payment_request: str) -> dict:
         """
         Decode a Lightning payment request to extract details.
 
@@ -254,7 +257,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to decode payment request: {str(e)}")
+            raise Exception(f"Failed to decode payment request: {str(e)}") from e
 
     def close(self):
         """Close REST session"""
