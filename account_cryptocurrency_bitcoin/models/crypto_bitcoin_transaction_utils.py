@@ -113,7 +113,7 @@ class CryptoBitcoinTransactionUtils(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to parse transaction hex: {str(e)}")
-            raise ValidationError(f"Unable to parse transaction data: {str(e)}")
+            raise ValidationError(f"Unable to parse transaction data: {str(e)}") from e
 
     def _parse_transaction_inputs(self, tx_bytes, offset):
         """Parse transaction inputs"""

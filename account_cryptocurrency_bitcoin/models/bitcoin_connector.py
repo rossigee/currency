@@ -78,7 +78,7 @@ class BitcoinConnector(models.Model):
             # Use new node configuration system
             node_config = self.env["bitcoin.node.config"].get_best_node(network)
             return node_config.get_connector()
-        except UserError:
+        except UserError as e:
             # Fallback to old system for backward compatibility
             if not network:
                 network = "mainnet"  # Default network
@@ -105,7 +105,7 @@ class BitcoinConnector(models.Model):
 
                 raise UserError(
                     f"No active Bitcoin connector found for {network}. Please configure a Bitcoin node connection."
-                )
+                ) from e
 
             return connector
 
@@ -125,13 +125,13 @@ class BitcoinConnector(models.Model):
                     services_config["bitcoin_core"]["connector"]
                     or self.get_default_connector()
                 )
-            except:
+            except Exception as e:
                 # Last resort - try any available connector
                 connector = self.search([("is_active", "=", True)], limit=1)
                 if not connector:
                     raise UserError(
                         "No Bitcoin connectors available. Please configure at least one Bitcoin node."
-                    )
+                    ) from e
                 return connector
 
     @api.model
@@ -288,24 +288,24 @@ class BitcoinConnector(models.Model):
 
             return data.get("result")
 
-        except requests.exceptions.Timeout:
+        except requests.exceptions.Timeout as e:
             self.connection_status = "timeout"
             self.status_message = "Connection timeout"
-            raise UserError("Bitcoin RPC connection timeout")
+            raise UserError("Bitcoin RPC connection timeout") from e
 
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as e:
             self.connection_status = "error"
             self.status_message = (
                 "Connection refused - check if Bitcoin node is running"
             )
             raise UserError(
                 "Cannot connect to Bitcoin node - check if it's running and accessible"
-            )
+            ) from e
 
         except Exception as e:
             self.connection_status = "error"
             self.status_message = str(e)
-            raise UserError(f"Bitcoin RPC error: {str(e)}")
+            raise UserError(f"Bitcoin RPC error: {str(e)}") from e
 
     def test_connection(self):
         """Test connection to Bitcoin node"""
@@ -417,7 +417,7 @@ class BitcoinConnector(models.Model):
 
         except Exception as e:
             _logger.error(f"Failed to get transaction details for {tx_hash}: {str(e)}")
-            raise UserError(f"Failed to get transaction details: {str(e)}")
+            raise UserError(f"Failed to get transaction details: {str(e)}") from e
 
     def get_address_transactions(self, address, count=100):
         """Get transactions for an address (requires txindex=1 on node)"""
@@ -474,7 +474,7 @@ class BitcoinConnector(models.Model):
 
         except Exception as e:
             _logger.error(f"Transaction broadcast failed: {str(e)}")
-            raise UserError(f"Failed to broadcast transaction: {str(e)}")
+            raise UserError(f"Failed to broadcast transaction: {str(e)}") from e
 
     @api.model
     def get_network_stats(self):

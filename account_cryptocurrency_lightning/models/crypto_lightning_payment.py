@@ -410,7 +410,7 @@ class CryptoLightningPayment(models.Model):
                 )
                 raise UserError(
                     f"Failed to start payment processing job: {str(job_error)}"
-                )
+                ) from job_error
 
             return {
                 "type": "ir.actions.client",
@@ -435,7 +435,7 @@ class CryptoLightningPayment(models.Model):
                 raise
             else:
                 # For other exceptions, wrap in UserError
-                raise UserError(f"Payment initiation failed: {str(e)}")
+                raise UserError(f"Payment initiation failed: {str(e)}") from e
 
     @job(default_channel="root.lightning")
     def _process_lightning_payment(self):

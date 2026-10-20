@@ -396,7 +396,7 @@ class CryptoBitcoinTransaction(models.Model):
             }
 
         except Exception as e:
-            raise ValidationError(f"PSBT creation failed: {str(e)}")
+            raise ValidationError(f"PSBT creation failed: {str(e)}") from e
 
     def action_export_psbt(self):
         """Export BIP-174 compliant PSBT file for external signing"""
@@ -432,7 +432,7 @@ class CryptoBitcoinTransaction(models.Model):
 
         except Exception as e:
             _logger.error(f"PSBT export failed: {str(e)}")
-            raise ValidationError(f"Failed to export PSBT: {str(e)}")
+            raise ValidationError(f"Failed to export PSBT: {str(e)}") from e
 
     def action_import_psbt(self):
         """Import signed PSBT"""
@@ -499,7 +499,7 @@ class CryptoBitcoinTransaction(models.Model):
 
         except Exception as e:
             _logger.error(f"Failed to fetch transaction {self.tx_hash}: {str(e)}")
-            raise ValidationError(f"Failed to fetch transaction: {str(e)}")
+            raise ValidationError(f"Failed to fetch transaction: {str(e)}") from e
 
     def _update_from_blockchain_data(self, tx_data):
         """Update transaction fields from blockchain data"""
@@ -722,7 +722,7 @@ class CryptoBitcoinTransaction(models.Model):
             _logger.error(
                 f"Failed to fetch transactions for address {address}: {str(e)}"
             )
-            raise ValidationError(f"Failed to fetch transactions: {str(e)}")
+            raise ValidationError(f"Failed to fetch transactions: {str(e)}") from e
 
     @api.model
     def _prepare_transaction_from_blockchain_data(

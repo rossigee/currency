@@ -175,7 +175,7 @@ class WizardCreateTransaction(models.TransientModel):
 
         except Exception as e:
             _logger.error(f"Failed to create transaction: {str(e)}")
-            raise ValidationError(f"Transaction creation failed: {str(e)}")
+            raise ValidationError(f"Transaction creation failed: {str(e)}") from e
 
     def _get_or_create_address(self, address_str):
         """

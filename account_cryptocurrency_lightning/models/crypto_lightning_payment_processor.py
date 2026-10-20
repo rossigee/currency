@@ -59,7 +59,7 @@ class CryptoLightningPaymentProcessor(models.Model):
                     "func": "process_lightning_payment",
                 }
             )
-            raise UserError(f"An error occurred while processing the payment: {str(e)}")
+            raise UserError(f"An error occurred while processing the payment: {str(e)}") from e
 
     @api.model
     def create_payment_request(self, address):

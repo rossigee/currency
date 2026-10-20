@@ -311,10 +311,10 @@ class WizardImportXpub(models.TransientModel):
             except ValidationError as e:
                 _logger.error(f"Import failed with validation error: {str(e)}")
                 # Re-raise validation errors for user to see
-                raise ValidationError(f"Import failed: {str(e)}")
+                raise ValidationError(f"Import failed: {str(e)}") from e
             except Exception as e:
                 _logger.error(f"Import failed with unexpected error: {str(e)}")
-                raise ValidationError(f"Unexpected error during import: {str(e)}")
+                raise ValidationError(f"Unexpected error during import: {str(e)}") from e
         else:
             _logger.info(
                 f"Not attempting import - missing required fields. XPUB: {bool(self.xpub)}, Name: {bool(self.name)}"

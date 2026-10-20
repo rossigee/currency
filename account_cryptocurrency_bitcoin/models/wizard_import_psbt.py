@@ -317,7 +317,7 @@ class WizardImportPsbt(models.TransientModel):
 
         except Exception as e:
             _logger.error(f"Failed to import PSBT: {str(e)}")
-            raise ValidationError(f"PSBT import failed: {str(e)}")
+            raise ValidationError(f"PSBT import failed: {str(e)}") from e
 
     def _get_or_create_address(self, address_str):
         """

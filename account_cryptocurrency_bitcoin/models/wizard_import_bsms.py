@@ -401,7 +401,7 @@ class WizardImportBsms(models.TransientModel):
                         )
                         raise ValidationError(
                             f"Failed to create cosigner {i}: {str(create_error)}"
-                        )
+                        ) from create_error
 
             _logger.info(
                 f"BSMS import complete: Created {created_cosigners} new cosigners, updated {updated_cosigners} existing cosigners"
@@ -430,7 +430,7 @@ class WizardImportBsms(models.TransientModel):
 
         except Exception as e:
             _logger.error(f"Failed to import BSMS: {str(e)}", exc_info=True)
-            raise ValidationError(f"BSMS import failed: {str(e)}")
+            raise ValidationError(f"BSMS import failed: {str(e)}") from e
 
     def _map_script_type(self, bsms_script_type):
         """Map BSMS script type to internal script type"""

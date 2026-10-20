@@ -244,7 +244,7 @@ class CryptoBitcoinPrivateKey(models.Model):
             _logger.error(f"Failed to derive XPRV from mnemonic: {str(e)}")
             raise ValidationError(
                 f"Failed to derive private key from mnemonic: {str(e)}"
-            )
+            ) from e
 
     def _generate_mnemonic(self, word_count=24):
         """Generate a cryptographically secure BIP39 mnemonic"""
@@ -331,7 +331,7 @@ class CryptoBitcoinPrivateKey(models.Model):
 
         except Exception as e:
             _logger.error(f"Failed to derive custom account path: {str(e)}")
-            raise ValidationError(f"Custom account derivation failed: {str(e)}")
+            raise ValidationError(f"Custom account derivation failed: {str(e)}") from e
 
     def _generate_sample_addresses(self, xpub, base_path, address_type="bech32"):
         """Generate first 3 receive addresses from account XPUB"""

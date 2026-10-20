@@ -51,7 +51,7 @@ class LndRestClient:
             return True
 
         except Exception as e:
-            raise Exception(f"Failed to connect to LND: {str(e)}")
+            raise Exception(f"Failed to connect to LND: {str(e)}") from e
 
     def get_info(self) -> dict:
         """
@@ -69,7 +69,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to get node info: {str(e)}")
+            raise Exception(f"Failed to get node info: {str(e)}") from e
 
     def get_wallet_balance(self) -> dict:
         """
@@ -87,7 +87,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to get wallet balance: {str(e)}")
+            raise Exception(f"Failed to get wallet balance: {str(e)}") from e
 
     def get_channel_balance(self) -> dict:
         """
@@ -105,7 +105,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to get channel balance: {str(e)}")
+            raise Exception(f"Failed to get channel balance: {str(e)}") from e
 
     def list_channels(self) -> dict:
         """
@@ -123,7 +123,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list channels: {str(e)}")
+            raise Exception(f"Failed to list channels: {str(e)}") from e
 
     def list_peers(self) -> dict:
         """
@@ -141,7 +141,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list peers: {str(e)}")
+            raise Exception(f"Failed to list peers: {str(e)}") from e
 
     def list_invoices(self, num_max_invoices: int = 100) -> dict:
         """
@@ -163,7 +163,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list invoices: {str(e)}")
+            raise Exception(f"Failed to list invoices: {str(e)}") from e
 
     def list_payments(self, max_payments: int = 100) -> dict:
         """
@@ -185,7 +185,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to list payments: {str(e)}")
+            raise Exception(f"Failed to list payments: {str(e)}") from e
 
     def lookup_invoice(self, payment_hash: str) -> dict:
         """
@@ -206,7 +206,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to lookup invoice: {str(e)}")
+            raise Exception(f"Failed to lookup invoice: {str(e)}") from e
 
     def pay_invoice(
         self, payment_request: str, fee_limit_sat: Optional[int] = None
@@ -237,7 +237,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to pay invoice: {str(e)}")
+            raise Exception(f"Failed to pay invoice: {str(e)}") from e
 
     def decode_payment_request(self, payment_request: str) -> dict:
         """
@@ -258,7 +258,7 @@ class LndRestClient:
 
             return response.json()
         except Exception as e:
-            raise Exception(f"Failed to decode payment request: {str(e)}")
+            raise Exception(f"Failed to decode payment request: {str(e)}") from e
 
     def close(self):
         """Close REST session"""

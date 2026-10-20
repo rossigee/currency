@@ -30,10 +30,10 @@ class ElectrumClient(models.AbstractModel):
             try:
                 self.env["electrum.server.config"].create_default_servers()
                 return self
-            except:
+            except Exception as e:
                 raise ValidationError(
                     "No Electrum servers available. Please configure at least one Electrum server."
-                )
+                ) from e
 
     @api.model
     def get_with_failover(self, network=None, max_attempts=3):
@@ -72,7 +72,7 @@ class ElectrumClient(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"All Electrum servers failed: {str(e)}")
-            raise ValidationError(f"No Electrum servers available: {str(e)}")
+            raise ValidationError(f"No Electrum servers available: {str(e)}") from e
 
     @api.model
     def test_connection(self, host=None, port=None, use_ssl=None, timeout=None):
@@ -174,7 +174,7 @@ class ElectrumClient(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to get address history via Electrum: {str(e)}")
-            raise ValidationError(f"Electrum address history failed: {str(e)}")
+            raise ValidationError(f"Electrum address history failed: {str(e)}") from e
 
     def _get_history_from_server(
         self, address, script_hash, host, port, use_ssl, timeout=None
@@ -322,7 +322,7 @@ class ElectrumClient(models.AbstractModel):
                     # Re-raise the error instead of using fallback data
                     raise ValidationError(
                         f"Unable to fetch complete transaction data for {txid}: {str(e)}"
-                    )
+                    ) from e
 
             return transactions
 
@@ -614,7 +614,7 @@ class ElectrumClient(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to get transaction via Electrum: {str(e)}")
-            raise ValidationError(f"Electrum transaction fetch failed: {str(e)}")
+            raise ValidationError(f"Electrum transaction fetch failed: {str(e)}") from e
 
     @api.model
     def get_block_height(self, host=None, port=None, use_ssl=True):
@@ -759,10 +759,10 @@ class ElectrumClient(models.AbstractModel):
                     if not chunk:
                         break
                     response_data += chunk
-                except socket.timeout:
+                except socket.timeout as e:
                     # Check if we've exceeded overall timeout
                     if time.time() - start_time > timeout:
-                        raise socket.timeout("Read timeout")
+                        raise socket.timeout("Read timeout") from e
                     continue
 
             # Parse response
@@ -780,35 +780,35 @@ class ElectrumClient(models.AbstractModel):
 
             return response.get("result", [])
 
-        except socket.timeout:
+        except socket.timeout as e:
             error_msg = f"Timeout connecting to {host}:{port} (timeout: {timeout}s)"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
+            raise ValidationError(error_msg) from e
 
         except socket.gaierror as e:
             error_msg = f"DNS resolution failed for {host}: {str(e)}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
+            raise ValidationError(error_msg) from e
 
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as e:
             error_msg = f"Connection refused by {host}:{port}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
+            raise ValidationError(error_msg) from e
 
         except ssl.SSLError as e:
             error_msg = f"SSL error connecting to {host}:{port}: {str(e)}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
+            raise ValidationError(error_msg) from e
 
         except json.JSONDecodeError as e:
             error_msg = f"Invalid JSON response from {host}:{port}: {str(e)}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
+            raise ValidationError(error_msg) from e
 
         except Exception as e:
             error_msg = f"Electrum request to {host}:{port} failed: {str(e)}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
+            raise ValidationError(error_msg) from e
 
         finally:
             # Ensure socket is always closed
@@ -866,10 +866,10 @@ class ElectrumClient(models.AbstractModel):
                 if not chunk:
                     break
                 response_data += chunk
-            except socket.timeout:
+            except socket.timeout as e:
                 # Check if we've exceeded overall timeout
                 if time.time() - start_time > timeout:
-                    raise socket.timeout("Read timeout")
+                    raise socket.timeout("Read timeout") from e
                 continue
 
         # Parse response

@@ -173,7 +173,7 @@ class CryptoLightningServiceProvider(models.Model):
         try:
             MacaroonUtils.validate_macaroon(macaroon_str)
         except MacaroonValidationError as e:
-            raise ValidationError(str(e))
+            raise ValidationError(str(e)) from e
 
     def _parse_macaroon(self, macaroon_str):
         """Parse macaroon and extract information"""
@@ -342,7 +342,7 @@ class CryptoLightningServiceProvider(models.Model):
             self.lnd_status_last_updated = fields.Datetime.now()
 
         except Exception as e:
-            raise Exception(f"Failed to fetch LND status: {str(e)}")
+            raise Exception(f"Failed to fetch LND status: {str(e)}") from e
         finally:
             client.close()
 
@@ -577,7 +577,7 @@ class CryptoLightningServiceProvider(models.Model):
                 "tag": "reload",
             }
         except Exception as e:
-            raise ValidationError(f"Failed to fetch transactions: {str(e)}")
+            raise ValidationError(f"Failed to fetch transactions: {str(e)}") from e
 
     def debug_permissions(self):
         """Debug method to check permissions"""

@@ -274,7 +274,7 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
             raise
         except Exception as e:
             _logger.error(f"Unexpected error in multisig public key creation: {str(e)}")
-            raise ValidationError(f"Failed to create multisig public key: {str(e)}")
+            raise ValidationError(f"Failed to create multisig public key: {str(e)}") from e
 
     def _generate_sample_addresses(self):
         """Generate sample receive addresses for display"""

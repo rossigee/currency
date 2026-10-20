@@ -467,7 +467,7 @@ class CryptoLightningScheduledPayment(models.Model):
                 subtype_xmlid="mail.mt_note",
             )
 
-            raise UserError(f"Payment execution failed: {str(e)}")
+            raise UserError(f"Payment execution failed: {str(e)}") from e
 
     @api.model
     def _cron_execute_scheduled_payments(self):

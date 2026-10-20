@@ -160,7 +160,7 @@ class WizardCreatePrivateKey(models.TransientModel):
             }
 
         except Exception as e:
-            raise ValidationError(f"Failed to create private key: {str(e)}")
+            raise ValidationError(f"Failed to create private key: {str(e)}") from e
 
     def action_create_public_key(self):
         """Create a public key from the created private key"""

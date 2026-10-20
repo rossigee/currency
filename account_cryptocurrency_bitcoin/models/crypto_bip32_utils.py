@@ -219,7 +219,7 @@ class CryptoBip32Utils(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to convert XPRV to XPUB: {str(e)}")
-            raise ValidationError(f"XPRV to XPUB conversion failed: {str(e)}")
+            raise ValidationError(f"XPRV to XPUB conversion failed: {str(e)}") from e
 
     @api.model
     def derive_bip44_account(self, master_xprv, account_index, coin_type=0):
@@ -301,7 +301,7 @@ class CryptoBip32Utils(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to derive BIP44 account: {str(e)}")
-            raise ValidationError(f"Account derivation failed: {str(e)}")
+            raise ValidationError(f"Account derivation failed: {str(e)}") from e
 
     @api.model
     def derive_address_from_xpub(
@@ -369,7 +369,7 @@ class CryptoBip32Utils(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to derive address from XPUB: {str(e)}")
-            raise ValidationError(f"Address derivation failed: {str(e)}")
+            raise ValidationError(f"Address derivation failed: {str(e)}") from e
 
     @api.model
     def derive_address_from_account_xpub(self, account_xpub, change, index):
@@ -500,7 +500,7 @@ class CryptoBip32Utils(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to derive BIP48 multisig: {str(e)}")
-            raise ValidationError(f"Multisig derivation failed: {str(e)}")
+            raise ValidationError(f"Multisig derivation failed: {str(e)}") from e
 
     @api.model
     def _private_key_to_public_key(self, private_key):
@@ -532,13 +532,13 @@ class CryptoBip32Utils(models.AbstractModel):
             # Use proper RIPEMD160 - required for Bitcoin compatibility
             ripemd160_hash = hashlib.new("ripemd160", sha256_hash).digest()
             return ripemd160_hash
-        except ValueError:
+        except ValueError as e:
             # RIPEMD160 is required for Bitcoin - cannot fallback safely
             raise ValidationError(
                 "RIPEMD160 hash function is not available. "
                 "This is required for Bitcoin address generation. "
                 "Please install a Python version with RIPEMD160 support or use a crypto library that provides it."
-            )
+            ) from e
 
     @api.model
     def _convertbits(self, data, frombits, tobits, pad=True):
@@ -707,7 +707,7 @@ class CryptoBip32Utils(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to generate multisig address: {str(e)}")
-            raise ValidationError(f"Multisig address generation failed: {str(e)}")
+            raise ValidationError(f"Multisig address generation failed: {str(e)}") from e
 
     @api.model
     def _create_multisig_address(self, public_keys, m_threshold, script_type):
@@ -834,7 +834,7 @@ class CryptoBip32Utils(models.AbstractModel):
                 except Exception as e:
                     raise ValidationError(
                         f"Invalid address format: {output['address']} - {str(e)}"
-                    )
+                    ) from e
 
             # For demo purposes, create empty inputs (in real implementation, would use actual UTXOs)
             # This creates a valid PSBT structure that can be extended with real UTXO data
@@ -896,16 +896,16 @@ class CryptoBip32Utils(models.AbstractModel):
                 "outputs": outputs,
             }
 
-        except ImportError:
+        except ImportError as e:
             _logger.error(
                 "embit library not available - install with: pip install embit"
             )
             raise ValidationError(
                 "Bitcoin PSBT library not available. Install 'embit' package."
-            )
+            ) from e
         except Exception as e:
             _logger.error(f"Failed to create BIP-174 PSBT: {str(e)}")
-            raise ValidationError(f"PSBT creation failed: {str(e)}")
+            raise ValidationError(f"PSBT creation failed: {str(e)}") from e
 
     @api.model
     def parse_psbt_signatures(self, psbt_base64):
@@ -1319,7 +1319,7 @@ class CryptoBip32Utils(models.AbstractModel):
             raise
         except Exception as e:
             _logger.error(f"Failed to parse script to address: {str(e)}")
-            raise ValidationError(f"Script parsing failed for {script_hex}: {str(e)}")
+            raise ValidationError(f"Script parsing failed for {script_hex}: {str(e)}") from e
 
     @api.model
     def _encode_bech32(self, hrp, witver, witprog):
@@ -1364,7 +1364,7 @@ class CryptoBip32Utils(models.AbstractModel):
             _logger.error(f"Bech32 encoding failed: {str(e)}")
             raise ValidationError(
                 f"Bech32 encoding failed for witness version {witver}: {str(e)}"
-            )
+            ) from e
 
     @api.model
     def _convertbits(self, data, frombits, tobits, pad=True):
@@ -1468,7 +1468,7 @@ class CryptoBip32Utils(models.AbstractModel):
                 )
 
         except Exception as e:
-            raise ValidationError(f"Bech32 decoding failed: {str(e)}")
+            raise ValidationError(f"Bech32 decoding failed: {str(e)}") from e
 
     @api.model
     def _convert_5bit_to_8bit(self, data, target_length):
@@ -1496,7 +1496,7 @@ class CryptoBip32Utils(models.AbstractModel):
             return bytes(ret)
 
         except Exception as e:
-            raise ValidationError(f"5-bit to 8-bit conversion failed: {str(e)}")
+            raise ValidationError(f"5-bit to 8-bit conversion failed: {str(e)}") from e
 
     @api.model
     def address_to_script_hash(self, address):
@@ -1539,7 +1539,7 @@ class CryptoBip32Utils(models.AbstractModel):
 
         except Exception as e:
             _logger.error(f"Failed to convert address to script hash: {str(e)}")
-            raise ValidationError(f"Address to script hash conversion failed: {str(e)}")
+            raise ValidationError(f"Address to script hash conversion failed: {str(e)}") from e
 
     @api.model
     def taproot_decode(self, address):
@@ -1563,7 +1563,7 @@ class CryptoBip32Utils(models.AbstractModel):
             )
 
         except Exception as e:
-            raise ValidationError(f"Taproot decoding failed: {str(e)}")
+            raise ValidationError(f"Taproot decoding failed: {str(e)}") from e
 
     @api.model
     def validate_bitcoin_address(self, address):

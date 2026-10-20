@@ -189,7 +189,7 @@ class CryptoBitcoinTransactionFetcher(models.Model):
             _logger.error(
                 f"Failed to fetch transactions via Electrum for {address}: {str(e)}"
             )
-            raise ValidationError(f"Electrum fetch failed: {str(e)}")
+            raise ValidationError(f"Electrum fetch failed: {str(e)}") from e
 
     def fetch_transaction_details(self, txid):
         """Fetch detailed transaction information by transaction ID"""
@@ -214,7 +214,7 @@ class CryptoBitcoinTransactionFetcher(models.Model):
 
         except Exception as e:
             _logger.error(f"Failed to fetch transaction {txid}: {str(e)}")
-            raise UserError(f"Failed to fetch transaction: {str(e)}")
+            raise UserError(f"Failed to fetch transaction: {str(e)}") from e
 
     def _normalize_transaction_data(self, raw_transactions):
         """Normalize transaction data from different APIs"""

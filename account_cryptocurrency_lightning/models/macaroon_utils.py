@@ -50,14 +50,14 @@ class MacaroonUtils:
             except Exception as e:
                 raise MacaroonValidationError(
                     f"Macaroon structure validation failed: {str(e)}"
-                )
+                ) from e
 
-        except (ValueError, TypeError, binascii.Error):
-            raise MacaroonValidationError("Invalid macaroon format")
+        except (ValueError, TypeError, binascii.Error) as e:
+            raise MacaroonValidationError("Invalid macaroon format") from e
         except MacaroonValidationError:
             raise  # Re-raise our custom errors
         except Exception as e:
-            raise MacaroonValidationError(f"Macaroon validation failed: {str(e)}")
+            raise MacaroonValidationError(f"Macaroon validation failed: {str(e)}") from e
 
     @staticmethod
     def parse_macaroon(macaroon_str: str) -> dict:

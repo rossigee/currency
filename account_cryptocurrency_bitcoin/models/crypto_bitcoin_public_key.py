@@ -389,7 +389,7 @@ class CryptoBitcoinPublicKey(models.Model):
 
         except Exception as e:
             _logger.error(f"Address derivation failed: {str(e)}")
-            raise ValidationError(f"Failed to derive address: {str(e)}")
+            raise ValidationError(f"Failed to derive address: {str(e)}") from e
 
     def derive_addresses(self, start_index=0, count=20, change=False):
         """

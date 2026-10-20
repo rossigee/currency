@@ -151,7 +151,7 @@ class CryptoLightningPaymentForm(models.TransientModel):
         except Exception as e:
             raise UserError(
                 f"An error occurred while creating the payment form: {str(e)}"
-            )
+            ) from e
 
     @api.onchange("address_id")
     def _onchange_address_id(self):

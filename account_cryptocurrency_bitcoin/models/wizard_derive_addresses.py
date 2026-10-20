@@ -88,7 +88,7 @@ class WizardDeriveAddresses(models.TransientModel):
             }
 
         except Exception as e:
-            raise ValidationError(f"Address derivation failed: {str(e)}")
+            raise ValidationError(f"Address derivation failed: {str(e)}") from e
 
     def action_export_addresses(self):
         """Export derived addresses as downloadable file"""
