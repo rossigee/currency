@@ -255,11 +255,18 @@ class ResCurrencyRateProviderXE(models.Model):
         url,
     ):
         try:
-            return requests.request("GET", url, timeout=10)
+            response = requests.request("GET", url, timeout=10)
         except Exception as e:
             raise UserError(
                 _("Couldn't fetch data. Please contact your administrator.")
             ) from e
+        # Otherwise an error page parses to zero rates and the update is skipped silently
+        if response.status_code != 200:
+            raise UserError(
+                _("XE.com returned HTTP %(status)s. No rates were fetched.")
+                % {"status": response.status_code}
+            )
+        return response
 
     def _parse_data(self, data, currencies):
         result = {}
