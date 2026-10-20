@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Default Electrum Servers for Mainnet -->
+        <record id="electrum_server_blockstream" model="electrum.server.config">
+            <field name="name">Blockstream Electrum</field>
+            <field name="host">electrum.blockstream.info</field>
+            <field name="port">50002</field>
+            <field name="use_ssl" eval="True"/>
+            <field name="network">mainnet</field>
+            <field name="sequence">10</field>
+            <field name="server_type">public</field>
+            <field name="is_active" eval="True"/>
+            <field name="timeout_seconds">10</field>
+        </record>
+
+        <record id="electrum_server_bluewallet" model="electrum.server.config">
+            <field name="name">BlueWallet Electrum</field>
+            <field name="host">electrum3.bluewallet.io</field>
+            <field name="port">50002</field>
+            <field name="use_ssl" eval="True"/>
+            <field name="network">mainnet</field>
+            <field name="sequence">20</field>
+            <field name="server_type">public</field>
+            <field name="is_active" eval="True"/>
+            <field name="timeout_seconds">10</field>
+        </record>
+
+        <record id="electrum_server_villocq" model="electrum.server.config">
+            <field name="name">Villocq Electrum</field>
+            <field name="host">electrum.villocq.com</field>
+            <field name="port">50002</field>
+            <field name="use_ssl" eval="True"/>
+            <field name="network">mainnet</field>
+            <field name="sequence">30</field>
+            <field name="server_type">public</field>
+            <field name="is_active" eval="True"/>
+            <field name="timeout_seconds">10</field>
+        </record>
+
+        <!-- Non-SSL alternatives for better connectivity -->
+        <record id="electrum_server_blockstream_nossl" model="electrum.server.config">
+            <field name="name">Blockstream Electrum (No SSL)</field>
+            <field name="host">electrum.blockstream.info</field>
+            <field name="port">50001</field>
+            <field name="use_ssl" eval="False"/>
+            <field name="network">mainnet</field>
+            <field name="sequence">40</field>
+            <field name="server_type">public</field>
+            <field name="is_active" eval="True"/>
+            <field name="timeout_seconds">8</field>
+        </record>
+
+        <!-- Default Electrum Servers for Testnet -->
+        <record id="electrum_server_blockstream_testnet" model="electrum.server.config">
+            <field name="name">Blockstream Testnet</field>
+            <field name="host">electrum.blockstream.info</field>
+            <field name="port">60002</field>
+            <field name="use_ssl" eval="True"/>
+            <field name="network">testnet</field>
+            <field name="sequence">10</field>
+            <field name="server_type">public</field>
+            <field name="is_active" eval="True"/>
+            <field name="timeout_seconds">10</field>
+        </record>
+
+    </data>
+</odoo>

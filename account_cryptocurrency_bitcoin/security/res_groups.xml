@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Bitcoin Operations Security Groups -->
+        
+        <!-- Basic Bitcoin Operations Group -->
+        <record id="group_bitcoin_user" model="res.groups">
+            <field name="name">Bitcoin Operations / User</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="comment">Access to basic Bitcoin functionality including private keys, accounts, and single-signature operations.</field>
+        </record>
+        
+        <!-- Advanced Bitcoin Operations Group -->
+        <record id="group_bitcoin_advanced" model="res.groups">
+            <field name="name">Bitcoin Operations / Advanced</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="implied_ids" eval="[(4, ref('group_bitcoin_user'))]"/>
+            <field name="comment">Access to advanced Bitcoin functionality including multisig operations, complex derivations, and wallet management.</field>
+        </record>
+        
+        <!-- Bitcoin Manager Group -->
+        <record id="group_bitcoin_manager" model="res.groups">
+            <field name="name">Bitcoin Operations / Manager</field>
+            <field name="category_id" ref="base.module_category_accounting"/>
+            <field name="implied_ids" eval="[(4, ref('group_bitcoin_advanced'))]"/>
+            <field name="comment">Full access to all Bitcoin functionality including system configuration, vault management, and user permissions.</field>
+        </record>
+        
+        <!-- Add default users to basic group (optional - can be commented out) -->
+        <record id="base.user_admin" model="res.users">
+            <field name="groups_id" eval="[(4, ref('group_bitcoin_manager'))]"/>
+        </record>
+        
+    </data>
+</odoo>
