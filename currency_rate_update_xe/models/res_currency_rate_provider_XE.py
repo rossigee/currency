@@ -260,7 +260,7 @@ class ResCurrencyRateProviderXE(models.Model):
             raise UserError(
                 _("Couldn't fetch data. Please contact your administrator.")
             ) from e
-        # Otherwise an error page parses to zero rates and the update is skipped silently
+        # Otherwise an error page parses to zero rates and the update is skipped
         if response.status_code != 200:
             raise UserError(
                 _("XE.com returned HTTP %(status)s. No rates were fetched.")
