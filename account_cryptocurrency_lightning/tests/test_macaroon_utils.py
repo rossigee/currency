@@ -1,11 +1,11 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import unittest
 import base64
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from odoo.tests.common import TransactionCase
+
 from ..models.macaroon_utils import MacaroonUtils, MacaroonValidationError
 
 
@@ -18,7 +18,9 @@ class TestMacaroonUtils(TransactionCase):
         self.valid_hex_macaroon = "0201036c6e6402ac01030a10dbaf04d38e9ba8ff52e93365b6d3ae381201301a0f0a07616464726573731204726561641a0c0a04696e666f1204726561641a100a08696e766f696365731204726561641a100a086d616361726f6f6e1204726561641a0f0a076d6573736167651204726561641a100a086f6666636861696e1204726561641a0f0a076f6e636861696e1204726561641a0d0a0570656572731204726561641a0e0a067369676e657212047265616400000620396b1846260476447cf1735d7bd51d741fdb9e78e1a17b72e38dac98792fa3f4"
 
         # Convert hex to base64 for testing base64 format
-        self.valid_base64_macaroon = base64.b64encode(bytes.fromhex(self.valid_hex_macaroon)).decode('utf-8')
+        self.valid_base64_macaroon = base64.b64encode(
+            bytes.fromhex(self.valid_hex_macaroon)
+        ).decode("utf-8")
 
         # Invalid macaroons for testing error cases
         self.invalid_hex = "invalid_hex_string"
@@ -30,14 +32,18 @@ class TestMacaroonUtils(TransactionCase):
         try:
             MacaroonUtils.validate_macaroon(self.valid_hex_macaroon)
         except MacaroonValidationError:
-            self.fail("validate_macaroon() raised MacaroonValidationError unexpectedly!")
+            self.fail(
+                "validate_macaroon() raised MacaroonValidationError unexpectedly!"
+            )
 
     def test_validate_macaroon_valid_base64(self):
         """Test validation of valid base64-encoded macaroon"""
         try:
             MacaroonUtils.validate_macaroon(self.valid_base64_macaroon)
         except MacaroonValidationError:
-            self.fail("validate_macaroon() raised MacaroonValidationError unexpectedly!")
+            self.fail(
+                "validate_macaroon() raised MacaroonValidationError unexpectedly!"
+            )
 
     def test_validate_macaroon_empty(self):
         """Test validation fails for empty macaroon"""
@@ -55,21 +61,21 @@ class TestMacaroonUtils(TransactionCase):
         result = MacaroonUtils.parse_macaroon(self.valid_hex_macaroon)
 
         self.assertIsInstance(result, dict)
-        self.assertIn('location', result)
-        self.assertIn('identifier', result)
-        self.assertIn('caveats', result)
-        self.assertIn('caveat_count', result)
-        self.assertIn('format', result)
-        self.assertEqual(result['format'], 'hex')
-        self.assertGreater(result['caveat_count'], 0)
+        self.assertIn("location", result)
+        self.assertIn("identifier", result)
+        self.assertIn("caveats", result)
+        self.assertIn("caveat_count", result)
+        self.assertIn("format", result)
+        self.assertEqual(result["format"], "hex")
+        self.assertGreater(result["caveat_count"], 0)
 
     def test_parse_macaroon_valid_base64(self):
         """Test parsing of valid base64-encoded macaroon"""
         result = MacaroonUtils.parse_macaroon(self.valid_base64_macaroon)
 
         self.assertIsInstance(result, dict)
-        self.assertEqual(result['format'], 'base64')
-        self.assertGreater(result['caveat_count'], 0)
+        self.assertEqual(result["format"], "base64")
+        self.assertGreater(result["caveat_count"], 0)
 
     def test_parse_macaroon_empty(self):
         """Test parsing returns empty dict for empty macaroon"""
@@ -89,18 +95,18 @@ class TestMacaroonUtils(TransactionCase):
         self.assertGreater(len(permissions), 0)
 
         # Check for expected LND permissions
-        permission_text = ' '.join(permissions).lower()
-        self.assertIn('read', permission_text)
+        permission_text = " ".join(permissions).lower()
+        self.assertIn("read", permission_text)
 
     def test_format_macaroon_info_valid(self):
         """Test formatting of macaroon information"""
         info_text = MacaroonUtils.format_macaroon_info(self.valid_hex_macaroon)
 
         self.assertIsInstance(info_text, str)
-        self.assertIn('Format: HEX', info_text)
-        self.assertIn('Location:', info_text)
-        self.assertIn('Identifier:', info_text)
-        self.assertIn('Caveats', info_text)
+        self.assertIn("Format: HEX", info_text)
+        self.assertIn("Location:", info_text)
+        self.assertIn("Identifier:", info_text)
+        self.assertIn("Caveats", info_text)
 
     def test_format_macaroon_info_empty(self):
         """Test formatting returns appropriate message for empty macaroon"""
@@ -124,15 +130,19 @@ class TestMacaroonUtils(TransactionCase):
 
     def test_decode_macaroon_string_with_format_hex(self):
         """Test internal decoding with format detection for hex"""
-        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(self.valid_hex_macaroon)
+        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(
+            self.valid_hex_macaroon
+        )
         self.assertIsInstance(result, bytes)
-        self.assertEqual(format_type, 'hex')
+        self.assertEqual(format_type, "hex")
 
     def test_decode_macaroon_string_with_format_base64(self):
         """Test internal decoding with format detection for base64"""
-        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(self.valid_base64_macaroon)
+        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(
+            self.valid_base64_macaroon
+        )
         self.assertIsInstance(result, bytes)
-        self.assertEqual(format_type, 'base64')
+        self.assertEqual(format_type, "base64")
 
     def test_safe_decode_bytes_utf8(self):
         """Test safe bytes decoding for UTF-8 text"""
@@ -151,7 +161,9 @@ class TestMacaroonUtils(TransactionCase):
         result = MacaroonUtils._safe_decode_bytes(None)
         self.assertEqual(result, "")
 
-    @patch('odoo.addons.account_cryptocurrency_lightning.models.macaroon_utils.pymacaroons')
+    @patch(
+        "odoo.addons.account_cryptocurrency_lightning.models.macaroon_utils.pymacaroons"
+    )
     def test_validate_macaroon_pymacaroons_exception(self, mock_pymacaroons):
         """Test handling of pymacaroons exceptions"""
         mock_pymacaroons.Macaroon.deserialize.side_effect = Exception("Parsing failed")
