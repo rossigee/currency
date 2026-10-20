@@ -3,11 +3,11 @@
 
 import base64
 import binascii
-from typing import Dict, List, Optional
 
 
 class MacaroonValidationError(Exception):
     """Exception raised when macaroon validation fails"""
+
     pass
 
 
@@ -47,17 +47,21 @@ class MacaroonUtils:
             try:
                 MacaroonUtils._manual_parse_macaroon(macaroon_bytes)
             except Exception as e:
-                raise MacaroonValidationError(f"Macaroon structure validation failed: {str(e)}")
+                raise MacaroonValidationError(
+                    f"Macaroon structure validation failed: {str(e)}"
+                ) from e
 
-        except (ValueError, TypeError, binascii.Error):
-            raise MacaroonValidationError("Invalid macaroon format")
+        except (ValueError, TypeError, binascii.Error) as e:
+            raise MacaroonValidationError("Invalid macaroon format") from e
         except MacaroonValidationError:
             raise  # Re-raise our custom errors
         except Exception as e:
-            raise MacaroonValidationError(f"Macaroon validation failed: {str(e)}")
+            raise MacaroonValidationError(
+                f"Macaroon validation failed: {str(e)}"
+            ) from e
 
     @staticmethod
-    def parse_macaroon(macaroon_str: str) -> Dict:
+    def parse_macaroon(macaroon_str: str) -> dict:
         """
         Parse macaroon and extract detailed information.
 
@@ -78,7 +82,10 @@ class MacaroonUtils:
             return {}
 
         try:
-            macaroon_bytes, format_type = MacaroonUtils._decode_macaroon_string_with_format(macaroon_str)
+            (
+                macaroon_bytes,
+                format_type,
+            ) = MacaroonUtils._decode_macaroon_string_with_format(macaroon_str)
 
             # Basic validation
             if len(macaroon_bytes) < 32 or macaroon_bytes[0] != 0x02:
@@ -86,13 +93,13 @@ class MacaroonUtils:
 
             # Use manual parsing for all macaroons
             parsed_info = MacaroonUtils._manual_parse_macaroon(macaroon_bytes)
-            parsed_info['format'] = format_type
+            parsed_info["format"] = format_type
             return parsed_info
         except Exception:
             return {}
 
     @staticmethod
-    def get_macaroon_permissions(macaroon_str: str) -> List[str]:
+    def get_macaroon_permissions(macaroon_str: str) -> list[str]:
         """
         Extract permissions/capabilities from macaroon caveats.
 
@@ -105,17 +112,17 @@ class MacaroonUtils:
         info = MacaroonUtils.parse_macaroon(macaroon_str)
         permissions = []
 
-        for caveat in info.get('caveats', []):
+        for caveat in info.get("caveats", []):
             # Skip binary caveats
-            if caveat.startswith('Binary caveat:'):
+            if caveat.startswith("Binary caveat:"):
                 continue
 
             # Extract common permission patterns
-            if 'read' in caveat.lower():
+            if "read" in caveat.lower():
                 permissions.append(f"Read: {caveat}")
-            elif 'write' in caveat.lower():
+            elif "write" in caveat.lower():
                 permissions.append(f"Write: {caveat}")
-            elif 'admin' in caveat.lower():
+            elif "admin" in caveat.lower():
                 permissions.append(f"Admin: {caveat}")
             else:
                 permissions.append(caveat)
@@ -145,7 +152,7 @@ class MacaroonUtils:
         info_text += f"Identifier: {info.get('identifier') or 'N/A'}\n"
         info_text += f"Caveats ({info.get('caveat_count', 0)}):\n"
 
-        for caveat in info.get('caveats', []):
+        for caveat in info.get("caveats", []):
             info_text += f"  • {caveat}\n"
 
         return info_text
@@ -181,12 +188,12 @@ class MacaroonUtils:
             Tuple of (decoded_bytes, format_type)
         """
         try:
-            return bytes.fromhex(macaroon_str), 'hex'
+            return bytes.fromhex(macaroon_str), "hex"
         except ValueError:
-            return base64.b64decode(macaroon_str), 'base64'
+            return base64.b64decode(macaroon_str), "base64"
 
     @staticmethod
-    def _safe_decode_bytes(data: Optional[bytes]) -> str:
+    def _safe_decode_bytes(data: bytes | None) -> str:
         """
         Safely decode bytes to string, falling back to hex if UTF-8 fails.
 
@@ -197,15 +204,15 @@ class MacaroonUtils:
             Decoded string or hex representation
         """
         if not data:
-            return ''
+            return ""
 
         try:
-            return data.decode('utf-8')
+            return data.decode("utf-8")
         except UnicodeDecodeError:
             return data.hex()
 
     @staticmethod
-    def _manual_parse_macaroon(macaroon_bytes: bytes) -> Dict:
+    def _manual_parse_macaroon(macaroon_bytes: bytes) -> dict:
         """
         Manual parser for macaroon binary format.
 
@@ -223,19 +230,35 @@ class MacaroonUtils:
 
         try:
             # Convert to string for searching, ignoring decode errors
-            text_content = macaroon_bytes.decode('utf-8', errors='ignore')
+            text_content = macaroon_bytes.decode("utf-8", errors="ignore")
 
             # Look for LND services and permissions
             permissions = []
-            services = ['address', 'info', 'invoices', 'macaroon', 'message', 'offchain', 'onchain', 'peers', 'signer']
-            perms = ['read', 'write', 'generate', 'admin']
+            services = [
+                "address",
+                "info",
+                "invoices",
+                "macaroon",
+                "message",
+                "offchain",
+                "onchain",
+                "peers",
+                "signer",
+            ]
+            perms = ["read", "write", "generate", "admin"]
 
             for service in services:
                 if service in text_content:
                     # Find permissions for this service
                     service_perms = []
                     for perm in perms:
-                        if perm in text_content[text_content.find(service):text_content.find(service)+50]:
+                        if (
+                            perm
+                            in text_content[
+                                text_content.find(service) : text_content.find(service)
+                                + 50
+                            ]
+                        ):
                             service_perms.append(perm)
 
                     if service_perms:
@@ -252,18 +275,17 @@ class MacaroonUtils:
             identifier = f"LND Macaroon ({len(macaroon_bytes)} bytes)"
 
             return {
-                'location': location,
-                'identifier': identifier,
-                'caveats': permissions if permissions else ['LND permissions detected'],
-                'caveat_count': len(permissions) if permissions else 1
+                "location": location,
+                "identifier": identifier,
+                "caveats": permissions if permissions else ["LND permissions detected"],
+                "caveat_count": len(permissions) if permissions else 1,
             }
 
         except Exception:
             # Return minimal info if scanning fails
             return {
-                'location': 'lnd',
-                'identifier': f'Binary macaroon ({len(macaroon_bytes)} bytes)',
-                'caveats': ['Valid LND macaroon detected'],
-                'caveat_count': 1
+                "location": "lnd",
+                "identifier": f"Binary macaroon ({len(macaroon_bytes)} bytes)",
+                "caveats": ["Valid LND macaroon detected"],
+                "caveat_count": 1,
             }
-

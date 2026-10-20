@@ -5,21 +5,21 @@ from odoo import api, fields, models
 
 
 class CryptoLightningMacaroonPermission(models.Model):
-    _name = 'crypto.lightning.macaroon.permission'
-    _description = 'Lightning Macaroon Permission'
-    _order = 'service, permission'
+    _name = "crypto.lightning.macaroon.permission"
+    _description = "Lightning Macaroon Permission"
+    _order = "service, permission"
 
     service_provider_id = fields.Many2one(
-        'crypto.lightning.service.provider',
-        string='Service Provider',
+        "crypto.lightning.service.provider",
+        string="Service Provider",
         required=True,
-        ondelete='cascade'
+        ondelete="cascade",
     )
-    service = fields.Char(string='Service', required=True)
-    permission = fields.Char(string='Permission', required=True)
-    description = fields.Char(string='Description')
+    service = fields.Char(string="Service", required=True)
+    permission = fields.Char(string="Permission", required=True)
+    description = fields.Char(string="Description")
 
-    @api.depends('service', 'permission', 'description')
+    @api.depends("service", "permission", "description")
     def _compute_display_name(self):
         for record in self:
             name = f"{record.service}: {record.permission}"
