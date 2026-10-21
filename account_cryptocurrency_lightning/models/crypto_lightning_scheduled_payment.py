@@ -406,15 +406,23 @@ class CryptoLightningScheduledPayment(models.Model):
 
         for schedule in scheduled_payments:
             try:
+                # Success or failure is recorded by the payment job once LND has
+                # answered; _execute_payment records failures raised before that.
                 schedule._execute_payment()
-                schedule.write({
-                    'successful_executions': schedule.successful_executions + 1,
-                    'last_execution_status': 'success'
-                })
             except Exception as e:
                 _logger.error(f"Failed to execute scheduled payment {schedule.id}: {str(e)}")
-                schedule.write({
-                    'failed_executions': schedule.failed_executions + 1,
-                    'last_execution_status': 'failed'
-                })
                 continue
+
+    def _record_execution_outcome(self, success):
+        """Record the final outcome of one payment run"""
+        self.ensure_one()
+        if success:
+            self.write({
+                'successful_executions': self.successful_executions + 1,
+                'last_execution_status': 'success'
+            })
+        else:
+            self.write({
+                'failed_executions': self.failed_executions + 1,
+                'last_execution_status': 'failed'
+            })

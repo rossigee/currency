@@ -463,6 +463,11 @@ class CryptoLightningPayment(models.Model):
             # Send failure notification to LSP mail channel
             self._send_payment_notification('failed')
 
+        # Record the final outcome on the schedule that created this payment
+        if self.scheduled_payment_id:
+            succeeded = self.payment_status == 'success'
+            self.scheduled_payment_id._record_execution_outcome(succeeded)
+
         # Clear job UUID when done
         self.write({'payment_job_uuid': False})
 
