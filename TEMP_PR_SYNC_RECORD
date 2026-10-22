@@ -1,0 +1,4 @@
+This is a TEMPORARY commit used only to create a valid diff for the re-raised sync PR #16.
+It adds no functional change.
+This file and commit MUST NOT be merged.
+After the PR is open and usable, the temp-sync branch will be cleaned (deleted).
