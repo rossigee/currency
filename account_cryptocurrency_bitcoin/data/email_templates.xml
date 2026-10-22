@@ -1,10 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <!-- Email Template for Multisig Signature Request -->
-    <template id="email_template_multisig_signature_request" name="Multisig Wallet: Signature Request" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_multisig_signature"/>
-            <field name="subject">Action Required: Bitcoin Multisig Wallet Setup - ${object.workflow_id.wallet_name}</field>
-            <field name="email_from">${(object.workflow_id.initiated_by.email_formatted or user.email_formatted) | safe}</field>
+    <template
+        id="email_template_multisig_signature_request"
+        name="Multisig Wallet: Signature Request"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_multisig_signature" />
+            <field
+            name="subject"
+        >Action Required: Bitcoin Multisig Wallet Setup - ${object.workflow_id.wallet_name}</field>
+            <field
+            name="email_from"
+        >${(object.workflow_id.initiated_by.email_formatted or user.email_formatted) | safe}</field>
             <field name="email_to">${object.signer_email | safe}</field>
             <field name="body_html" type="html">
 <![CDATA[
@@ -86,11 +95,20 @@
         </template>
 
         <!-- Email Template for Workflow Completion -->
-        <template id="email_template_multisig_workflow_complete" name="Multisig Wallet: Setup Complete" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_multisig_workflow"/>
+        <template
+        id="email_template_multisig_workflow_complete"
+        name="Multisig Wallet: Setup Complete"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_multisig_workflow" />
             <field name="subject">Multisig Wallet Created: ${object.wallet_name}</field>
-            <field name="email_from">${(object.initiated_by.email_formatted or user.email_formatted) | safe}</field>
-            <field name="partner_to">${','.join([str(sig.signer_partner_id.id) for sig in object.signature_ids if sig.signer_partner_id])}</field>
+            <field
+            name="email_from"
+        >${(object.initiated_by.email_formatted or user.email_formatted) | safe}</field>
+            <field
+            name="partner_to"
+        >${','.join([str(sig.signer_partner_id.id) for sig in object.signature_ids if sig.signer_partner_id])}</field>
             <field name="body_html" type="html">
 <![CDATA[
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -151,9 +169,16 @@
         </template>
 
         <!-- Email Template for Balance Alerts -->
-        <template id="email_template_balance_alert" name="Bitcoin Balance Alert" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
-            <field name="subject">🚨 Bitcoin Balance Alert: ${object.multisig_wallet_id.name}</field>
+        <template
+        id="email_template_balance_alert"
+        name="Bitcoin Balance Alert"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor" />
+            <field
+            name="subject"
+        >🚨 Bitcoin Balance Alert: ${object.multisig_wallet_id.name}</field>
             <field name="email_from">${(user.email_formatted) | safe}</field>
             <field name="body_html" type="html">
 <![CDATA[
@@ -294,9 +319,16 @@
         </template>
 
         <!-- Email Template for Daily Balance Summary -->
-        <template id="email_template_balance_summary" name="Daily Bitcoin Balance Summary" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
-            <field name="subject">📊 Daily Bitcoin Balance Summary - ${object.multisig_wallet_id.name}</field>
+        <template
+        id="email_template_balance_summary"
+        name="Daily Bitcoin Balance Summary"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor" />
+            <field
+            name="subject"
+        >📊 Daily Bitcoin Balance Summary - ${object.multisig_wallet_id.name}</field>
             <field name="email_from">${(user.email_formatted) | safe}</field>
             <field name="body_html" type="html">
 <![CDATA[

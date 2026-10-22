@@ -1,58 +1,106 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
 
         <record id="res_config_settings_view_form_bitcoin" model="ir.ui.view">
             <field name="name">res.config.settings.view.form.inherit.bitcoin</field>
             <field name="model">res.config.settings</field>
-            <field name="priority" eval="90"/>
-            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="priority" eval="90" />
+            <field name="inherit_id" ref="base.res_config_settings_view_form" />
             <field name="arch" type="xml">
                 <xpath expr="//form" position="inside">
-                    <app_settings string="Bitcoin Integration" data-key="bitcoin_integration">
-                        <block title="Bitcoin Integration" name="bitcoin_integration_settings">
+                    <app_settings
+                        string="Bitcoin Integration"
+                        data-key="bitcoin_integration"
+                    >
+                        <block
+                            title="Bitcoin Integration"
+                            name="bitcoin_integration_settings"
+                        >
                             <!-- Bitcoin Node Connection -->
-                            <setting string="Use Local Node"
-                                     help="Connect to your local Bitcoin Core node for real-time data and better privacy">
-                                <field name="bitcoin_use_local_node"/>
-                                <div class="content-group mt16" invisible="not bitcoin_use_local_node">
+                            <setting
+                                string="Use Local Node"
+                                help="Connect to your local Bitcoin Core node for real-time data and better privacy"
+                            >
+                                <field name="bitcoin_use_local_node" />
+                                <div
+                                    class="content-group mt16"
+                                    invisible="not bitcoin_use_local_node"
+                                >
                                     <div class="row">
-                                        <label for="bitcoin_node_rpc_host" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_node_rpc_host" class="col-9"/>
+                                        <label
+                                            for="bitcoin_node_rpc_host"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_node_rpc_host"
+                                            class="col-9"
+                                        />
                                     </div>
                                     <div class="row">
-                                        <label for="bitcoin_node_rpc_port" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_node_rpc_port" class="col-9"/>
+                                        <label
+                                            for="bitcoin_node_rpc_port"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_node_rpc_port"
+                                            class="col-9"
+                                        />
                                     </div>
                                     <div class="row">
-                                        <label for="bitcoin_node_rpc_user" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_node_rpc_user" class="col-9"/>
+                                        <label
+                                            for="bitcoin_node_rpc_user"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_node_rpc_user"
+                                            class="col-9"
+                                        />
                                     </div>
                                     <div class="row">
-                                        <label for="bitcoin_node_rpc_password" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_node_rpc_password" password="True" class="col-9"/>
+                                        <label
+                                            for="bitcoin_node_rpc_password"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_node_rpc_password"
+                                            password="True"
+                                            class="col-9"
+                                        />
                                     </div>
                                     <div class="row">
-                                        <label for="bitcoin_node_use_ssl" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_node_use_ssl" class="col-9"/>
+                                        <label
+                                            for="bitcoin_node_use_ssl"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_node_use_ssl"
+                                            class="col-9"
+                                        />
                                     </div>
                                     <div class="row">
-                                        <label for="bitcoin_network" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_network" class="col-9"/>
+                                        <label
+                                            for="bitcoin_network"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field name="bitcoin_network" class="col-9" />
                                     </div>
 
                                     <div class="row mt8">
                                         <div class="col-12">
-                                            <button name="action_test_bitcoin_connection"
-                                                    string="Test Bitcoin Connection"
-                                                    type="object"
-                                                    class="btn-primary"/>
+                                            <button
+                                                name="action_test_bitcoin_connection"
+                                                string="Test Bitcoin Connection"
+                                                type="object"
+                                                class="btn-primary"
+                                            />
                                         </div>
                                     </div>
 
                                     <div class="alert alert-info mt8" role="alert">
-                                        <strong>📋 Bitcoin Node Setup:</strong><br/>
-                                        Ensure your Bitcoin Core node is running with these settings in bitcoin.conf:<br/>
+                                        <strong>📋 Bitcoin Node Setup:</strong><br />
+                                        Ensure your Bitcoin Core node is running with these settings in bitcoin.conf:<br
+                                        />
                                         <pre>server=1
 rpcuser=your_username
 rpcpassword=your_secure_password
@@ -62,48 +110,90 @@ txindex=1  # Optional: enables full transaction lookup</pre>
                                 </div>
 
                                 <!-- External API Settings -->
-                                <div class="content-group mt16" invisible="bitcoin_use_local_node">
+                                <div
+                                    class="content-group mt16"
+                                    invisible="bitcoin_use_local_node"
+                                >
                                     <div class="row">
-                                        <label for="bitcoin_external_api_provider" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_external_api_provider" class="col-9"/>
+                                        <label
+                                            for="bitcoin_external_api_provider"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_external_api_provider"
+                                            class="col-9"
+                                        />
                                     </div>
-                                    <div class="row" invisible="bitcoin_external_api_provider != 'custom'">
-                                        <label for="bitcoin_custom_api_base_url" class="col-3 o_light_label"/>
-                                        <field name="bitcoin_custom_api_base_url" class="col-9"
-                                               required="bitcoin_external_api_provider == 'custom'"/>
+                                    <div
+                                        class="row"
+                                        invisible="bitcoin_external_api_provider != 'custom'"
+                                    >
+                                        <label
+                                            for="bitcoin_custom_api_base_url"
+                                            class="col-3 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_custom_api_base_url"
+                                            class="col-9"
+                                            required="bitcoin_external_api_provider == 'custom'"
+                                        />
                                     </div>
 
                                     <div class="alert alert-warning mt8" role="alert">
-                                        <strong>⚠️ External API Limitations:</strong><br/>
+                                        <strong>⚠️ External API Limitations:</strong><br
+                                        />
                                         External APIs have rate limits and may not provide all features available with a local node.
                                     </div>
                                 </div>
                             </setting>
 
                             <!-- Transaction Import Settings -->
-                            <setting string="Transaction Import Settings"
-                                     help="Configure limits and performance settings for blockchain transaction imports">
+                            <setting
+                                string="Transaction Import Settings"
+                                help="Configure limits and performance settings for blockchain transaction imports"
+                            >
                                 <div class="content-group">
                                     <div class="row">
-                                        <label for="bitcoin_max_addresses_per_import" class="col-6 o_light_label"/>
-                                        <field name="bitcoin_max_addresses_per_import" class="col-6"/>
+                                        <label
+                                            for="bitcoin_max_addresses_per_import"
+                                            class="col-6 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_max_addresses_per_import"
+                                            class="col-6"
+                                        />
                                     </div>
                                     <div class="row">
-                                        <label for="bitcoin_import_delay" class="col-6 o_light_label"/>
-                                        <field name="bitcoin_import_delay" class="col-6"/>
+                                        <label
+                                            for="bitcoin_import_delay"
+                                            class="col-6 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_import_delay"
+                                            class="col-6"
+                                        />
                                     </div>
                                     <div class="row">
-                                        <label for="bitcoin_cache_duration" class="col-6 o_light_label"/>
-                                        <field name="bitcoin_cache_duration" class="col-6"/>
+                                        <label
+                                            for="bitcoin_cache_duration"
+                                            class="col-6 o_light_label"
+                                        />
+                                        <field
+                                            name="bitcoin_cache_duration"
+                                            class="col-6"
+                                        />
                                     </div>
                                 </div>
 
                                 <div class="alert alert-info mt8" role="alert">
-                                    <strong>📊 Import Settings:</strong><br/>
+                                    <strong>📊 Import Settings:</strong><br />
                                     <ul class="mb-0">
-                                        <li><strong>Max Addresses:</strong> Limits addresses checked in one import to prevent timeouts</li>
-                                        <li><strong>Delay:</strong> Pause between API requests to avoid rate limiting</li>
-                                        <li><strong>Cache Duration:</strong> How long to cache blockchain height before refreshing</li>
+                                        <li><strong
+                                            >Max Addresses:</strong> Limits addresses checked in one import to prevent timeouts</li>
+                                        <li><strong
+                                            >Delay:</strong> Pause between API requests to avoid rate limiting</li>
+                                        <li><strong
+                                            >Cache Duration:</strong> How long to cache blockchain height before refreshing</li>
                                     </ul>
                                 </div>
                             </setting>
