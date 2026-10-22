@@ -57,6 +57,8 @@ jobs:
         run: pip install "odoo-addon-vault_connector @ git+https://github.com/rossigee/odoo-vault-connector@17.0#subdirectory=vault_connector"
       - name: Install queue_job
         run: pip install "odoo-addon-queue_job @ git+https://github.com/OCA/queue@17.0#subdirectory=queue_job"
+      - name: Install crypto python dependencies
+        run: pip install mnemonic embit ecdsa base58 qrcode cron-converter cron-descriptor
       - name: Install addons and dependencies
         run: oca_install_addons
       - name: Check licenses
