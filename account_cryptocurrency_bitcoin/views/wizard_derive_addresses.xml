@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
         <record id="wizard_derive_addresses_view_form" model="ir.ui.view">
@@ -6,27 +6,45 @@
             <field name="model">wizard.derive.addresses</field>
             <field name="arch" type="xml">
                 <form string="Derive Addresses from XPUB">
-                    <field name="derived_addresses_display" widget="text" readonly="1"
-                           options="{'resizable': true}" nolabel="1"/>
+                    <field
+                        name="derived_addresses_display"
+                        widget="text"
+                        readonly="1"
+                        options="{'resizable': true}"
+                        nolabel="1"
+                    />
                     <group invisible="derived_addresses_display">
                         <group string="Derivation Parameters">
-                            <field name="public_key_id" readonly="context.get('default_public_key_id', False)"/>
-                            <field name="start_index"/>
-                            <field name="count"/>
-                            <field name="address_type"/>
+                            <field
+                                name="public_key_id"
+                                readonly="context.get('default_public_key_id', False)"
+                            />
+                            <field name="start_index" />
+                            <field name="count" />
+                            <field name="address_type" />
                         </group>
                     </group>
 
                     <group invisible="not derived_addresses_display">
-                        <separator string="Derived Addresses"/>
+                        <separator string="Derived Addresses" />
                     </group>
                     
                     <footer>
-                        <button string="Derive Addresses" name="action_derive_addresses" type="object" 
-                                class="btn-primary" invisible="derived_addresses_display"/>
-                        <button string="Export JSON" name="action_export_addresses" type="object" 
-                                class="btn-secondary" invisible="not derived_addresses_display"/>
-                        <button string="Close" class="btn-secondary" special="cancel"/>
+                        <button
+                            string="Derive Addresses"
+                            name="action_derive_addresses"
+                            type="object"
+                            class="btn-primary"
+                            invisible="derived_addresses_display"
+                        />
+                        <button
+                            string="Export JSON"
+                            name="action_export_addresses"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="not derived_addresses_display"
+                        />
+                        <button string="Close" class="btn-secondary" special="cancel" />
                     </footer>
                 </form>
             </field>

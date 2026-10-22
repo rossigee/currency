@@ -1,43 +1,43 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data noupdate="1">
         <!-- Cron job to check expired multisig workflows -->
         <record id="ir_cron_check_expired_multisig_workflows" model="ir.cron">
             <field name="name">Bitcoin: Check Expired Multisig Workflows</field>
-            <field name="model_id" ref="model_crypto_bitcoin_multisig_workflow"/>
+            <field name="model_id" ref="model_crypto_bitcoin_multisig_workflow" />
             <field name="state">code</field>
             <field name="code">model._cron_check_expired_workflows()</field>
-            <field name="user_id" ref="base.user_root"/>
+            <field name="user_id" ref="base.user_root" />
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="numbercall">-1</field>
-            <field name="active" eval="True"/>
+            <field name="active" eval="True" />
         </record>
 
         <!-- Cron job to check balance monitors -->
         <record id="ir_cron_check_balance_monitors" model="ir.cron">
             <field name="name">Bitcoin: Check Balance Monitors</field>
-            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor" />
             <field name="state">code</field>
             <field name="code">model._cron_check_all_balances()</field>
-            <field name="user_id" ref="base.user_root"/>
+            <field name="user_id" ref="base.user_root" />
             <field name="interval_number">15</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
-            <field name="active" eval="True"/>
+            <field name="active" eval="True" />
         </record>
 
         <!-- Cron job for daily balance summaries -->
         <record id="ir_cron_daily_balance_summary" model="ir.cron">
             <field name="name">Bitcoin: Send Daily Balance Summaries</field>
-            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor" />
             <field name="state">code</field>
             <field name="code">model._cron_send_daily_summaries()</field>
-            <field name="user_id" ref="base.user_root"/>
+            <field name="user_id" ref="base.user_root" />
             <field name="interval_number">1</field>
             <field name="interval_type">days</field>
             <field name="numbercall">-1</field>
-            <field name="active" eval="False"/>
+            <field name="active" eval="False" />
         </record>
 
         <!-- Action to create workflow from multisig wallet view -->
@@ -55,7 +55,10 @@
         </record>
 
         <!-- Balance Monitor Action -->
-        <record id="crypto_bitcoin_balance_monitor_action" model="ir.actions.act_window">
+        <record
+            id="crypto_bitcoin_balance_monitor_action"
+            model="ir.actions.act_window"
+        >
             <field name="name">Balance Monitors</field>
             <field name="res_model">crypto.bitcoin.balance.monitor</field>
             <field name="view_mode">tree,kanban,form</field>
@@ -94,7 +97,10 @@
         </record>
 
         <!-- Balance History Action -->
-        <record id="crypto_bitcoin_balance_history_action" model="ir.actions.act_window">
+        <record
+            id="crypto_bitcoin_balance_history_action"
+            model="ir.actions.act_window"
+        >
             <field name="name">Balance History</field>
             <field name="res_model">crypto.bitcoin.balance.history</field>
             <field name="view_mode">tree,graph</field>

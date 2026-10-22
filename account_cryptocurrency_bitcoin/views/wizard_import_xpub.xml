@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
         <record id="wizard_import_xpub_view_form" model="ir.ui.view">
@@ -7,73 +7,128 @@
             <field name="arch" type="xml">
                 <form string="Import XPUB">
                     <header>
-                        <button name="action_import_xpub" string="Import XPUB" type="object" 
-                                class="btn-primary"/>
-                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                        <button
+                            name="action_import_xpub"
+                            string="Import XPUB"
+                            type="object"
+                            class="btn-primary"
+                        />
+                        <button
+                            string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"
+                        />
                     </header>
                     
                     <div class="alert alert-info" role="alert">
-                        <strong>📖 Import Extended Public Key (XPUB):</strong><br/>
+                        <strong>📖 Import Extended Public Key (XPUB):</strong><br />
                         Import an XPUB from hardware wallets, other software, or manually entered.
                         This allows creating multisig wallets or monitoring accounts without exposing private keys.
                     </div>
                     
                     <group>
                         <group>
-                            <field name="name" placeholder="e.g., Hardware Wallet #1"/>
-                            <field name="key_type"/>
-                            <field name="derivation_path" readonly="key_type != 'master'"/>
+                            <field name="name" placeholder="e.g., Hardware Wallet #1" />
+                            <field name="key_type" />
+                            <field
+                                name="derivation_path"
+                                readonly="key_type != 'master'"
+                            />
                         </group>
                         <group>
-                            <field name="owner_id"/>
-                            <field name="partner_id" invisible="key_type != &quot;account&quot;"/>
+                            <field name="owner_id" />
+                            <field
+                                name="partner_id"
+                                invisible="key_type != &quot;account&quot;"
+                            />
                         </group>
                     </group>
                     
                     <group string="XPUB Details">
-                        <field name="xpub" widget="text" placeholder="xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj"/>
-                        <field name="master_fingerprint" placeholder="4b4e812f" 
-                               help="8-character hex fingerprint of the master/root key for validation"/>
+                        <field
+                            name="xpub"
+                            widget="text"
+                            placeholder="xpub6BosfCnifzxcFwrSzQiqu2DBVTshkCXacvNsWGYJVVhhawA7d4R5WSWGFNbi8Aw6ZRc1brxMyWMzG3DSSSSoekkudhUd9yLb6qx39T9nMdj"
+                        />
+                        <field
+                            name="master_fingerprint"
+                            placeholder="4b4e812f"
+                            help="8-character hex fingerprint of the master/root key for validation"
+                        />
                     </group>
                     
                     <!-- Key-specific settings -->
-                    <group string="Key Settings" invisible="key_type not in ['account', 'multisig']">
+                    <group
+                        string="Key Settings"
+                        invisible="key_type not in ['account', 'multisig']"
+                    >
                         <group>
-                            <field name="account_index" invisible="key_type not in ['account', 'multisig']"/>
-                            <field name="script_type" invisible="key_type != &quot;multisig&quot;"/>
+                            <field
+                                name="account_index"
+                                invisible="key_type not in ['account', 'multisig']"
+                            />
+                            <field
+                                name="script_type"
+                                invisible="key_type != &quot;multisig&quot;"
+                            />
                         </group>
                         <group>
-                            <field name="cosigner_index" invisible="key_type != &quot;multisig&quot;"/>
-                            <field name="multisig_wallet_id" invisible="key_type != &quot;multisig&quot;"/>
+                            <field
+                                name="cosigner_index"
+                                invisible="key_type != &quot;multisig&quot;"
+                            />
+                            <field
+                                name="multisig_wallet_id"
+                                invisible="key_type != &quot;multisig&quot;"
+                            />
                         </group>
                     </group>
                     
                     <!-- Validation Results -->
                     <group string="Validation Results" invisible="not xpub">
-                        <field name="fingerprint_match" widget="boolean_button" readonly="1" string="Master Fingerprint Match"/>
+                        <field
+                            name="fingerprint_match"
+                            widget="boolean_button"
+                            readonly="1"
+                            string="Master Fingerprint Match"
+                        />
                     </group>
                     
                     <!-- XPUB Validation -->
                     <group string="XPUB Validation" invisible="not xpub">
                         <div class="row">
                             <div class="col-2">
-                                <field name="xpub_valid" widget="boolean_button" readonly="1"/>
+                                <field
+                                    name="xpub_valid"
+                                    widget="boolean_button"
+                                    readonly="1"
+                                />
                             </div>
                             <div class="col-10">
-                                <field name="xpub_details" widget="text" readonly="1" nolabel="1" 
-                                       class="text-monospace" style="font-size: 12px;"/>
+                                <field
+                                    name="xpub_details"
+                                    widget="text"
+                                    readonly="1"
+                                    nolabel="1"
+                                    class="text-monospace"
+                                    style="font-size: 12px;"
+                                />
                             </div>
                         </div>
                     </group>
                     
                     <group string="Notes">
-                        <field name="notes" widget="text" nolabel="1"/>
+                        <field name="notes" widget="text" nolabel="1" />
                     </group>
                     
                     <group>
-                        <button name="action_import_xpub" string="Import XPUB and Create Public Key" 
-                                type="object" class="btn-primary btn-lg" 
-                                style="width: 100%; margin: 10px 0;"/>
+                        <button
+                            name="action_import_xpub"
+                            string="Import XPUB and Create Public Key"
+                            type="object"
+                            class="btn-primary btn-lg"
+                            style="width: 100%; margin: 10px 0;"
+                        />
                     </group>
                     
                 </form>
