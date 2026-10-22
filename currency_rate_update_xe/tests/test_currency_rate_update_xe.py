@@ -117,7 +117,7 @@ class TestResCurrencyRateProviderXE(common.TransactionCase):
 
     def test_http_error_raises(self):
         self._mock_xe_response(status_code=403, content=ERROR_PAGE)
-        with self.assertRaisesRegex(Exception, "HTTP 403"):
+        with self.assertRaisesRegex(UserError, "HTTP 403"):
             self.xe_provider._obtain_rates(
                 "EUR", ["USD", "EUR"], self.today, self.today
             )
