@@ -1,39 +1,38 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
         <record id="crypto_bitcoin_public_key_view_form" model="ir.ui.view">
             <field name="name">crypto.bitcoin.public.key.form</field>
             <field name="model">crypto.bitcoin.public.key</field>
             <field name="arch" type="xml">
-                <form string="Bitcoin Public Keys">
+                <form>
                     <!-- Hidden fields for view logic -->
                     <field name="private_key_id" invisible="1" />
-                    
+
                     <header>
                         <button
-                            name="action_derive_addresses_wizard"
-                            string="Derive Addresses"
-                            type="object"
-                            class="btn-primary"
-                            invisible="not xpub"
-                        />
+                        name="action_derive_addresses_wizard"
+                        string="Derive Addresses"
+                        type="object"
+                        class="btn-primary"
+                        invisible="not xpub"
+                    />
                         <button
-                            name="action_refresh_vault_status"
-                            string="Refresh Vault Status"
-                            type="object"
-                            class="btn-secondary"
-                            invisible="not id"
-                        />
+                        name="action_refresh_vault_status"
+                        string="Refresh Vault Status"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="not id"
+                    />
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button
-                                name="action_view_private_key"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-lock"
-                                invisible="private_key_id in []"
-                            >
+                            name="action_view_private_key"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-lock"
+                            invisible="private_key_id in []"
+                        >
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Private Key</span>
                                 </div>
@@ -45,63 +44,63 @@
                                 <field name="owner_id" />
                                 <field name="key_type" readonly="id" />
                                 <field
-                                    name="derivation_path"
-                                    readonly="1"
-                                    invisible="not derivation_path"
-                                />
+                                name="derivation_path"
+                                readonly="1"
+                                invisible="not derivation_path"
+                            />
                                 <field
-                                    name="account_index"
-                                    readonly="1"
-                                    invisible="key_type != &quot;account&quot;"
-                                />
+                                name="account_index"
+                                readonly="1"
+                                invisible="key_type != &quot;account&quot;"
+                            />
                             </group>
                             <group>
                                 <field
-                                    name="partner_id"
-                                    invisible="key_type != &quot;account&quot;"
-                                />
+                                name="partner_id"
+                                invisible="key_type != &quot;account&quot;"
+                            />
                                 <field
-                                    name="fingerprint"
-                                    readonly="1"
-                                    invisible="not fingerprint"
-                                />
+                                name="fingerprint"
+                                readonly="1"
+                                invisible="not fingerprint"
+                            />
                                 <field
-                                    name="token_uuid"
-                                    readonly="1"
-                                    invisible="not id"
-                                />
+                                name="token_uuid"
+                                readonly="1"
+                                invisible="not id"
+                            />
                                 <field
-                                    name="vault_status"
-                                    readonly="1"
-                                    invisible="not id"
-                                />
+                                name="vault_status"
+                                readonly="1"
+                                invisible="not id"
+                            />
                             </group>
                         </group>
                         <notebook>
                             <page string="XPUB">
                                 <group string="Extended Public Key">
                                     <field
-                                        name="xpub"
-                                        widget="CopyClipboardChar"
-                                        invisible="not xpub"
-                                    />
+                                    name="xpub"
+                                    widget="CopyClipboardChar"
+                                    invisible="not xpub"
+                                />
                                 </group>
-                                
+
                                 <div
-                                    class="alert alert-info"
-                                    role="alert"
-                                    invisible="id"
-                                >
+                                class="alert alert-info"
+                                role="alert"
+                                invisible="id"
+                            >
                                     <strong>📖 Import XPUB:</strong><br />
                                     Paste the extended public key (XPUB) from your hardware wallet, Electrum, or other Bitcoin software.
                                     Set the key type and other details above first.
                                 </div>
-                                
+
                                 <div
-                                    class="alert alert-info"
-                                    role="alert"
-                                    invisible="xpub"
-                                >
+                                class="alert alert-info"
+                                role="alert"
+                                invisible="xpub"
+                            >
                                     <strong>ℹ️ XPUB Not Available:</strong><br />
                                     The XPUB cannot be retrieved from Vault. Check vault status and try refreshing.
                                 </div>
@@ -109,26 +108,26 @@
                                 <group string="Key Fingerprints" invisible="not xpub">
                                     <group>
                                         <field
-                                            name="master_fingerprint"
-                                            string="Master Key Fingerprint"
-                                        />
+                                        name="master_fingerprint"
+                                        string="Master Key Fingerprint"
+                                    />
                                         <field
-                                            name="fingerprint"
-                                            string="This Key Fingerprint"
-                                        />
+                                        name="fingerprint"
+                                        string="This Key Fingerprint"
+                                    />
                                     </group>
                                     <group>
                                         <field
-                                            name="xpub_parent_fingerprint"
-                                            string="Parent Key Fingerprint"
-                                        />
+                                        name="xpub_parent_fingerprint"
+                                        string="Parent Key Fingerprint"
+                                    />
                                     </group>
                                 </group>
 
                                 <group
-                                    string="XPUB Technical Details"
-                                    invisible="not xpub"
-                                >
+                                string="XPUB Technical Details"
+                                invisible="not xpub"
+                            >
                                     <group>
                                         <field name="xpub_version" />
                                         <field name="xpub_depth" />
@@ -140,49 +139,49 @@
                                     </group>
                                 </group>
                             </page>
-                            
+
                             <page
-                                string="Multisig Setup Guide"
-                                invisible="key_type != &quot;multisig&quot;"
-                            >
+                            string="Multisig Setup Guide"
+                            invisible="key_type != &quot;multisig&quot;"
+                        >
                                 <div class="alert alert-info" role="alert">
                                     <h4>🔑 Cosigner Key Created</h4>
                                     <p>This is <strong
-                                        >your contribution</strong> to a multisig wallet. To create actual multisig addresses, you need XPUBs from all other cosigners.</p>
-                                    
+                                    >your contribution</strong> to a multisig wallet. To create actual multisig addresses, you need XPUBs from all other cosigners.</p>
+
                                     <h5>📋 Next Steps:</h5>
                                     <ol>
                                         <li><strong
-                                            >Share Your XPUB:</strong> Provide your XPUB (from the XPUB tab) to other cosigners</li>
+                                        >Share Your XPUB:</strong> Provide your XPUB (from the XPUB tab) to other cosigners</li>
                                         <li><strong
-                                            >Collect Other XPUBs:</strong> Get corresponding XPUBs from other cosigners using the same derivation path</li>
+                                        >Collect Other XPUBs:</strong> Get corresponding XPUBs from other cosigners using the same derivation path</li>
                                         <li><strong
-                                            >Use Wallet Software:</strong> Import all XPUBs into multisig wallet software (Electrum, Bitcoin Core, etc.)</li>
+                                        >Use Wallet Software:</strong> Import all XPUBs into multisig wallet software (Electrum, Bitcoin Core, etc.)</li>
                                         <li><strong
-                                            >Verify Setup:</strong> Ensure all cosigners generate the same multisig addresses</li>
+                                        >Verify Setup:</strong> Ensure all cosigners generate the same multisig addresses</li>
                                     </ol>
-                                    
+
                                     <h5>⚠️ Important Notes:</h5>
                                     <ul>
                                         <li><strong
-                                            >Single addresses shown here are NOT multisig</strong> - they're just from your individual key</li>
+                                        >Single addresses shown here are NOT multisig</strong> - they're just from your individual key</li>
                                         <li>All cosigners must use the <strong
-                                            >same account index and script type</strong></li>
+                                        >same account index and script type</strong></li>
                                         <li>Your derivation path: <code><field
-                                                    name="derivation_path"
-                                                    readonly="1"
-                                                    nolabel="1"
-                                                /></code></li>
+                                                name="derivation_path"
+                                                readonly="1"
+                                                nolabel="1"
+                                            /></code></li>
                                         <li
-                                        >Test the setup with small amounts before using for large transactions</li>
+                                    >Test the setup with small amounts before using for large transactions</li>
                                     </ul>
                                 </div>
                             </page>
-                            
+
                             <page string="Notes">
                                 <field name="notes" widget="text" />
                             </page>
-                            
+
                             <page string="Derived Addresses" invisible="not xpub">
                             <group>
                                 <group string="Derivation Settings">
@@ -191,20 +190,20 @@
                             </group>
                             <separator string="Receive Addresses (m/0/x)" />
                             <field
-                                    name="derived_receive_addresses"
-                                    widget="text"
-                                    readonly="1"
-                                    invisible="not derived_receive_addresses"
-                                    options="{'resizable': true}"
-                                />
+                                name="derived_receive_addresses"
+                                widget="text"
+                                readonly="1"
+                                invisible="not derived_receive_addresses"
+                                options="{'resizable': true}"
+                            />
                             <separator string="Change Addresses (m/1/x)" />
                             <field
-                                    name="derived_change_addresses"
-                                    widget="text"
-                                    readonly="1"
-                                    invisible="not derived_change_addresses"
-                                    options="{'resizable': true}"
-                                />
+                                name="derived_change_addresses"
+                                widget="text"
+                                readonly="1"
+                                invisible="not derived_change_addresses"
+                                options="{'resizable': true}"
+                            />
                         </page>
                     </notebook>
                     </sheet>
@@ -216,7 +215,7 @@
             <field name="name">crypto.bitcoin.public.key.tree</field>
             <field name="model">crypto.bitcoin.public.key</field>
             <field name="arch" type="xml">
-                <tree string="Bitcoin Public Keys">
+                <tree>
                     <field name="name" />
                     <field name="key_type" />
                     <field name="derivation_path" />
@@ -242,12 +241,11 @@
                 </p>
                 <ul>
                     <li><strong
-                        >Click "Create":</strong> Import extended public keys (XPUB) from hardware wallets or other sources</li>
+                    >Click "Create":</strong> Import extended public keys (XPUB) from hardware wallets or other sources</li>
                     <li><strong
-                        >Derive from Private Key:</strong> Go to Private Keys → Create Account or Multisig Public Key</li>
+                    >Derive from Private Key:</strong> Go to Private Keys → Create Account or Multisig Public Key</li>
                 </ul>
             </field>
         </record>
-        
-    </data>
+
 </odoo>

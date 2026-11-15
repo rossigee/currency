@@ -1,0 +1,653 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils: https://docutils.sourceforge.io/" />
+<title>Account Management Tools for Lightning</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 9511 2024-01-13 09:50:07Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+Despite the name, some widely supported CSS2 features are used.
+
+See https://docutils.sourceforge.io/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: gray; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic, pre.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="account-management-tools-for-lightning">
+<h1 class="title">Account Management Tools for Lightning</h1>
+
+<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! This file is generated by oca-gen-addon-readme !!
+!! changes will be overwritten.                   !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! source digest: sha256:9a7cbbc3c986c43aafbf35c7f819e2ca5bcbd1741fbefee184d19ec6954361df
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Beta" src="https://img.shields.io/badge/maturity-Beta-yellow.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/currency/tree/17.0/account_cryptocurrency_lightning"><img alt="OCA/currency" src="https://img.shields.io/badge/github-OCA%2Fcurrency-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/currency-17-0/currency-17-0-account_cryptocurrency_lightning"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/currency&amp;target_branch=17.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
+<p>Lightning Network payment module for Odoo 16.</p>
+<p>Provides comprehensive Lightning Network integration including:</p>
+<ul class="simple">
+<li>Lightning Service Provider (LND node) management with macaroon
+authentication</li>
+<li>Lightning address management with transaction history</li>
+<li>Professional payment processing with background job support</li>
+<li>Real-time BTC price integration and QR code generation</li>
+<li>Complete audit trail and state tracking</li>
+<li>Secure credential storage via vault connector</li>
+</ul>
+<p>Features live payment request generation, status tracking (draft →
+pending → success/failed), and full LND REST API integration for
+Lightning Network operations.</p>
+<p><strong>Table of contents</strong></p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#configuration" id="toc-entry-1">Configuration</a><ul>
+<li><a class="reference internal" href="#prerequisites" id="toc-entry-2">Prerequisites</a></li>
+<li><a class="reference internal" href="#initial-setup" id="toc-entry-3">Initial Setup</a></li>
+<li><a class="reference internal" href="#security-configuration" id="toc-entry-4">Security Configuration</a></li>
+<li><a class="reference internal" href="#validation" id="toc-entry-5">Validation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#usage" id="toc-entry-6">Usage</a><ul>
+<li><a class="reference internal" href="#daily-operations" id="toc-entry-7">Daily Operations</a></li>
+<li><a class="reference internal" href="#payment-workflow" id="toc-entry-8">Payment Workflow</a></li>
+<li><a class="reference internal" href="#mobile-payment-support" id="toc-entry-9">Mobile Payment Support</a></li>
+<li><a class="reference internal" href="#troubleshooting" id="toc-entry-10">Troubleshooting</a></li>
+<li><a class="reference internal" href="#customization" id="toc-entry-11">Customization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bug-tracker" id="toc-entry-12">Bug Tracker</a></li>
+<li><a class="reference internal" href="#credits" id="toc-entry-13">Credits</a><ul>
+<li><a class="reference internal" href="#authors" id="toc-entry-14">Authors</a></li>
+<li><a class="reference internal" href="#contributors" id="toc-entry-15">Contributors</a></li>
+<li><a class="reference internal" href="#maintainers" id="toc-entry-16">Maintainers</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="configuration">
+<h1><a class="toc-backref" href="#toc-entry-1">Configuration</a></h1>
+<div class="section" id="prerequisites">
+<h2><a class="toc-backref" href="#toc-entry-2">Prerequisites</a></h2>
+<ol class="arabic simple">
+<li><strong>LND Node</strong>: Running Lightning Network Daemon (LND) v0.19.1+ with
+REST API enabled</li>
+<li><strong>Dependencies</strong>: Ensure vault_connector and queue_job modules are
+installed</li>
+<li><strong>Python Packages</strong>: requests and qrcode (automatically installed)</li>
+</ol>
+</div>
+<div class="section" id="initial-setup">
+<h2><a class="toc-backref" href="#toc-entry-3">Initial Setup</a></h2>
+<ol class="arabic simple">
+<li><strong>Install the module</strong> via Apps → Lightning</li>
+<li><strong>Configure Lightning Service Provider</strong>:<ul>
+<li>Navigate to Cryptocurrency → Configuration → Lightning Service
+Providers</li>
+<li>Click “Create” and fill in:<ul>
+<li>Name: Your LND node name (e.g., “Main LND Node”)</li>
+<li>REST URL: LND REST endpoint (e.g.,
+“<a class="reference external" href="https://lnd.yourserver.com:8080">https://lnd.yourserver.com:8080</a>”)</li>
+<li>Public Key: Your node’s public key (from lncli getinfo)</li>
+</ul>
+</li>
+<li><strong>Upload Macaroon</strong>:<ul>
+<li>Obtain your LND macaroon: base64 /path/to/admin.macaroon</li>
+<li>Paste the base64 string into the “Macaroon (Base64/Hex)” field</li>
+<li>Click “Parse and Validate Macaroon” to verify</li>
+<li>The system will securely store it in the vault</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Test Connection</strong>:<ul>
+<li>In the service provider form, click the “LND Status” tab</li>
+<li>Click “Refresh Status” to verify connectivity</li>
+<li>You should see node info, balances, and channel data</li>
+</ul>
+</li>
+<li><strong>Configure Lightning Addresses</strong>:<ul>
+<li>Navigate to Cryptocurrency → Lightning → Lightning Addresses</li>
+<li>Add Lightning addresses you want to send payments to</li>
+<li>Link each address to the appropriate service provider</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section" id="security-configuration">
+<h2><a class="toc-backref" href="#toc-entry-4">Security Configuration</a></h2>
+<ol class="arabic simple">
+<li><strong>User Groups</strong>: Assign users to the “Lightning User” group for
+access</li>
+<li><strong>SSL Certificates</strong>: Ensure your LND node has valid SSL certificates</li>
+<li><strong>Macaroon Permissions</strong>: Use admin.macaroon or create custom
+macaroons with required permissions:<ul>
+<li>lncli bakemacaroon <a class="reference external" href="info:read">info:read</a> invoices:read invoices:write
+offchain:read offchain:write</li>
+</ul>
+</li>
+<li><strong>Firewall</strong>: Ensure LND REST port (default 8080) is accessible from
+Odoo server</li>
+</ol>
+</div>
+<div class="section" id="validation">
+<h2><a class="toc-backref" href="#toc-entry-5">Validation</a></h2>
+<ol class="arabic simple">
+<li><strong>Create Test Payment</strong>:<ul>
+<li>Go to Lightning Addresses, select an address</li>
+<li>Click “Create Payment”</li>
+<li>Enter amount and click “Pay Now”</li>
+<li>Verify payment processes through draft → pending → success states</li>
+</ul>
+</li>
+<li><strong>Check Background Jobs</strong>: Monitor via Settings → Technical → Queue
+Jobs</li>
+</ol>
+</div>
+</div>
+<div class="section" id="usage">
+<h1><a class="toc-backref" href="#toc-entry-6">Usage</a></h1>
+<div class="section" id="daily-operations">
+<h2><a class="toc-backref" href="#toc-entry-7">Daily Operations</a></h2>
+<p><strong>Payment Processing</strong></p>
+<ul class="simple">
+<li>Navigate to <strong>Cryptocurrency → Lightning → Lightning Payments</strong></li>
+<li>Click “Create Payment” to open the payment wizard</li>
+<li>Select Lightning address, enter amount, and click “Pay Now”</li>
+<li>Monitor payment status in real-time (draft → pending → success/failed)</li>
+<li>View detailed transaction information including fees and route hops</li>
+</ul>
+<p><strong>Lightning Address Management</strong></p>
+<ul class="simple">
+<li><strong>View Addresses</strong>: Cryptocurrency → Lightning → Lightning Addresses</li>
+<li><strong>Add New Address</strong>: Click “Create” and enter Lightning address
+(<a class="reference external" href="mailto:user&#64;domain.com">user&#64;domain.com</a>)</li>
+<li><strong>Link Service Provider</strong>: Associate addresses with your LND nodes</li>
+<li><strong>View Transactions</strong>: Use “Fetch Transactions” to pull latest
+activity from LND</li>
+</ul>
+<p><strong>Service Provider Monitoring</strong></p>
+<ul class="simple">
+<li><strong>Node Status</strong>: Check LND node health via “LND Status” tab</li>
+<li><strong>Macaroon Management</strong>: Upload/update authentication credentials</li>
+<li><strong>Connection Testing</strong>: Verify REST API connectivity</li>
+</ul>
+<p><strong>Payment History and Audit</strong></p>
+<ul class="simple">
+<li><strong>Payment Records</strong>: All payments are permanently stored with complete
+audit trail</li>
+<li><strong>Status Tracking</strong>: View state changes, timestamps, and responsible
+users</li>
+<li><strong>Transaction Details</strong>: Access route information, fees, and technical
+data</li>
+<li><strong>Notes and Attachments</strong>: Add internal documentation to payment
+records</li>
+</ul>
+</div>
+<div class="section" id="payment-workflow">
+<h2><a class="toc-backref" href="#toc-entry-8">Payment Workflow</a></h2>
+<ol class="arabic simple">
+<li><strong>Draft State</strong>: Live BTC price calculation, QR code generation for
+mobile payments</li>
+<li><strong>Payment Initiation</strong>: Values freeze at current rates, background
+job starts</li>
+<li><strong>Pending State</strong>: Payment being processed by LND node</li>
+<li><strong>Completion</strong>: Success or failure with detailed results and error
+information</li>
+</ol>
+</div>
+<div class="section" id="mobile-payment-support">
+<h2><a class="toc-backref" href="#toc-entry-9">Mobile Payment Support</a></h2>
+<ul class="simple">
+<li><strong>QR Code Generation</strong>: Automatic Lightning invoice QR codes for
+mobile wallet scanning</li>
+<li><strong>Out-of-band Payments</strong>: Generate payment requests without immediate
+processing</li>
+<li><strong>Real-time Updates</strong>: Live price calculations until payment
+confirmation</li>
+</ul>
+</div>
+<div class="section" id="troubleshooting">
+<h2><a class="toc-backref" href="#toc-entry-10">Troubleshooting</a></h2>
+<p><strong>Payment Failures</strong></p>
+<ul class="simple">
+<li>Check Lightning address validity and reachability</li>
+<li>Verify LND node connectivity and channel liquidity</li>
+<li>Review macaroon permissions and expiration</li>
+<li>Monitor background job logs for detailed error messages</li>
+</ul>
+<p><strong>Connection Issues</strong></p>
+<ul class="simple">
+<li>Validate REST URL accessibility and SSL certificates</li>
+<li>Check firewall rules and network connectivity</li>
+<li>Verify macaroon encoding (base64 vs hex)</li>
+<li>Test with lncli getinfo directly on LND server</li>
+</ul>
+<p><strong>Performance Optimization</strong></p>
+<ul class="simple">
+<li>Use queue_job for background payment processing</li>
+<li>Configure appropriate fee limits for routing</li>
+<li>Monitor channel balance and liquidity management</li>
+<li>Regular macaroon rotation for security</li>
+</ul>
+</div>
+<div class="section" id="customization">
+<h2><a class="toc-backref" href="#toc-entry-11">Customization</a></h2>
+<p><strong>BTC Price Service Override</strong></p>
+<p>The module uses a configurable BTC price service system that can be
+customized:</p>
+<ul class="simple">
+<li><strong>Via UI</strong>: Navigate to Configuration → BTC Price Services to add
+custom services</li>
+<li><strong>Priority System</strong>: Services are tried in sequence order (lower
+sequence = higher priority)</li>
+<li><strong>Custom Implementation</strong>: Create a custom module to override price
+sources:</li>
+</ul>
+<pre class="code python literal-block">
+<span class="c1"># In your custom module</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">odoo</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span><span class="w">
+
+</span><span class="k">class</span><span class="w"> </span><span class="nc">CryptoBtcPriceService</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span><span class="w">
+</span>    <span class="n">_inherit</span> <span class="o">=</span> <span class="s1">'crypto.btc.price.service'</span><span class="w">
+
+</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_get_custom_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currency_name</span><span class="p">):</span><span class="w">
+</span>        <span class="c1"># Your custom API integration</span><span class="w">
+</span>        <span class="k">return</span> <span class="n">your_api_call</span><span class="p">(</span><span class="n">currency_name</span><span class="p">)</span>
+</pre>
+<ul class="simple">
+<li><strong>Service Types</strong>:<ul>
+<li><tt class="docutils literal">coingecko</tt>: Default CoinGecko API integration</li>
+<li><tt class="docutils literal">custom</tt>: Override <tt class="docutils literal">_get_custom_price()</tt> method for your
+implementation</li>
+</ul>
+</li>
+<li><strong>Built-in Features</strong>: Automatic caching, fallback handling, error
+tracking, and statistics</li>
+</ul>
+</div>
+</div>
+<div class="section" id="bug-tracker">
+<h1><a class="toc-backref" href="#toc-entry-12">Bug Tracker</a></h1>
+<p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/currency/issues">GitHub Issues</a>.
+In case of trouble, please check there if your issue has already been reported.
+If you spotted it first, help us to smash it by providing a detailed and welcomed
+<a class="reference external" href="https://github.com/OCA/currency/issues/new?body=module:%20account_cryptocurrency_lightning%0Aversion:%2017.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
+<p>Do not contact contributors directly about support or help with technical issues.</p>
+</div>
+<div class="section" id="credits">
+<h1><a class="toc-backref" href="#toc-entry-13">Credits</a></h1>
+<div class="section" id="authors">
+<h2><a class="toc-backref" href="#toc-entry-14">Authors</a></h2>
+<ul class="simple">
+<li>Ross Golder</li>
+</ul>
+</div>
+<div class="section" id="contributors">
+<h2><a class="toc-backref" href="#toc-entry-15">Contributors</a></h2>
+<ul class="simple">
+<li>Ross Golder &lt;<a class="reference external" href="mailto:ross&#64;golder.org">ross&#64;golder.org</a>&gt;</li>
+</ul>
+</div>
+<div class="section" id="maintainers">
+<h2><a class="toc-backref" href="#toc-entry-16">Maintainers</a></h2>
+<p>This module is maintained by the OCA.</p>
+<a class="reference external image-reference" href="https://odoo-community.org">
+<img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />
+</a>
+<p>OCA, or the Odoo Community Association, is a nonprofit organization whose
+mission is to support the collaborative development of Odoo features and
+promote its widespread use.</p>
+<p>This module is part of the <a class="reference external" href="https://github.com/OCA/currency/tree/17.0/account_cryptocurrency_lightning">OCA/currency</a> project on GitHub.</p>
+<p>You are welcome to contribute. To learn how please visit <a class="reference external" href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,11 +1,11 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import unittest
 import base64
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from odoo.tests.common import TransactionCase
+
 from ..models.macaroon_utils import MacaroonUtils, MacaroonValidationError
 
 
@@ -15,10 +15,10 @@ class TestMacaroonUtils(TransactionCase):
     def setUp(self):
         super().setUp()
         # Sample valid LND macaroon (hex format) for testing
-        self.valid_hex_macaroon = "0201036c6e6402ac01030a10dbaf04d38e9ba8ff52e93365b6d3ae381201301a0f0a07616464726573731204726561641a0c0a04696e666f1204726561641a100a08696e766f696365731204726561641a100a086d616361726f6f6e1204726561641a0f0a076d6573736167651204726561641a100a086f6666636861696e1204726561641a0f0a076f6e636861696e1204726561641a0d0a0570656572731204726561641a0e0a067369676e657212047265616400000620396b1846260476447cf1735d7bd51d741fdb9e78e1a17b72e38dac98792fa3f4"
+        self.valid_hex_macaroon = "0201036c6e6402ac01030a10dbaf04d38e9ba8ff52e93365b6d3ae381201301a0f0a07616464726573731204726561641a0c0a04696e666f1204726561641a100a08696e766f696365731204726561641a100a086d616361726f6f6e1204726561641a0f0a076d6573736167651204726561641a100a086f6666636861696e1204726561641a0f0a076f6e636861696e1204726561641a0d0a0570656572731204726561641a0e0a067369676e657212047265616400000620396b1846260476447cf1735d7bd51d741fdb9e78e1a17b72e38dac98792fa3f4"  # noqa: E501
 
         # Convert hex to base64 for testing base64 format
-        self.valid_base64_macaroon = base64.b64encode(bytes.fromhex(self.valid_hex_macaroon)).decode('utf-8')
+        self.valid_base64_macaroon = base64.b64encode(bytes.fromhex(self.valid_hex_macaroon)).decode('utf-8')  # noqa: E501
 
         # Invalid macaroons for testing error cases
         self.invalid_hex = "invalid_hex_string"
@@ -30,14 +30,14 @@ class TestMacaroonUtils(TransactionCase):
         try:
             MacaroonUtils.validate_macaroon(self.valid_hex_macaroon)
         except MacaroonValidationError:
-            self.fail("validate_macaroon() raised MacaroonValidationError unexpectedly!")
+            self.fail("validate_macaroon() raised MacaroonValidationError unexpectedly!")  # noqa: E501
 
     def test_validate_macaroon_valid_base64(self):
         """Test validation of valid base64-encoded macaroon"""
         try:
             MacaroonUtils.validate_macaroon(self.valid_base64_macaroon)
         except MacaroonValidationError:
-            self.fail("validate_macaroon() raised MacaroonValidationError unexpectedly!")
+            self.fail("validate_macaroon() raised MacaroonValidationError unexpectedly!")  # noqa: E501
 
     def test_validate_macaroon_empty(self):
         """Test validation fails for empty macaroon"""
@@ -124,13 +124,13 @@ class TestMacaroonUtils(TransactionCase):
 
     def test_decode_macaroon_string_with_format_hex(self):
         """Test internal decoding with format detection for hex"""
-        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(self.valid_hex_macaroon)
+        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(self.valid_hex_macaroon)  # noqa: E501
         self.assertIsInstance(result, bytes)
         self.assertEqual(format_type, 'hex')
 
     def test_decode_macaroon_string_with_format_base64(self):
         """Test internal decoding with format detection for base64"""
-        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(self.valid_base64_macaroon)
+        result, format_type = MacaroonUtils._decode_macaroon_string_with_format(self.valid_base64_macaroon)  # noqa: E501
         self.assertIsInstance(result, bytes)
         self.assertEqual(format_type, 'base64')
 

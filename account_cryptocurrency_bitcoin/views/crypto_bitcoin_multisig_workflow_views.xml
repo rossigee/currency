@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
         <!-- Multisig Workflow Tree View -->
         <record id="crypto_bitcoin_multisig_workflow_tree_view" model="ir.ui.view">
             <field name="name">crypto.bitcoin.multisig.workflow.tree</field>
@@ -15,12 +14,12 @@
                     <field name="signatures_collected" string="Signed" />
                     <field name="signatures_required" string="Required" />
                     <field
-                        name="state"
-                        widget="badge"
-                        decoration-success="state == 'wallet_created'"
-                        decoration-warning="state == 'collecting_signatures'"
-                        decoration-danger="state == 'cancelled'"
-                    />
+                    name="state"
+                    widget="badge"
+                    decoration-success="state == 'wallet_created'"
+                    decoration-warning="state == 'collecting_signatures'"
+                    decoration-danger="state == 'cancelled'"
+                />
                     <field name="initiated_date" />
                     <field name="expiry_date" />
                 </tree>
@@ -35,120 +34,120 @@
                 <form>
                     <header>
                         <button
-                            name="action_start_collection"
-                            string="Start Signature Collection"
-                            type="object"
-                            class="btn-primary"
-                            invisible="state != &quot;draft&quot;"
-                        />
+                        name="action_start_collection"
+                        string="Start Signature Collection"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != &quot;draft&quot;"
+                    />
                         <button
-                            name="action_create_wallet"
-                            string="Create Wallet"
-                            type="object"
-                            class="btn-primary"
-                            invisible="state != &quot;signatures_complete&quot;"
-                        />
+                        name="action_create_wallet"
+                        string="Create Wallet"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != &quot;signatures_complete&quot;"
+                    />
                         <button
-                            name="action_cancel"
-                            string="Cancel"
-                            type="object"
-                            class="btn-secondary"
-                            invisible="state in ['wallet_created', 'cancelled']"
-                        />
+                        name="action_cancel"
+                        string="Cancel"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="state in ['wallet_created', 'cancelled']"
+                    />
                         <field
-                            name="state"
-                            widget="statusbar"
-                            statusbar_visible="draft,collecting_signatures,signatures_complete,wallet_created"
-                        />
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="draft,collecting_signatures,signatures_complete,wallet_created"
+                    />
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button
-                                name="%(crypto_bitcoin_multisig_wallet_action)d"
-                                type="action"
-                                class="oe_stat_button"
-                                icon="fa-shield"
-                                invisible="not multisig_wallet_id"
-                                context="{'form_view_ref': 'account_cryptocurrency_bitcoin.crypto_bitcoin_multisig_wallet_form_view'}"
-                            >
+                            name="%(crypto_bitcoin_multisig_wallet_action)d"
+                            type="action"
+                            class="oe_stat_button"
+                            icon="fa-shield"
+                            invisible="not multisig_wallet_id"
+                            context="{'form_view_ref': 'account_cryptocurrency_bitcoin.crypto_bitcoin_multisig_wallet_form_view'}"
+                        >
                                 <field name="multisig_wallet_id" invisible="1" />
                                 <div class="o_stat_info">
                                     <span class="o_stat_text">View Wallet</span>
                                 </div>
                             </button>
                             <button
-                                name="action_download_pdf"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-file-pdf-o"
-                                invisible="not setup_form_pdf"
-                            >
+                            name="action_download_pdf"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-file-pdf-o"
+                            invisible="not setup_form_pdf"
+                        >
                                 <div class="o_stat_info">
                                     <span class="o_stat_text">Download PDF</span>
                                 </div>
                             </button>
                         </div>
-                        
+
                         <div class="oe_title">
                             <h1><field name="name" placeholder="Workflow Name" /></h1>
                         </div>
-                        
+
                         <group>
                             <group string="Wallet Configuration">
                                 <field name="wallet_name" />
                                 <field name="use_case" />
                                 <field name="wallet_type" readonly="state != 'draft'" />
                                 <field
-                                    name="m_threshold"
-                                    invisible="wallet_type != &quot;custom&quot;"
-                                />
+                                name="m_threshold"
+                                invisible="wallet_type != &quot;custom&quot;"
+                            />
                                 <field
-                                    name="n_total"
-                                    invisible="wallet_type != &quot;custom&quot;"
-                                />
+                                name="n_total"
+                                invisible="wallet_type != &quot;custom&quot;"
+                            />
                                 <field name="script_type" readonly="state != 'draft'" />
                                 <field
-                                    name="derivation_path"
-                                    readonly="state != 'draft'"
-                                />
+                                name="derivation_path"
+                                readonly="state != 'draft'"
+                            />
                             </group>
                             <group string="Workflow Settings">
                                 <field name="initiated_by" />
                                 <field name="initiated_date" />
                                 <field name="expiry_date" />
                                 <field
-                                    name="completed_date"
-                                    invisible="not completed_date"
-                                />
+                                name="completed_date"
+                                invisible="not completed_date"
+                            />
                                 <field name="require_all_signatures" />
                                 <field
-                                    name="signature_deadline_days"
-                                    readonly="state != 'draft'"
-                                />
+                                name="signature_deadline_days"
+                                readonly="state != 'draft'"
+                            />
                             </group>
                         </group>
-                        
+
                          <group string="Security">
                             <field name="form_data_hash" widget="CopyClipboardChar" />
                             <field name="setup_form_pdf" invisible="1" />
                             <field
-                                name="signatures_collected"
-                                string="Signatures Collected"
-                            />
+                            name="signatures_collected"
+                            string="Signatures Collected"
+                        />
                             <field
-                                name="signatures_required"
-                                string="Signatures Required"
-                            />
+                            name="signatures_required"
+                            string="Signatures Required"
+                        />
                         </group>
-                        
+
                         <notebook>
                             <page string="Cosigner Signatures">
                                 <field name="signature_ids" nolabel="1">
                                     <tree
-                                        create="false"
-                                        delete="false"
-                                        editable="bottom"
-                                    >
+                                    create="false"
+                                    delete="false"
+                                    editable="bottom"
+                                >
                                         <field name="cosigner_index" />
                                         <field name="name" />
                                         <field name="signer_email" />
@@ -159,26 +158,26 @@
                                         <field name="signed_date" />
                                         <field name="verification_method" />
                                         <button
-                                            name="action_sign"
-                                            string="Sign"
-                                            type="object"
-                                            class="btn-sm btn-primary"
-                                            invisible="state != &quot;pending&quot;"
-                                        />
+                                        name="action_sign"
+                                        string="Sign"
+                                        type="object"
+                                        class="btn-sm btn-primary"
+                                        invisible="state != &quot;pending&quot;"
+                                    />
                                         <button
-                                            name="action_reject"
-                                            string="Reject"
-                                            type="object"
-                                            class="btn-sm btn-danger"
-                                            invisible="state != &quot;pending&quot;"
-                                        />
+                                        name="action_reject"
+                                        string="Reject"
+                                        type="object"
+                                        class="btn-sm btn-danger"
+                                        invisible="state != &quot;pending&quot;"
+                                    />
                                         <button
-                                            name="get_portal_url"
-                                            string="Copy Portal Link"
-                                            type="object"
-                                            class="btn-sm btn-secondary"
-                                            invisible="state != &quot;pending&quot;"
-                                        />
+                                        name="get_portal_url"
+                                        string="Copy Portal Link"
+                                        type="object"
+                                        class="btn-sm btn-secondary"
+                                        invisible="state != &quot;pending&quot;"
+                                    />
                                     </tree>
                                     <form>
                                         <header>
@@ -194,8 +193,8 @@
                                                 </group>
                                                 <group string="Hardware Wallet">
                                                     <field
-                                                        name="hardware_wallet_model"
-                                                    />
+                                                    name="hardware_wallet_model"
+                                                />
                                                     <field name="wallet_serial_last4" />
                                                     <field name="firmware_version" />
                                                     <field name="master_fingerprint" />
@@ -203,10 +202,10 @@
                                             </group>
                                             <group string="Extended Public Key">
                                                 <field
-                                                    name="xpub"
-                                                    widget="text"
-                                                    style="font-family: monospace;"
-                                                />
+                                                name="xpub"
+                                                widget="text"
+                                                style="font-family: monospace;"
+                                            />
                                                 <field name="xpub_verified" />
                                             </group>
                                             <group string="Verification">
@@ -222,49 +221,49 @@
                                     </form>
                                 </field>
                             </page>
-                            
+
                             <page string="Instructions">
                                 <div class="alert alert-info" role="alert">
                                     <h4
-                                        class="alert-heading"
-                                    >Multisig Wallet Setup Instructions</h4>
+                                    class="alert-heading"
+                                >Multisig Wallet Setup Instructions</h4>
                                     <hr />
                                     <ol>
                                         <li><strong
-                                            >Configure Wallet:</strong> Set the wallet parameters (M-of-N, script type, etc.)</li>
+                                        >Configure Wallet:</strong> Set the wallet parameters (M-of-N, script type, etc.)</li>
                                         <li><strong
-                                            >Start Collection:</strong> Click "Start Signature Collection" to begin the process</li>
+                                        >Start Collection:</strong> Click "Start Signature Collection" to begin the process</li>
                                         <li><strong
-                                            >Gather Signatures:</strong> Each cosigner receives an email with instructions to provide their xPub and sign</li>
+                                        >Gather Signatures:</strong> Each cosigner receives an email with instructions to provide their xPub and sign</li>
                                         <li><strong
-                                            >Verify Data:</strong> Review all cosigner information for accuracy</li>
+                                        >Verify Data:</strong> Review all cosigner information for accuracy</li>
                                         <li><strong
-                                            >Create Wallet:</strong> Once all signatures are collected, create the actual multisig wallet</li>
+                                        >Create Wallet:</strong> Once all signatures are collected, create the actual multisig wallet</li>
                                     </ol>
-                                    
+
                                     <h5 class="mt-3">Security Best Practices:</h5>
                                     <ul>
                                         <li
-                                        >Verify cosigner identities through secure channels</li>
+                                    >Verify cosigner identities through secure channels</li>
                                         <li>Use hardware wallets for key generation</li>
                                         <li
-                                        >Never share private keys or seed phrases</li>
+                                    >Never share private keys or seed phrases</li>
                                         <li>Test with small amounts first</li>
                                         <li
-                                        >Keep multiple secure backups of wallet configuration</li>
+                                    >Keep multiple secure backups of wallet configuration</li>
                                     </ul>
                                 </div>
                             </page>
-                            
+
                             <page string="Notes">
                                 <field
-                                    name="notes"
-                                    placeholder="Add any additional notes about this wallet setup..."
-                                />
+                                name="notes"
+                                placeholder="Add any additional notes about this wallet setup..."
+                            />
                             </page>
                         </notebook>
                     </sheet>
-                    
+
                     <div class="oe_chatter">
                         <field name="message_follower_ids" />
                         <field name="activity_ids" />
@@ -290,9 +289,9 @@
                     <field name="state" />
                     <field name="expiry_date" />
                     <progressbar
-                        field="state"
-                        colors='{"wallet_created": "success", "cancelled": "danger", "collecting_signatures": "warning"}'
-                    />
+                    field="state"
+                    colors='{"wallet_created": "success", "cancelled": "danger", "collecting_signatures": "warning"}'
+                />
                     <templates>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click">
@@ -303,28 +302,28 @@
                                         </strong>
                                     </div>
                                     <field
-                                        name="state"
-                                        widget="label_selection"
-                                        options="{'classes': {'draft': 'default', 'collecting_signatures': 'warning', 'signatures_complete': 'info', 'wallet_created': 'success', 'cancelled': 'danger'}}"
-                                    />
+                                    name="state"
+                                    widget="label_selection"
+                                    options="{'classes': {'draft': 'default', 'collecting_signatures': 'warning', 'signatures_complete': 'info', 'wallet_created': 'success', 'cancelled': 'danger'}}"
+                                />
                                 </div>
                                 <div class="o_kanban_record_body">
                                     <div><strong>Wallet:</strong> <field
-                                            name="wallet_name"
-                                        /></div>
+                                        name="wallet_name"
+                                    /></div>
                                     <div><strong>Type:</strong> <field
-                                            name="m_threshold"
-                                        />-of-<field name="n_total" /></div>
+                                        name="m_threshold"
+                                    />-of-<field name="n_total" /></div>
                                     <div><strong>Use Case:</strong> <field
-                                            name="use_case"
-                                        /></div>
+                                        name="use_case"
+                                    /></div>
                                     <div class="mt-2">
                                         <span class="badge badge-pill badge-info">
                                             <field
-                                                name="signatures_collected"
-                                            /> / <field
-                                                name="signatures_required"
-                                            /> signatures
+                                            name="signatures_collected"
+                                        /> / <field
+                                            name="signatures_required"
+                                        /> signatures
                                         </span>
                                     </div>
                                 </div>
@@ -334,9 +333,9 @@
                                     </div>
                                     <div class="oe_kanban_bottom_right">
                                         <field
-                                            name="activity_ids"
-                                            widget="kanban_activity"
-                                        />
+                                        name="activity_ids"
+                                        widget="kanban_activity"
+                                    />
                                     </div>
                                 </div>
                             </div>
@@ -356,58 +355,58 @@
                     <field name="wallet_name" />
                     <field name="initiated_by" />
                     <filter
-                        string="My Workflows"
-                        name="my_workflows"
-                        domain="[('initiated_by', '=', uid)]"
-                    />
+                    string="My Workflows"
+                    name="my_workflows"
+                    domain="[('initiated_by', '=', uid)]"
+                />
                     <separator />
                     <filter
-                        string="Draft"
-                        name="draft"
-                        domain="[('state', '=', 'draft')]"
-                    />
+                    string="Draft"
+                    name="draft"
+                    domain="[('state', '=', 'draft')]"
+                />
                     <filter
-                        string="Collecting Signatures"
-                        name="collecting"
-                        domain="[('state', '=', 'collecting_signatures')]"
-                    />
+                    string="Collecting Signatures"
+                    name="collecting"
+                    domain="[('state', '=', 'collecting_signatures')]"
+                />
                     <filter
-                        string="Ready to Create"
-                        name="ready"
-                        domain="[('state', '=', 'signatures_complete')]"
-                    />
+                    string="Ready to Create"
+                    name="ready"
+                    domain="[('state', '=', 'signatures_complete')]"
+                />
                     <filter
-                        string="Completed"
-                        name="completed"
-                        domain="[('state', '=', 'wallet_created')]"
-                    />
+                    string="Completed"
+                    name="completed"
+                    domain="[('state', '=', 'wallet_created')]"
+                />
                     <separator />
                     <filter
-                        string="Expiring Soon"
-                        name="expiring"
-                        domain="[('expiry_date', '&lt;=', (context_today() + relativedelta(days=2)).strftime('%Y-%m-%d'))]"
-                    />
+                    string="Expiring Soon"
+                    name="expiring"
+                    domain="[('expiry_date', '&lt;=', (context_today() + relativedelta(days=2)).strftime('%Y-%m-%d'))]"
+                />
                     <group expand="0" string="Group By">
                         <filter
-                            string="State"
-                            name="group_state"
-                            context="{'group_by': 'state'}"
-                        />
+                        string="State"
+                        name="group_state"
+                        context="{'group_by': 'state'}"
+                    />
                         <filter
-                            string="Use Case"
-                            name="group_use_case"
-                            context="{'group_by': 'use_case'}"
-                        />
+                        string="Use Case"
+                        name="group_use_case"
+                        context="{'group_by': 'use_case'}"
+                    />
                         <filter
-                            string="Initiated By"
-                            name="group_initiated_by"
-                            context="{'group_by': 'initiated_by'}"
-                        />
+                        string="Initiated By"
+                        name="group_initiated_by"
+                        context="{'group_by': 'initiated_by'}"
+                    />
                         <filter
-                            string="Initiated Date"
-                            name="group_date"
-                            context="{'group_by': 'initiated_date:month'}"
-                        />
+                        string="Initiated Date"
+                        name="group_date"
+                        context="{'group_by': 'initiated_date:month'}"
+                    />
                     </group>
                 </search>
             </field>
@@ -415,16 +414,16 @@
 
         <!-- Multisig Workflow Action -->
         <record
-            id="crypto_bitcoin_multisig_workflow_action"
-            model="ir.actions.act_window"
-        >
+        id="crypto_bitcoin_multisig_workflow_action"
+        model="ir.actions.act_window"
+    >
             <field name="name">Multisig Setup Workflows</field>
             <field name="res_model">crypto.bitcoin.multisig.workflow</field>
             <field name="view_mode">tree,kanban,form</field>
             <field
-                name="search_view_id"
-                ref="crypto_bitcoin_multisig_workflow_search_view"
-            />
+            name="search_view_id"
+            ref="crypto_bitcoin_multisig_workflow_search_view"
+        />
             <field name="context">{'search_default_my_workflows': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
@@ -439,12 +438,11 @@
 
         <!-- Menu Item -->
         <menuitem
-            id="menu_crypto_bitcoin_multisig_workflow"
-            name="Setup Workflows"
-            parent="menu_crypto_bitcoin_multisig"
-            action="crypto_bitcoin_multisig_workflow_action"
-            sequence="20"
-        />
+        id="menu_crypto_bitcoin_multisig_workflow"
+        name="Setup Workflows"
+        parent="menu_crypto_bitcoin_multisig"
+        action="crypto_bitcoin_multisig_workflow_action"
+        sequence="20"
+    />
 
-    </data>
 </odoo>

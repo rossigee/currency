@@ -7,4 +7,4 @@ from odoo import fields, models
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    bitcoin_wallet_ids = fields.One2many('crypto.bitcoin.wallet', 'owner_id', string='Bitcoin Wallets')
+    bitcoin_wallet_ids = fields.One2many('crypto.bitcoin.wallet', 'owner_id', string='Bitcoin Wallets')  # noqa: E501

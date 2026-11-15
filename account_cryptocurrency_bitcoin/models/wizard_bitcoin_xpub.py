@@ -1,5 +1,6 @@
-from odoo import models, fields, api
+from odoo import fields, models
 from odoo.exceptions import ValidationError
+
 
 class WizardBitcoinXpub(models.TransientModel):
     _name = 'wizard.bitcoin.xpub'
@@ -11,7 +12,7 @@ class WizardBitcoinXpub(models.TransientModel):
     def validate_and_save_xpub(self):
         # Validate the XPUB string
         if not self._validate_xpub(self.xpub):
-            raise ValidationError('Invalid XPUB format. Please enter a valid XPUB string.')
+            raise ValidationError('Invalid XPUB format. Please enter a valid XPUB string.') from None  # noqa: E501
 
         # Use the existing model to create a record
         self.env['crypto.bitcoin.public.key'].create({

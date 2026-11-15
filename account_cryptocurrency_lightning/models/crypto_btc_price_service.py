@@ -1,10 +1,12 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api, _
-from odoo.exceptions import UserError
 import logging
+
 import requests
+
+from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -30,7 +32,7 @@ class CryptoBtcPriceService(models.Model):
     timeout_seconds = fields.Integer(string='Timeout (seconds)', default=10)
 
     # Caching
-    cache_duration_minutes = fields.Integer(string='Cache Duration (minutes)', default=5)
+    cache_duration_minutes = fields.Integer(string='Cache Duration (minutes)', default=5)  # noqa: E501
     last_update = fields.Datetime(string='Last Update', readonly=True)
     cached_prices = fields.Text(string='Cached Prices JSON', readonly=True)
 
@@ -54,7 +56,7 @@ class CryptoBtcPriceService(models.Model):
         services = self.search([('active', '=', True)], order='sequence, id')
 
         if not services:
-            raise UserError("No active BTC price services configured")
+            raise UserError("No active BTC price services configured") from None
 
         last_error = None
 
@@ -67,15 +69,15 @@ class CryptoBtcPriceService(models.Model):
             except Exception as e:
                 last_error = str(e)
                 service._update_error_stats(last_error)
-                _logger.warning(f"BTC price service {service.name} failed: {last_error}")
+                _logger.warning(f"BTC price service {service.name} failed: {last_error}")  # noqa: E501
                 continue
 
         # All services failed
-        raise UserError(f"All BTC price services failed. Last error: {last_error}")
+        raise UserError(f"All BTC price services failed. Last error: {last_error}") from None  # noqa: E501
 
     def _get_price_from_service(self, currency_name):
         """
-        Get price from this specific service. Override this method for custom implementations.
+        Get price from this specific service. Override this method for custom implementations.  # noqa: E501
 
         Args:
             currency_name (str): Currency code
@@ -96,7 +98,7 @@ class CryptoBtcPriceService(models.Model):
             # This method should be overridden by custom modules
             price = self._get_custom_price(currency_name)
         else:
-            raise UserError(f"Unknown service type: {self.service_type}")
+            raise UserError(f"Unknown service type: {self.service_type}") from None
 
         # Cache the result
         if price:
@@ -132,7 +134,7 @@ class CryptoBtcPriceService(models.Model):
                 # Your custom implementation here
                 return your_custom_price_logic(currency_name)
         """
-        raise UserError("Custom price service not implemented. Please override _get_custom_price method.")
+        raise UserError("Custom price service not implemented. Please override _get_custom_price method.") from None  # noqa: E501
 
     def _get_cached_price(self, currency_name):
         """Get price from cache if still valid"""
@@ -166,7 +168,7 @@ class CryptoBtcPriceService(models.Model):
                 'last_update': fields.Datetime.now()
             })
         except Exception as e:
-            _logger.warning(f"Failed to cache price: {str(e)}")
+            _logger.warning(f"Failed to cache price: {e!s}")
 
     def _update_success_stats(self):
         """Update success statistics"""

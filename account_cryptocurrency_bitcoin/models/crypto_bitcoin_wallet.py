@@ -1,11 +1,10 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api
-import base58
-import hashlib
-import time
 import logging
+import time
+
+from odoo import fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -20,15 +19,15 @@ class CryptoBitcoinWallet(models.Model):
     notes = fields.Text(string='Notes')
 
     xpub_ids = fields.One2many('crypto.bitcoin.public.key', 'wallet_id', string='XPUBs')
-    address_ids = fields.One2many('crypto.bitcoin.address', 'wallet_id', string='Addresses')
-    sent_tx_ids = fields.Many2many('crypto.bitcoin.transaction', string='Sent Transactions', compute='_compute_sent_tx_ids')
-    rcvd_tx_ids = fields.Many2many('crypto.bitcoin.transaction', string='Received Transactions', compute='_compute_rcvd_tx_ids')
+    address_ids = fields.One2many('crypto.bitcoin.address', 'wallet_id', string='Addresses')  # noqa: E501
+    sent_tx_ids = fields.Many2many('crypto.bitcoin.transaction', string='Sent Transactions', compute='_compute_sent_tx_ids')  # noqa: E501
+    rcvd_tx_ids = fields.Many2many('crypto.bitcoin.transaction', string='Received Transactions', compute='_compute_rcvd_tx_ids')  # noqa: E501
 
 
     def _compute_sent_tx_ids(self):
         for wallet in self:
             address_ids = wallet.address_ids.ids
-            # Find transactions where wallet addresses appear in outputs (money sent to this wallet)
+            # Find transactions where wallet addresses appear in outputs (money sent to this wallet)  # noqa: E501
             transactions = self.env['crypto.bitcoin.transaction'].search([
                 ('output_line_ids.address_id', 'in', address_ids)
             ], order='date desc')
@@ -37,7 +36,7 @@ class CryptoBitcoinWallet(models.Model):
     def _compute_rcvd_tx_ids(self):
         for wallet in self:
             address_ids = wallet.address_ids.ids
-            # Find transactions where wallet addresses appear in inputs (money spent from this wallet)
+            # Find transactions where wallet addresses appear in inputs (money spent from this wallet)  # noqa: E501
             transactions = self.env['crypto.bitcoin.transaction'].search([
                 ('input_line_ids.address_id', 'in', address_ids)
             ], order='date desc')
@@ -54,33 +53,33 @@ class CryptoBitcoinWallet(models.Model):
     def action_import_transactions(self):
         """Import transactions for all addresses in this wallet"""
         self.ensure_one()
-        
+
         # Prevent concurrent imports
         import_key = f"wallet_import_{self.id}"
         if hasattr(self.env, '_wallet_imports_running'):
             if import_key in self.env._wallet_imports_running:
-                _logger.warning(f"Import already running for wallet {self.id}, skipping")
+                _logger.warning(f"Import already running for wallet {self.id}, skipping")  # noqa: E501
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
                         'title': 'Import In Progress',
-                        'message': 'Transaction import is already running for this wallet.',
+                        'message': 'Transaction import is already running for this wallet.',  # noqa: E501
                         'type': 'warning'
                     }
                 }
         else:
             self.env._wallet_imports_running = set()
-        
+
         # Queue background job for transaction import
-        job = self.with_delay(description=f"Import transactions for wallet {self.name}")._import_transactions_background()
-        
+        job = self.with_delay(description=f"Import transactions for wallet {self.name}")._import_transactions_background()  # noqa: E501
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': 'Transaction Import Started',
-                'message': f'Transaction import has been queued as background job. You will be notified when complete.',
+                'message': 'Transaction import has been queued as background job. You will be notified when complete.',  # noqa: E501
                 'type': 'info'
             }
         }
@@ -94,61 +93,61 @@ class CryptoBitcoinWallet(models.Model):
                     title="No Addresses"
                 )
                 return
-        
+
             # Main import logic
             total_created = 0
             total_updated = 0
             total_transactions = 0
             chunk_size = 5  # Show progress every 5 addresses
-            
+
             # Limit to first 50 addresses to prevent runaway processes
             addresses_to_check = self.address_ids[:50]
             if len(self.address_ids) > 50:
-                _logger.warning(f"Wallet has {len(self.address_ids)} addresses, limiting to first 50 for transaction import")
-            
+                _logger.warning(f"Wallet has {len(self.address_ids)} addresses, limiting to first 50 for transaction import")  # noqa: E501
+
             # Track processed addresses to detect duplicates
             processed_addresses = set()
-            
+
             for i, address in enumerate(addresses_to_check, 1):
                 # Check for duplicate addresses
                 if address.address in processed_addresses:
-                    _logger.error(f"Duplicate address detected: {address.address} - skipping")
+                    _logger.error(f"Duplicate address detected: {address.address} - skipping")  # noqa: E501
                     continue
                 processed_addresses.add(address.address)
-                _logger.info(f"Processing wallet address {i}/{len(addresses_to_check)}: {address.address}")
-                
-                result = self.env['crypto.bitcoin.transaction'].fetch_address_transactions(
-                    address.address, 
+                _logger.info(f"Processing wallet address {i}/{len(addresses_to_check)}: {address.address}")  # noqa: E501
+
+                result = self.env['crypto.bitcoin.transaction'].fetch_address_transactions(  # noqa: E501
+                    address.address,
                     network='mainnet'  # TODO: Make this configurable
                 )
                 total_created += result['created']
                 total_updated += result['updated']
                 total_transactions += result['total']
-                
-                _logger.info(f"Address {address.address} complete: {result['created']} new, {result['updated']} updated, {result['total']} total")
-                
-                
+
+                _logger.info(f"Address {address.address} complete: {result['created']} new, {result['updated']} updated, {result['total']} total")  # noqa: E501
+
+
                 # Add a small delay between addresses to avoid overwhelming the API
                 if i < len(addresses_to_check):  # Don't delay after the last address
                     time.sleep(0.5)
-            
+
             # Send completion notification to user
-            message = f"Wallet transaction import complete!\n• {total_created} new transactions\n• {total_updated} updated transactions\n• {total_transactions} total found\n• {len(addresses_to_check)} addresses scanned"
-            
+            message = f"Wallet transaction import complete!\n• {total_created} new transactions\n• {total_updated} updated transactions\n• {total_transactions} total found\n• {len(addresses_to_check)} addresses scanned"  # noqa: E501
+
             self.env.user.notify_success(
                 message=message,
                 title="Transaction Import Complete"
             )
-            
-            _logger.info(f"Background transaction import completed for wallet {self.name}: {total_created} new, {total_updated} updated")
-            
+
+            _logger.info(f"Background transaction import completed for wallet {self.name}: {total_created} new, {total_updated} updated")  # noqa: E501
+
             # Return result summary for job queue display
-            return f"✅ Import completed: {total_created} new, {total_updated} updated, {total_transactions} total transactions found across {len(addresses_to_check)} addresses"
-            
+            return f"✅ Import completed: {total_created} new, {total_updated} updated, {total_transactions} total transactions found across {len(addresses_to_check)} addresses"  # noqa: E501
+
         except Exception as e:
-            error_msg = f'Failed to import wallet transactions: {str(e)}'
-            _logger.error(f"Background transaction import failed for wallet {self.name}: {str(e)}")
-            
+            error_msg = f'Failed to import wallet transactions: {e!s}'
+            _logger.error(f"Background transaction import failed for wallet {self.name}: {e!s}")  # noqa: E501
+
             self.env.user.notify_danger(
                 message=error_msg,
                 title="Transaction Import Failed"

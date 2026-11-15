@@ -1,14 +1,14 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api
-from odoo.exceptions import UserError, ValidationError
-import requests
 import json
 import logging
-import socket
 import time
-from datetime import datetime
+
+import requests
+
+from odoo import api, fields, models
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -22,24 +22,24 @@ class CryptoBitcoinTransactionFetcher(models.Model):
         ('electrum', 'Electrum Server'),
         ('custom', 'Custom API')
     ], string='Service Type', required=True, default='electrum')
-    
+
     # Connection settings
     base_url = fields.Char(string='Base URL', help="Base URL for the API service")
     electrum_host = fields.Char(string='Electrum Host', help="Electrum server hostname")
-    electrum_port = fields.Integer(string='Electrum Port', default=50002, help="Electrum server port")
-    use_ssl = fields.Boolean(string='Use SSL', default=True, help="Use SSL for Electrum connection")
-    
+    electrum_port = fields.Integer(string='Electrum Port', default=50002, help="Electrum server port")  # noqa: E501
+    use_ssl = fields.Boolean(string='Use SSL', default=True, help="Use SSL for Electrum connection")  # noqa: E501
+
     # Network
     network = fields.Selection([
         ('mainnet', 'Bitcoin Mainnet'),
         ('testnet', 'Bitcoin Testnet')
     ], string='Network', required=True, default='mainnet')
-    
+
     # Rate limiting
-    rate_limit_delay = fields.Float(string='Rate Limit Delay (seconds)', default=0.1, 
-                                   help="Delay between API requests to avoid rate limiting")
-    max_retries = fields.Integer(string='Max Retries', default=3, help="Maximum number of retry attempts")
-    
+    rate_limit_delay = fields.Float(string='Rate Limit Delay (seconds)', default=0.1,
+                                   help="Delay between API requests to avoid rate limiting")  # noqa: E501
+    max_retries = fields.Integer(string='Max Retries', default=3, help="Maximum number of retry attempts")  # noqa: E501
+
     # Status
     last_used = fields.Datetime(string='Last Used')
     is_active = fields.Boolean(string='Active', default=True)
@@ -52,7 +52,7 @@ class CryptoBitcoinTransactionFetcher(models.Model):
             ('network', '=', network),
             ('is_active', '=', True)
         ], limit=1, order='last_used desc')
-        
+
         if not fetcher:
             # Create default Blockstream fetcher
             base_urls = {
@@ -67,20 +67,20 @@ class CryptoBitcoinTransactionFetcher(models.Model):
                 'is_active': True
             })
             _logger.info(f"Created default transaction fetcher: {fetcher.name}")
-        
+
         return fetcher
 
     def test_connection(self):
         """Test connection to the service"""
         self.ensure_one()
-        
+
         try:
             if self.service_type == 'electrum':
                 return self._test_electrum_connection()
             else:
                 return self._test_api_connection()
         except Exception as e:
-            self.status_message = f"Connection test failed: {str(e)}"
+            self.status_message = f"Connection test failed: {e!s}"
             return False
 
     def _test_electrum_connection(self):
@@ -88,7 +88,7 @@ class CryptoBitcoinTransactionFetcher(models.Model):
         try:
             import socket
             import ssl
-            
+
             # Get configuration using the same priority system as ElectrumClient
             electrum_client = self.env['electrum.client']
             host, port, use_ssl = electrum_client._get_electrum_config(
@@ -96,31 +96,31 @@ class CryptoBitcoinTransactionFetcher(models.Model):
                 port=self.electrum_port,
                 use_ssl=self.use_ssl
             )
-            
+
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(10)
-            
+
             if use_ssl:
                 context = ssl.create_default_context()
                 sock = context.wrap_socket(sock, server_hostname=host)
-            
+
             sock.connect((host, port))
-            
+
             # Send a test request
             request = {"id": 1, "method": "server.version", "params": []}
             sock.send((json.dumps(request) + '\n').encode())
             response = sock.recv(1024).decode()
             sock.close()
-            
+
             if 'result' in response:
                 self.status_message = "Electrum connection successful"
                 return True
             else:
                 self.status_message = f"Electrum connection failed: {response}"
                 return False
-                
+
         except Exception as e:
-            self.status_message = f"Electrum connection error: {str(e)}"
+            self.status_message = f"Electrum connection error: {e!s}"
             return False
 
     def _test_api_connection(self):
@@ -128,16 +128,16 @@ class CryptoBitcoinTransactionFetcher(models.Model):
         try:
             test_url = f"{self.base_url}/blocks/tip/height"
             response = requests.get(test_url, timeout=10)
-            
+
             if response.status_code == 200:
-                self.status_message = f"API connection successful (height: {response.text})"
+                self.status_message = f"API connection successful (height: {response.text})"  # noqa: E501
                 return True
             else:
-                self.status_message = f"API connection failed: HTTP {response.status_code}"
+                self.status_message = f"API connection failed: HTTP {response.status_code}"  # noqa: E501
                 return False
-                
+
         except Exception as e:
-            self.status_message = f"API connection error: {str(e)}"
+            self.status_message = f"API connection error: {e!s}"
             return False
 
     def fetch_address_transactions(self, address):
@@ -151,10 +151,10 @@ class CryptoBitcoinTransactionFetcher(models.Model):
         try:
             self._update_last_used()
             _logger.info(f"Fetching transactions via Electrum for address: {address}")
-            
+
             # Use dedicated Electrum client
             electrum_client = self.env['electrum.client']
-            
+
             # Get transaction history
             transactions = electrum_client.get_address_history(
                 address=address,
@@ -162,62 +162,62 @@ class CryptoBitcoinTransactionFetcher(models.Model):
                 port=self.electrum_port,
                 use_ssl=self.use_ssl
             )
-            
+
             _logger.info(f"Electrum client returned {len(transactions)} transactions")
-            
+
             # Normalize to our expected format
             return self._normalize_transaction_data(transactions)
-            
+
         except Exception as e:
-            _logger.error(f"Failed to fetch transactions via Electrum for {address}: {str(e)}")
-            raise ValidationError(f"Electrum fetch failed: {str(e)}")
+            _logger.error(f"Failed to fetch transactions via Electrum for {address}: {e!s}")  # noqa: E501
+            raise ValidationError(f"Electrum fetch failed: {e!s}")
 
     def fetch_transaction_details(self, txid):
         """Fetch detailed transaction information by transaction ID"""
         self.ensure_one()
-        
+
         try:
             self._update_last_used()
-            
+
             if self.service_type in ['blockstream', 'mempool']:
                 url = f"{self.base_url}/tx/{txid}"
                 response = requests.get(url, timeout=30)
-                
+
                 if response.status_code != 200:
-                    raise UserError(f"Transaction not found: {txid}")
-                
+                    raise UserError(f"Transaction not found: {txid}") from None
+
                 tx_data = response.json()
                 return self._normalize_transaction_data([tx_data])[0]
             else:
-                raise ValidationError(f"Transaction lookup not supported for: {self.service_type}")
-                
+                raise ValidationError(f"Transaction lookup not supported for: {self.service_type}") from None  # noqa: E501
+
         except Exception as e:
-            _logger.error(f"Failed to fetch transaction {txid}: {str(e)}")
-            raise UserError(f"Failed to fetch transaction: {str(e)}")
+            _logger.error(f"Failed to fetch transaction {txid}: {e!s}")
+            raise UserError(f"Failed to fetch transaction: {e!s}")
 
     def _normalize_transaction_data(self, raw_transactions):
         """Normalize transaction data from different APIs"""
         normalized = []
-        
+
         _logger.info(f"Normalizing {len(raw_transactions)} transactions")
         _logger.info(f"Raw transactions type: {type(raw_transactions)}")
         if raw_transactions:
             _logger.info(f"First element type: {type(raw_transactions[0])}")
             _logger.info(f"First element preview: {str(raw_transactions[0])[:200]}")
-        
+
         for i, tx in enumerate(raw_transactions):
             try:
                 # Debug: Check if tx is the expected format
                 _logger.info(f"Processing transaction {i}: type={type(tx)}")
                 if not isinstance(tx, dict):
-                    _logger.error(f"Transaction {i} is not a dict: type={type(tx)}, value={str(tx)[:200]}")
+                    _logger.error(f"Transaction {i} is not a dict: type={type(tx)}, value={str(tx)[:200]}")  # noqa: E501
                     continue
-                
+
                 # Common fields across APIs
-                _logger.info(f"Getting txid from tx...")
+                _logger.info("Getting txid from tx...")
                 txid = tx.get('txid')
                 _logger.info(f"Got txid: {txid}")
-                
+
                 normalized_tx = {
                     'txid': txid,
                     'version': tx.get('version', 1),
@@ -233,24 +233,24 @@ class CryptoBitcoinTransactionFetcher(models.Model):
                     'inputs': [],
                     'outputs': []
                 }
-                _logger.info(f"Created normalized_tx structure")
-                
+                _logger.info("Created normalized_tx structure")
+
                 # Handle confirmation status
-                _logger.info(f"Processing status...")
+                _logger.info("Processing status...")
                 if 'status' in tx and tx['status'].get('confirmed'):
-                    _logger.info(f"Transaction is confirmed, getting block info...")
+                    _logger.info("Transaction is confirmed, getting block info...")
                     normalized_tx['block_height'] = tx['status'].get('block_height')
                     normalized_tx['block_hash'] = tx['status'].get('block_hash')
                     normalized_tx['block_time'] = tx['status'].get('block_time')
-                    
+
                     # Calculate confirmations (approximate)
                     if normalized_tx['block_height']:
-                        _logger.info(f"Getting current block height...")
+                        _logger.info("Getting current block height...")
                         current_height = self._get_current_block_height()
                         if current_height:
-                            normalized_tx['confirmations'] = max(0, current_height - normalized_tx['block_height'] + 1)
-                _logger.info(f"Status processing complete")
-                
+                            normalized_tx['confirmations'] = max(0, current_height - normalized_tx['block_height'] + 1)  # noqa: E501
+                _logger.info("Status processing complete")
+
                 # Process inputs
                 _logger.info(f"Processing {len(tx.get('vin', []))} inputs...")
                 for vin in tx.get('vin', []):
@@ -264,12 +264,12 @@ class CryptoBitcoinTransactionFetcher(models.Model):
                         'witness': vin.get('witness', [])
                     }
                     normalized_tx['inputs'].append(normalized_input)
-                
-                # Process outputs  
+
+                # Process outputs
                 _logger.info(f"Processing {len(tx.get('vout', []))} outputs...")
                 for vout in tx.get('vout', []):
                     _logger.info(f"Processing output, type: {type(vout)}")
-                    
+
                     # Handle scriptpubkey safely - it might be a string or dict
                     scriptpubkey = vout.get('scriptpubkey', {})
                     if isinstance(scriptpubkey, dict):
@@ -278,24 +278,24 @@ class CryptoBitcoinTransactionFetcher(models.Model):
                         # scriptpubkey is a string (hex), no address available
                         scriptpubkey_address = None
                         _logger.debug(f"scriptpubkey is string: {scriptpubkey}")
-                    
+
                     normalized_output = {
                         'value': vout.get('value', 0),
                         'scriptpubkey': scriptpubkey,
                         'scriptpubkey_address': scriptpubkey_address
                     }
                     normalized_tx['outputs'].append(normalized_output)
-                
-                _logger.info(f"Appending normalized transaction to result list...")
+
+                _logger.info("Appending normalized transaction to result list...")
                 normalized.append(normalized_tx)
                 _logger.info(f"Transaction {i} normalization complete")
-                
+
             except Exception as e:
-                tx_id = tx.get('txid', 'unknown') if isinstance(tx, dict) else str(tx)[:50]
-                _logger.warning(f"Failed to normalize transaction {tx_id}: {str(e)}")
+                tx_id = tx.get('txid', 'unknown') if isinstance(tx, dict) else str(tx)[:50]  # noqa: E501
+                _logger.warning(f"Failed to normalize transaction {tx_id}: {e!s}")
                 _logger.debug(f"Raw transaction data: {tx}")
                 continue
-        
+
         return normalized
 
     def _get_current_block_height(self):
@@ -305,7 +305,7 @@ class CryptoBitcoinTransactionFetcher(models.Model):
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 return int(response.text)
-        except:
+        except Exception:
             pass
         return None
 
@@ -316,18 +316,18 @@ class CryptoBitcoinTransactionFetcher(models.Model):
     def fetch_wallet_transactions(self, wallet_addresses):
         """Fetch transactions for multiple addresses (wallet)"""
         self.ensure_one()
-        
+
         all_transactions = {}
-        
+
         for address in wallet_addresses:
             try:
                 transactions = self.fetch_address_transactions(address)
                 all_transactions[address] = transactions
                 time.sleep(self.rate_limit_delay)
             except Exception as e:
-                _logger.error(f"Failed to fetch transactions for address {address}: {str(e)}")
+                _logger.error(f"Failed to fetch transactions for address {address}: {e!s}")  # noqa: E501
                 all_transactions[address] = []
-        
+
         return all_transactions
 
     @api.model
@@ -337,5 +337,5 @@ class CryptoBitcoinTransactionFetcher(models.Model):
             existing = self.search([('network', '=', network)], limit=1)
             if not existing:
                 self.get_default_fetcher(network)
-        
+
         return True

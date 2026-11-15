@@ -1,61 +1,62 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api
-from odoo.exceptions import ValidationError
 import logging
+
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
 class WizardCreateAccountPublicKey(models.TransientModel):
     _name = 'wizard.create.account.public.key'
     _description = 'Wizard to Create Account-Level Public Key'
-    
+
     @api.model
     def create(self, vals):
-        """Override create to ensure private_key_id from context and execute account creation"""
+        """Override create to ensure private_key_id from context and execute account creation"""  # noqa: E501
         # Apply default from context if missing
-        if 'private_key_id' not in vals and 'default_private_key_id' in self.env.context:
+        if 'private_key_id' not in vals and 'default_private_key_id' in self.env.context:  # noqa: E501
             vals['private_key_id'] = self.env.context['default_private_key_id']
-        
+
         # Create the wizard record first
         wizard = super().create(vals)
-        
+
         # Then execute the account public key creation
         wizard._execute_account_creation()
-        
+
         return wizard
 
     # Source private key
-    private_key_id = fields.Many2one('crypto.bitcoin.private.key', string='Private Key', 
+    private_key_id = fields.Many2one('crypto.bitcoin.private.key', string='Private Key',
                                    required=True, readonly=True)
     private_key_name = fields.Char(related='private_key_id.name', readonly=True)
-    
+
     # Account details
     account_index = fields.Integer(string='Account Index', required=True, default=0,
-                                 help="BIP44 account index (0-2147483647). Each account needs a unique index.")
+                                 help="BIP44 account index (0-2147483647). Each account needs a unique index.")  # noqa: E501
     partner_id = fields.Many2one('res.partner', string='Assign to Partner',
-                               help="Optional: Assign this account to a specific partner for payment processing")
-    name_suffix = fields.Char(string='Name Suffix', 
+                               help="Optional: Assign this account to a specific partner for payment processing")  # noqa: E501
+    name_suffix = fields.Char(string='Name Suffix',
                              help="Optional custom suffix for the public key name")
-    
+
     # Account management
-    suggest_next_account = fields.Boolean(string='Auto-suggest Next Account', default=True,
-                                        help="Automatically suggest the next available account index")
-    next_available_account = fields.Integer(string='Next Available Account', compute='_compute_next_account')
-    existing_accounts = fields.Text(string='Existing Account Keys', compute='_compute_existing_accounts')
-    
+    suggest_next_account = fields.Boolean(string='Auto-suggest Next Account', default=True,  # noqa: E501
+                                        help="Automatically suggest the next available account index")  # noqa: E501
+    next_available_account = fields.Integer(string='Next Available Account', compute='_compute_next_account')  # noqa: E501
+    existing_accounts = fields.Text(string='Existing Account Keys', compute='_compute_existing_accounts')  # noqa: E501
+
     # Derivation preview
-    derivation_path = fields.Char(string='Derivation Path', compute='_compute_derivation_info')
-    
+    derivation_path = fields.Char(string='Derivation Path', compute='_compute_derivation_info')  # noqa: E501
+
     # Options
-    notes = fields.Text(string='Notes', help="Optional notes about this account public key")
-    create_sample_addresses = fields.Boolean(string='Generate Sample Addresses', default=True,
-                                           help="Generate a few sample addresses to verify derivation")
+    notes = fields.Text(string='Notes', help="Optional notes about this account public key")  # noqa: E501
+    create_sample_addresses = fields.Boolean(string='Generate Sample Addresses', default=True,  # noqa: E501
+                                           help="Generate a few sample addresses to verify derivation")  # noqa: E501
     sample_address_count = fields.Integer(string='Sample Address Count', default=3)
-    
+
     # Results (shown after creation)
-    created_public_key_id = fields.Many2one('crypto.bitcoin.public.key', string='Created Public Key', readonly=True)
+    created_public_key_id = fields.Many2one('crypto.bitcoin.public.key', string='Created Public Key', readonly=True)  # noqa: E501
     derived_xpub = fields.Char(string='Derived XPUB', readonly=True)
     sample_addresses = fields.Text(string='Sample Addresses', readonly=True)
     success_message = fields.Text(string='Success Message', readonly=True)
@@ -76,7 +77,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
                     ('private_key_id', '=', record.private_key_id.id),
                     ('key_type', '=', 'account')
                 ], order='account_index desc', limit=1)
-                
+
                 if existing_accounts:
                     record.next_available_account = existing_accounts.account_index + 1
                 else:
@@ -93,12 +94,12 @@ class WizardCreateAccountPublicKey(models.TransientModel):
                     ('private_key_id', '=', record.private_key_id.id),
                     ('key_type', '=', 'account')
                 ], order='account_index')
-                
+
                 if existing:
                     lines = []
                     for account in existing:
-                        partner_info = f" → {account.partner_id.name}" if account.partner_id else ""
-                        lines.append(f"Account {account.account_index}: {account.name}{partner_info}")
+                        partner_info = f" → {account.partner_id.name}" if account.partner_id else ""  # noqa: E501
+                        lines.append(f"Account {account.account_index}: {account.name}{partner_info}")  # noqa: E501
                     record.existing_accounts = "\n".join(lines)
                 else:
                     record.existing_accounts = "No account keys created yet"
@@ -118,8 +119,8 @@ class WizardCreateAccountPublicKey(models.TransientModel):
         """Validate wizard inputs"""
         # Validate account index range
         if self.account_index < 0 or self.account_index > 2147483647:
-            raise ValidationError("Account index must be between 0 and 2147483647")
-            
+            raise ValidationError("Account index must be between 0 and 2147483647") from None  # noqa: E501
+
         # Check for duplicate account index
         existing_account = self.env['crypto.bitcoin.public.key'].search([
             ('private_key_id', '=', self.private_key_id.id),
@@ -127,65 +128,65 @@ class WizardCreateAccountPublicKey(models.TransientModel):
             ('account_index', '=', self.account_index)
         ])
         if existing_account:
-            raise ValidationError(f"Account {self.account_index} already has a public key: {existing_account.name}")
+            raise ValidationError(f"Account {self.account_index} already has a public key: {existing_account.name}") from None  # noqa: E501
 
     def _execute_account_creation(self):
         """Execute the account public key creation (called automatically on save)"""
         self.ensure_one()
-        
+
         try:
             self._validate_inputs()
-            
+
             # Create account public key using private key method
             account_public_key = self.private_key_id.create_account_public_key(
                 account_index=self.account_index,
                 partner_id=self.partner_id.id if self.partner_id else None,
                 name_suffix=self.name_suffix
             )
-            
+
             # Add notes if provided
             if self.notes:
                 account_public_key.notes = self.notes
-                
+
             # Store reference for display
             self.created_public_key_id = account_public_key.id
             self.derived_xpub = account_public_key.xpub
-            
+
             # Generate sample addresses if requested
             if self.create_sample_addresses and self.sample_address_count > 0:
                 self._generate_sample_addresses()
-            
+
             # Prepare success message
             self._prepare_success_message()
-            
-            _logger.info(f"Account public key creation completed successfully")
-            
+
+            _logger.info("Account public key creation completed successfully")
+
         except ValidationError as e:
-            _logger.error(f"Validation error in account public key creation: {str(e)}")
+            _logger.error(f"Validation error in account public key creation: {e!s}")
             raise
         except Exception as e:
-            _logger.error(f"Unexpected error in account public key creation: {str(e)}")
-            raise ValidationError(f"Failed to create account public key: {str(e)}")
+            _logger.error(f"Unexpected error in account public key creation: {e!s}")
+            raise ValidationError(f"Failed to create account public key: {e!s}")
 
     def _generate_sample_addresses(self):
         """Generate sample receive addresses for display"""
         sample_lines = []
-        sample_lines.append(f"📋 Sample Receive Addresses ({self.derivation_path}/0/x):")
-        
+        sample_lines.append(f"📋 Sample Receive Addresses ({self.derivation_path}/0/x):")  # noqa: E501
+
         try:
-            for i in range(min(self.sample_address_count, 3)):  # Limit to 3 samples for now
+            for i in range(min(self.sample_address_count, 3)):  # Limit to 3 samples for now  # noqa: E501
                 try:
-                    addr_data = self.env['crypto.bip32.utils'].derive_address_from_account_xpub(
+                    addr_data = self.env['crypto.bip32.utils'].derive_address_from_account_xpub(  # noqa: E501
                         self.derived_xpub, 0, i  # 0 = receive chain
                     )
                     sample_lines.append(f"  {i}: {addr_data['address']}")
                 except Exception as e:
-                    sample_lines.append(f"  {i}: Error - {str(e)}")
-                    
+                    sample_lines.append(f"  {i}: Error - {e!s}")
+
             self.sample_addresses = "\n".join(sample_lines)
         except Exception as e:
-            _logger.warning(f"Could not generate sample addresses: {str(e)}")
-            self.sample_addresses = f"Sample address generation failed: {str(e)}"
+            _logger.warning(f"Could not generate sample addresses: {e!s}")
+            self.sample_addresses = f"Sample address generation failed: {e!s}"
 
     def _prepare_success_message(self):
         """Prepare the success message for display"""
@@ -200,7 +201,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
 • Use this XPUB to derive addresses for account {self.account_index}
 • All addresses follow BIP44 path: {self.derivation_path}/chain/index
 • Chain 0 = receive addresses, Chain 1 = change addresses
-{f"• Share with {self.partner_id.name} for payment processing" if self.partner_id else ""}
+{f"• Share with {self.partner_id.name} for payment processing" if self.partner_id else ""}  # noqa: E501
 
 ⚠️ Security Notes:
 • XPUB allows address generation but NOT spending
@@ -211,11 +212,11 @@ class WizardCreateAccountPublicKey(models.TransientModel):
     def action_create_account_public_key(self):
         """Legacy method - now just calls the execution method and returns form"""
         self.ensure_one()
-        
+
         # Execute the creation if not already done
         if not self.created_public_key_id:
             self._execute_account_creation()
-        
+
         # Return action to show results
         return {
             'type': 'ir.actions.act_window',
@@ -230,10 +231,10 @@ class WizardCreateAccountPublicKey(models.TransientModel):
     def action_view_public_key(self):
         """View the created public key record"""
         self.ensure_one()
-        
+
         if not self.created_public_key_id:
-            raise ValidationError("No public key created yet")
-            
+            raise ValidationError("No public key created yet") from None
+
         return {
             'type': 'ir.actions.act_window',
             'name': f'Account Public Key - Account {self.account_index}',
@@ -246,7 +247,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
     def action_create_another(self):
         """Create another account public key"""
         self.ensure_one()
-        
+
         return {
             'type': 'ir.actions.act_window',
             'name': 'Create Another Account Public Key',
@@ -255,6 +256,6 @@ class WizardCreateAccountPublicKey(models.TransientModel):
             'target': 'new',
             'context': {
                 'default_private_key_id': self.private_key_id.id,
-                'default_account_index': self.account_index + 1 if self.account_index is not False else 1,
+                'default_account_index': self.account_index + 1 if self.account_index is not False else 1,  # noqa: E501
             }
         }
