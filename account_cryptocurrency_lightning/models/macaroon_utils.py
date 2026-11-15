@@ -3,12 +3,10 @@
 
 import base64
 import binascii
-from typing import Dict, List, Optional
 
 
 class MacaroonValidationError(Exception):
     """Exception raised when macaroon validation fails"""
-    pass
 
 
 class MacaroonUtils:
@@ -29,7 +27,7 @@ class MacaroonUtils:
             MacaroonValidationError: If macaroon is invalid
         """
         if not macaroon_str:
-            raise MacaroonValidationError("Macaroon cannot be empty")
+            raise MacaroonValidationError("Macaroon cannot be empty") from None
 
         try:
             macaroon_bytes = MacaroonUtils._decode_macaroon_string(macaroon_str)
@@ -37,27 +35,27 @@ class MacaroonUtils:
             # Basic structural validation for macaroons
             # Macaroons start with version (0x02 for v2) and are at least 32 bytes
             if len(macaroon_bytes) < 32:
-                raise MacaroonValidationError("Macaroon too short")
+                raise MacaroonValidationError("Macaroon too short") from None
 
             if macaroon_bytes[0] != 0x02:
-                raise MacaroonValidationError("Invalid macaroon version")
+                raise MacaroonValidationError("Invalid macaroon version") from None
 
             # Basic macaroon structure validation
             # Just check we can parse basic structure
             try:
                 MacaroonUtils._manual_parse_macaroon(macaroon_bytes)
             except Exception as e:
-                raise MacaroonValidationError(f"Macaroon structure validation failed: {str(e)}")
+                raise MacaroonValidationError(f"Macaroon structure validation failed: {e!s}")  # noqa: E501
 
         except (ValueError, TypeError, binascii.Error):
-            raise MacaroonValidationError("Invalid macaroon format")
+            raise MacaroonValidationError("Invalid macaroon format") from e
         except MacaroonValidationError:
             raise  # Re-raise our custom errors
         except Exception as e:
-            raise MacaroonValidationError(f"Macaroon validation failed: {str(e)}")
+            raise MacaroonValidationError(f"Macaroon validation failed: {e!s}")
 
     @staticmethod
-    def parse_macaroon(macaroon_str: str) -> Dict:
+    def parse_macaroon(macaroon_str: str) -> dict:
         """
         Parse macaroon and extract detailed information.
 
@@ -78,7 +76,7 @@ class MacaroonUtils:
             return {}
 
         try:
-            macaroon_bytes, format_type = MacaroonUtils._decode_macaroon_string_with_format(macaroon_str)
+            macaroon_bytes, format_type = MacaroonUtils._decode_macaroon_string_with_format(macaroon_str)  # noqa: E501
 
             # Basic validation
             if len(macaroon_bytes) < 32 or macaroon_bytes[0] != 0x02:
@@ -92,7 +90,7 @@ class MacaroonUtils:
             return {}
 
     @staticmethod
-    def get_macaroon_permissions(macaroon_str: str) -> List[str]:
+    def get_macaroon_permissions(macaroon_str: str) -> list[str]:
         """
         Extract permissions/capabilities from macaroon caveats.
 
@@ -186,7 +184,7 @@ class MacaroonUtils:
             return base64.b64decode(macaroon_str), 'base64'
 
     @staticmethod
-    def _safe_decode_bytes(data: Optional[bytes]) -> str:
+    def _safe_decode_bytes(data: bytes | None) -> str:
         """
         Safely decode bytes to string, falling back to hex if UTF-8 fails.
 
@@ -205,7 +203,7 @@ class MacaroonUtils:
             return data.hex()
 
     @staticmethod
-    def _manual_parse_macaroon(macaroon_bytes: bytes) -> Dict:
+    def _manual_parse_macaroon(macaroon_bytes: bytes) -> dict:
         """
         Manual parser for macaroon binary format.
 
@@ -213,10 +211,10 @@ class MacaroonUtils:
         and looks for readable permission strings in the binary data.
         """
         if len(macaroon_bytes) < 34:
-            raise ValueError("Macaroon too short for manual parsing")
+            raise ValueError("Macaroon too short for manual parsing") from None
 
         if macaroon_bytes[0] != 0x02:
-            raise ValueError("Invalid macaroon version")
+            raise ValueError("Invalid macaroon version") from None
 
         # For LND macaroons, we'll scan for common permission strings
         # rather than trying to parse the complex binary format perfectly
@@ -227,7 +225,7 @@ class MacaroonUtils:
 
             # Look for LND services and permissions
             permissions = []
-            services = ['address', 'info', 'invoices', 'macaroon', 'message', 'offchain', 'onchain', 'peers', 'signer']
+            services = ['address', 'info', 'invoices', 'macaroon', 'message', 'offchain', 'onchain', 'peers', 'signer']  # noqa: E501
             perms = ['read', 'write', 'generate', 'admin']
 
             for service in services:
@@ -235,7 +233,7 @@ class MacaroonUtils:
                     # Find permissions for this service
                     service_perms = []
                     for perm in perms:
-                        if perm in text_content[text_content.find(service):text_content.find(service)+50]:
+                        if perm in text_content[text_content.find(service):text_content.find(service)+50]:  # noqa: E501
                             service_perms.append(perm)
 
                     if service_perms:
@@ -266,4 +264,3 @@ class MacaroonUtils:
                 'caveats': ['Valid LND macaroon detected'],
                 'caveat_count': 1
             }
-

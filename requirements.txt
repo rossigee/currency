@@ -1,0 +1,9 @@
+# generated from manifests external_dependencies
+base58
+cron-converter
+cron-descriptor
+ecdsa
+embit
+mnemonic
+qrcode
+requests

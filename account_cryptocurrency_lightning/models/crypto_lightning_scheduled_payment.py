@@ -1,12 +1,11 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api, _
-from odoo.exceptions import UserError, ValidationError
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 import logging
 import re
+
+from odoo import api, fields, models
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -20,8 +19,8 @@ class CryptoLightningScheduledPayment(models.Model):
 
     # Basic Information
     name = fields.Char(string='Schedule Name', required=True, tracking=True)
-    address_id = fields.Many2one('crypto.lightning.address', string='Lightning Address', required=True, tracking=True)
-    lsp_id = fields.Many2one('crypto.lightning.service.provider', string='Lightning Service Provider', required=True, tracking=True)
+    address_id = fields.Many2one('crypto.lightning.address', string='Lightning Address', required=True, tracking=True)  # noqa: E501
+    lsp_id = fields.Many2one('crypto.lightning.service.provider', string='Lightning Service Provider', required=True, tracking=True)  # noqa: E501
 
     # Amount Configuration
     amount_type = fields.Selection([
@@ -39,13 +38,13 @@ class CryptoLightningScheduledPayment(models.Model):
 
     # Schedule Configuration - Cron expression only
     cron_expression = fields.Char(string='Cron Expression', required=True,
-                                 help='Unix cron format: minute hour day month weekday\nExamples:\n* * * * * = every minute\n*/5 * * * * = every 5 minutes\n0 * * * * = every hour\n0 9 * * 1 = every Monday at 9 AM')
-    cron_description = fields.Char(string='Schedule Description', compute='_compute_cron_description', store=False)
+                                 help='Unix cron format: minute hour day month weekday\nExamples:\n* * * * * = every minute\n*/5 * * * * = every 5 minutes\n0 * * * * = every hour\n0 9 * * 1 = every Monday at 9 AM')  # noqa: E501
+    cron_description = fields.Char(string='Schedule Description', compute='_compute_cron_description', store=False)  # noqa: E501
 
     # Date Management
-    start_date = fields.Date(string='Start Date', required=True, default=fields.Date.today, tracking=True)
-    end_date = fields.Date(string='End Date', help='Leave empty for indefinite schedule')
-    next_execution_date = fields.Datetime(string='Next Execution', readonly=True, tracking=True)
+    start_date = fields.Date(string='Start Date', required=True, default=fields.Date.today, tracking=True)  # noqa: E501
+    end_date = fields.Date(string='End Date', help='Leave empty for indefinite schedule')  # noqa: E501
+    next_execution_date = fields.Datetime(string='Next Execution', readonly=True, tracking=True)  # noqa: E501
     last_execution_date = fields.Datetime(string='Last Execution', readonly=True)
 
     # Status and Control
@@ -59,7 +58,7 @@ class CryptoLightningScheduledPayment(models.Model):
 
     # Statistics
     total_executions = fields.Integer(string='Total Executions', readonly=True)
-    successful_executions = fields.Integer(string='Successful Executions', readonly=True)
+    successful_executions = fields.Integer(string='Successful Executions', readonly=True)  # noqa: E501
     failed_executions = fields.Integer(string='Failed Executions', readonly=True)
     last_execution_status = fields.Selection([
         ('success', 'Success'),
@@ -69,15 +68,15 @@ class CryptoLightningScheduledPayment(models.Model):
     # Related Payment Records
     payment_ids = fields.One2many('crypto.lightning.payment', 'scheduled_payment_id',
                                  string='Generated Payments', readonly=True)
-    payment_count = fields.Integer(string='Payment Count', compute='_compute_payment_count')
+    payment_count = fields.Integer(string='Payment Count', compute='_compute_payment_count')  # noqa: E501
 
     # Display
-    display_name = fields.Char(string='Display Name', compute='_compute_display_name', store=True)
+    display_name = fields.Char(string='Display Name', compute='_compute_display_name', store=True)  # noqa: E501
 
-    @api.depends('name', 'address_id', 'amount_type', 'amount_fiat', 'amount_satoshi', 'currency_id')
+    @api.depends('name', 'address_id', 'amount_type', 'amount_fiat', 'amount_satoshi', 'currency_id')  # noqa: E501
     def _compute_display_name(self):
         for record in self:
-            if record.amount_type == 'fiat' and record.amount_fiat and record.currency_id:
+            if record.amount_type == 'fiat' and record.amount_fiat and record.currency_id:  # noqa: E501
                 amount_str = f"{record.amount_fiat} {record.currency_id.name}"
             elif record.amount_type == 'satoshi' and record.amount_satoshi:
                 amount_str = f"{record.amount_satoshi} sats"
@@ -85,10 +84,10 @@ class CryptoLightningScheduledPayment(models.Model):
                 amount_str = "No amount"
 
             if record.address_id:
-                address_short = record.address_id.address[:20] + ('...' if len(record.address_id.address) > 20 else '')
-                record.display_name = f"{record.name or 'Scheduled Payment'}: {amount_str} to {address_short}"
+                address_short = record.address_id.address[:20] + ('...' if len(record.address_id.address) > 20 else '')  # noqa: E501
+                record.display_name = f"{record.name or 'Scheduled Payment'}: {amount_str} to {address_short}"  # noqa: E501
             else:
-                record.display_name = f"{record.name or 'Scheduled Payment'}: {amount_str}"
+                record.display_name = f"{record.name or 'Scheduled Payment'}: {amount_str}"  # noqa: E501
 
     @api.depends('payment_ids')
     def _compute_payment_count(self):
@@ -99,7 +98,7 @@ class CryptoLightningScheduledPayment(models.Model):
     def _compute_cron_description(self):
         for record in self:
             if record.cron_expression:
-                record.cron_description = record._parse_cron_description(record.cron_expression)
+                record.cron_description = record._parse_cron_description(record.cron_expression)  # noqa: E501
             else:
                 record.cron_description = "Not configured"
 
@@ -108,31 +107,31 @@ class CryptoLightningScheduledPayment(models.Model):
         for record in self:
             if record.amount_type == 'fiat':
                 if not record.amount_fiat or record.amount_fiat <= 0:
-                    raise ValidationError("Fiat amount must be greater than 0")
+                    raise ValidationError("Fiat amount must be greater than 0") from None  # noqa: E501
                 if not record.currency_id:
-                    raise ValidationError("Currency is required for fiat amounts")
+                    raise ValidationError("Currency is required for fiat amounts") from None  # noqa: E501
             elif record.amount_type == 'satoshi':
                 if not record.amount_satoshi or record.amount_satoshi <= 0:
-                    raise ValidationError("Satoshi amount must be greater than 0")
+                    raise ValidationError("Satoshi amount must be greater than 0") from None  # noqa: E501
 
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
         for record in self:
-            if record.end_date and record.start_date and record.end_date < record.start_date:
-                raise ValidationError("End date must be after start date")
+            if record.end_date and record.start_date and record.end_date < record.start_date:  # noqa: E501
+                raise ValidationError("End date must be after start date") from None
 
     @api.constrains('cron_expression')
     def _check_cron_expression(self):
         for record in self:
             if not record.cron_expression:
-                raise ValidationError("Cron expression is required")
+                raise ValidationError("Cron expression is required") from None
             if not record._validate_cron_expression(record.cron_expression):
-                raise ValidationError("Invalid cron expression format. Use: minute hour day month weekday")
+                raise ValidationError("Invalid cron expression format. Use: minute hour day month weekday") from None  # noqa: E501
 
             # Warning for very frequent schedules
-            if record.cron_expression in ["* * * * *"] or (record.cron_expression.startswith("*/") and
+            if record.cron_expression in ["* * * * *"] or (record.cron_expression.startswith("*/") and  # noqa: E501
                                                           record.cron_expression.split()[0].endswith("1")):
-                _logger.warning(f"High-frequency scheduled payment created: {record.cron_expression} for {record.name}")
+                _logger.warning(f"High-frequency scheduled payment created: {record.cron_expression} for {record.name}")  # noqa: E501
 
     @api.onchange('cron_expression')
     def _onchange_cron_expression(self):
@@ -157,10 +156,10 @@ class CryptoLightningScheduledPayment(models.Model):
 
         # Basic validation for each field
         patterns = [
-            r'^(\*|([0-5]?\d)(,([0-5]?\d))*|([0-5]?\d)-([0-5]?\d)|\*/([1-9]\d*))$',  # minute (0-59)
-            r'^(\*|([01]?\d|2[0-3])(,([01]?\d|2[0-3]))*|([01]?\d|2[0-3])-([01]?\d|2[0-3])|\*/([1-9]\d*))$',  # hour (0-23)
-            r'^(\*|([0-2]?\d|3[01])(,([0-2]?\d|3[01]))*|([0-2]?\d|3[01])-([0-2]?\d|3[01])|\*/([1-9]\d*))$',  # day (1-31)
-            r'^(\*|([0]?\d|1[0-2])(,([0]?\d|1[0-2]))*|([0]?\d|1[0-2])-([0]?\d|1[0-2])|\*/([1-9]\d*))$',  # month (1-12)
+            r'^(\*|([0-5]?\d)(,([0-5]?\d))*|([0-5]?\d)-([0-5]?\d)|\*/([1-9]\d*))$',  # minute (0-59)  # noqa: E501
+            r'^(\*|([01]?\d|2[0-3])(,([01]?\d|2[0-3]))*|([01]?\d|2[0-3])-([01]?\d|2[0-3])|\*/([1-9]\d*))$',  # hour (0-23)  # noqa: E501
+            r'^(\*|([0-2]?\d|3[01])(,([0-2]?\d|3[01]))*|([0-2]?\d|3[01])-([0-2]?\d|3[01])|\*/([1-9]\d*))$',  # day (1-31)  # noqa: E501
+            r'^(\*|([0]?\d|1[0-2])(,([0]?\d|1[0-2]))*|([0]?\d|1[0-2])-([0]?\d|1[0-2])|\*/([1-9]\d*))$',  # month (1-12)  # noqa: E501
             r'^(\*|[0-6](,[0-6])*|[0-6]-[0-6]|\*/([1-7]))$'  # weekday (0-6)
         ]
 
@@ -171,20 +170,20 @@ class CryptoLightningScheduledPayment(models.Model):
         return True
 
     def _parse_cron_description(self, cron_expr):
-        """Parse cron expression into human-readable description using cron-descriptor"""
+        """Parse cron expression into human-readable description using cron-descriptor"""  # noqa: E501
         if not cron_expr:
             return "Invalid cron expression"
 
         try:
             from cron_descriptor import ExpressionDescriptor
-            
+
             descriptor = ExpressionDescriptor(
                 expression=cron_expr,
                 use_24hour_time_format=True
             )
-            
+
             return descriptor.get_description()
-            
+
         except Exception as e:
             _logger.warning(f"Error generating cron description for '{cron_expr}': {e}")
             return f"Custom schedule: {cron_expr}"
@@ -193,7 +192,7 @@ class CryptoLightningScheduledPayment(models.Model):
         """Activate the scheduled payment"""
         self.ensure_one()
         if self.state != 'draft':
-            raise UserError("Only draft schedules can be activated")
+            raise UserError("Only draft schedules can be activated") from None
 
         # Calculate next execution date
         self._calculate_next_execution()
@@ -209,7 +208,7 @@ class CryptoLightningScheduledPayment(models.Model):
         """Pause the scheduled payment"""
         self.ensure_one()
         if self.state != 'active':
-            raise UserError("Only active schedules can be paused")
+            raise UserError("Only active schedules can be paused") from None
 
         self.write({'state': 'paused'})
         self.message_post(body="Scheduled payment paused")
@@ -218,7 +217,7 @@ class CryptoLightningScheduledPayment(models.Model):
         """Resume the scheduled payment"""
         self.ensure_one()
         if self.state != 'paused':
-            raise UserError("Only paused schedules can be resumed")
+            raise UserError("Only paused schedules can be resumed") from None
 
         # Recalculate next execution from current time
         self._calculate_next_execution()
@@ -234,7 +233,7 @@ class CryptoLightningScheduledPayment(models.Model):
         """Cancel the scheduled payment"""
         self.ensure_one()
         if self.state in ['completed', 'cancelled']:
-            raise UserError("Schedule is already completed or cancelled")
+            raise UserError("Schedule is already completed or cancelled") from None
 
         self.write({'state': 'cancelled'})
         self.message_post(body="Scheduled payment cancelled")
@@ -243,7 +242,7 @@ class CryptoLightningScheduledPayment(models.Model):
         """Reset cancelled or completed schedule back to draft"""
         self.ensure_one()
         if self.state not in ['cancelled', 'completed']:
-            raise UserError("Only cancelled or completed schedules can be reset to draft")
+            raise UserError("Only cancelled or completed schedules can be reset to draft") from None  # noqa: E501
 
         self.write({
             'state': 'draft',
@@ -256,7 +255,7 @@ class CryptoLightningScheduledPayment(models.Model):
         """Manually execute the payment now"""
         self.ensure_one()
         if self.state not in ['active', 'paused']:
-            raise UserError("Only active or paused schedules can be executed")
+            raise UserError("Only active or paused schedules can be executed") from None
 
         return self._execute_payment()
 
@@ -294,19 +293,19 @@ class CryptoLightningScheduledPayment(models.Model):
 
         try:
             from cron_converter import Cron
-            
+
             # Create cron object and schedule from current time
             cron = Cron(self.cron_expression)
             schedule = cron.schedule(current_datetime)
-            
+
             # Get next execution time
             next_execution = schedule.next()
-            
+
             # Ensure it's a datetime object (cron-converter returns datetime)
             return next_execution
-            
+
         except Exception as e:
-            _logger.error(f"Error parsing cron expression '{self.cron_expression}': {e}")
+            _logger.error(f"Error parsing cron expression '{self.cron_expression}': {e}")  # noqa: E501
             # Fallback: return False to indicate invalid cron expression
             return False
 
@@ -317,14 +316,14 @@ class CryptoLightningScheduledPayment(models.Model):
         try:
             # Get company currency and BTC price (needed for both calculation types)
             company_currency = self.env.company.currency_id
-            btc_price = self.env['crypto.btc.price.service'].get_btc_price(company_currency.name)
+            btc_price = self.env['crypto.btc.price.service'].get_btc_price(company_currency.name)  # noqa: E501
 
             # Determine amount based on type
             if self.amount_type == 'fiat':
                 amount = self.amount_fiat
                 currency = self.currency_id
                 # Convert fiat amount to satoshis
-                base_amount = currency._convert(amount, company_currency, self.env.company, fields.Date.today())
+                base_amount = currency._convert(amount, company_currency, self.env.company, fields.Date.today())  # noqa: E501
                 satoshis = int((base_amount / btc_price) * 100000000)
             else:
                 # For satoshi amounts, we need to convert to fiat for the payment model
@@ -357,7 +356,7 @@ class CryptoLightningScheduledPayment(models.Model):
             # Calculate next execution
             self._calculate_next_execution()
 
-            _logger.info(f"Scheduled payment {self.id} executed successfully, created payment {payment.id}")
+            _logger.info(f"Scheduled payment {self.id} executed successfully, created payment {payment.id}")  # noqa: E501
 
             return {
                 'type': 'ir.actions.act_window',
@@ -369,7 +368,7 @@ class CryptoLightningScheduledPayment(models.Model):
             }
 
         except Exception as e:
-            _logger.error(f"Scheduled payment {self.id} execution failed: {str(e)}")
+            _logger.error(f"Scheduled payment {self.id} execution failed: {e!s}")
 
             self.write({
                 'total_executions': self.total_executions + 1,
@@ -383,12 +382,12 @@ class CryptoLightningScheduledPayment(models.Model):
 
             # Post message about failure
             self.message_post(
-                body=f"Scheduled payment execution failed: {str(e)}",
+                body=f"Scheduled payment execution failed: {e!s}",
                 message_type='notification',
                 subtype_xmlid='mail.mt_note'
             )
 
-            raise UserError(f"Payment execution failed: {str(e)}")
+            raise UserError(f"Payment execution failed: {e!s}")
 
     @api.model
     def _cron_execute_scheduled_payments(self):
@@ -402,7 +401,7 @@ class CryptoLightningScheduledPayment(models.Model):
             ('next_execution_date', '!=', False)
         ])
 
-        _logger.info(f"Found {len(scheduled_payments)} scheduled payments due for execution")
+        _logger.info(f"Found {len(scheduled_payments)} scheduled payments due for execution")  # noqa: E501
 
         for schedule in scheduled_payments:
             try:
@@ -410,7 +409,7 @@ class CryptoLightningScheduledPayment(models.Model):
                 # answered; _execute_payment records failures raised before that.
                 schedule._execute_payment()
             except Exception as e:
-                _logger.error(f"Failed to execute scheduled payment {schedule.id}: {str(e)}")
+                _logger.error(f"Failed to execute scheduled payment {schedule.id}: {e!s}")  # noqa: E501
                 continue
 
     def _record_execution_outcome(self, success):

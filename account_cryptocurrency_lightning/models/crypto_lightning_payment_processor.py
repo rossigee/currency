@@ -1,11 +1,10 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api
-from odoo.exceptions import UserError
-
 import requests
-import json
+
+from odoo import api, models
+from odoo.exceptions import UserError
 
 
 class CryptoLightningPaymentProcessor(models.Model):
@@ -32,12 +31,12 @@ class CryptoLightningPaymentProcessor(models.Model):
             # Step 1: Create payment request on recipient's LN node
             payment_request = self.create_payment_request(address)
             if not payment_request:
-                raise UserError("Failed to create payment request.")
+                raise UserError("Failed to create payment request.") from None
 
             # Step 2: Submit payment to LSP for payment
             payment_result = self.submit_payment_to_lsp(payment_request, amount_sats)
             if not payment_result:
-                raise UserError("Failed to submit payment to LSP.")
+                raise UserError("Failed to submit payment to LSP.") from None
 
             # Log successful payment processing
             self.env['ir.logging'].sudo().create({
@@ -56,7 +55,7 @@ class CryptoLightningPaymentProcessor(models.Model):
                 'message': str(e),
                 'func': 'process_lightning_payment',
             })
-            raise UserError(f"An error occurred while processing the payment: {str(e)}")
+            raise UserError(f"An error occurred while processing the payment: {e!s}")
 
     @api.model
     def create_payment_request(self, address):
@@ -75,7 +74,7 @@ class CryptoLightningPaymentProcessor(models.Model):
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            return {'error': f"Failed to create payment request: {str(e)}"}
+            return {'error': f"Failed to create payment request: {e!s}"}
 
     @api.model
     def submit_payment_to_lsp(self, payment_request, service_provider_id=None):
@@ -91,7 +90,7 @@ class CryptoLightningPaymentProcessor(models.Model):
 
         # Get service provider - use provided ID or find default
         if service_provider_id:
-            service_provider = self.env['crypto.lightning.service.provider'].browse(service_provider_id)
+            service_provider = self.env['crypto.lightning.service.provider'].browse(service_provider_id)  # noqa: E501
         else:
             service_provider = self.env['crypto.lightning.service.provider'].search([
                 ('active', '=', True)
@@ -105,14 +104,14 @@ class CryptoLightningPaymentProcessor(models.Model):
 
         try:
             # Get macaroon from vault
-            vault_data = service_provider._get_data_from_vault(service_provider.token_uuid)
+            vault_data = service_provider._get_data_from_vault(service_provider.token_uuid)  # noqa: E501
             macaroon = vault_data.get('macaroon')
             if not macaroon:
                 return {'error': 'No macaroon available for service provider'}
 
             # Convert macaroon to hex if needed
             import base64
-            if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):
+            if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):  # noqa: E501
                 macaroon_hex = macaroon
             else:
                 macaroon_bytes = base64.b64decode(macaroon)
@@ -131,4 +130,4 @@ class CryptoLightningPaymentProcessor(models.Model):
                 client.close()
 
         except Exception as e:
-            return {'error': f'Failed to process payment: {str(e)}'}
+            return {'error': f'Failed to process payment: {e!s}'}

@@ -307,7 +307,7 @@ status messages.
 ```xml
 <group string="Section Title" colspan="2">
     <div class="alert alert-warning" style="width: 100%; margin: 10px 0;">
-        <strong>Warning:</strong> Message text  
+        <strong>Warning:</strong> Message text
     </div>
 </group>
 ```

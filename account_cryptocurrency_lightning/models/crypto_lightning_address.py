@@ -1,19 +1,17 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api
-from odoo.exceptions import ValidationError
-import json
-from .lnd_rest_client import LndRestClient
+
+from odoo import api, fields, models
 
 
 class CryptoLightningAddress(models.Model):
     _name = 'crypto.lightning.address'
     _description = "Lightning Address"
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    
+
     _sql_constraints = [
-        ('unique_lightning_address', 'unique(address)', 'Lightning address must be unique')
+        ('unique_lightning_address', 'unique(address)', 'Lightning address must be unique')  # noqa: E501
     ]
 
     owner_id = fields.Many2one('res.partner', string='Owner')
@@ -24,17 +22,17 @@ class CryptoLightningAddress(models.Model):
         ('bolt12', 'BOLT12'),
         ('other', 'Other'),
     ], string='Type', required=True, default='bolt11')
-    service_provider_id = fields.Many2one('crypto.lightning.service.provider', string='Service Provider',
-                                        help='LND service provider to fetch transaction data from',
-                                        default=lambda self: self.env['crypto.lightning.service.provider'].search([], limit=1))
+    service_provider_id = fields.Many2one('crypto.lightning.service.provider', string='Service Provider',  # noqa: E501
+                                        help='LND service provider to fetch transaction data from',  # noqa: E501
+                                        default=lambda self: self.env['crypto.lightning.service.provider'].search([], limit=1))  # noqa: E501
     notes = fields.Text(string='Notes')
-    
+
     # Related payments
-    payment_ids = fields.One2many('crypto.lightning.payment', 'address_id', string='Lightning Payments')
-    payment_count = fields.Integer(string='Payment Count', compute='_compute_payment_count')
-    
+    payment_ids = fields.One2many('crypto.lightning.payment', 'address_id', string='Lightning Payments')  # noqa: E501
+    payment_count = fields.Integer(string='Payment Count', compute='_compute_payment_count')  # noqa: E501
+
     # Attachments
-    attachment_count = fields.Integer(string='Attachment Count', compute='_compute_attachment_count')
+    attachment_count = fields.Integer(string='Attachment Count', compute='_compute_attachment_count')  # noqa: E501
 
 
     @api.depends('address', 'owner_id', 'owner_id.name')
@@ -64,7 +62,7 @@ class CryptoLightningAddress(models.Model):
     def action_view_payments(self):
         """Open payments related to this lightning address"""
         self.ensure_one()
-        action = self.env.ref('account_cryptocurrency_lightning.crypto_lightning_payment_action').read()[0]
+        action = self.env.ref('account_cryptocurrency_lightning.crypto_lightning_payment_action').read()[0]  # noqa: E501
         action['domain'] = [('address_id', '=', self.id)]
         action['context'] = {'default_address_id': self.id}
         return action

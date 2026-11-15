@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
-    <data noupdate="1">
+<odoo noupdate="1">
 
         <!-- Default Electrum Servers for Mainnet -->
         <record id="electrum_server_blockstream" model="electrum.server.config">
@@ -65,5 +64,4 @@
             <field name="timeout_seconds">10</field>
         </record>
 
-    </data>
 </odoo>

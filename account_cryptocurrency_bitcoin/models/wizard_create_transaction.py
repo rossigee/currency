@@ -1,9 +1,10 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api
-from odoo.exceptions import ValidationError
 import logging
+
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -12,34 +13,34 @@ class WizardCreateTransaction(models.TransientModel):
     _name = 'wizard.create.transaction'
     _description = 'Create Bitcoin Transaction Wizard'
 
-    multisig_wallet_id = fields.Many2one('crypto.bitcoin.multisig.wallet', 
+    multisig_wallet_id = fields.Many2one('crypto.bitcoin.multisig.wallet',
                                          string='Multisig Wallet', required=True)
-    
+
     # Transaction details
-    name = fields.Char(string='Transaction Name', required=True, 
+    name = fields.Char(string='Transaction Name', required=True,
                        default='New Transaction')
     notes = fields.Text(string='Notes')
-    
+
     # Fee settings
     target_fee_rate = fields.Float(string='Fee Rate (sat/vB)', default=5.0,
                                    help="Target fee rate in satoshis per virtual byte")
-    
+
     # Output lines
     output_line_ids = fields.One2many('wizard.create.transaction.line', 'wizard_id',
                                       string='Transaction Outputs')
-    
+
     # Summary fields
-    total_output_btc = fields.Float(string='Total Output (BTC)', 
+    total_output_btc = fields.Float(string='Total Output (BTC)',
                                     compute='_compute_totals', store=False)
-    total_output_sat = fields.Integer(string='Total Output (sat)', 
+    total_output_sat = fields.Integer(string='Total Output (sat)',
                                       compute='_compute_totals', store=False)
-    estimated_fee_sat = fields.Integer(string='Estimated Fee (sat)', 
+    estimated_fee_sat = fields.Integer(string='Estimated Fee (sat)',
                                        compute='_compute_totals', store=False)
-    estimated_fee_btc = fields.Float(string='Estimated Fee (BTC)', 
+    estimated_fee_btc = fields.Float(string='Estimated Fee (BTC)',
                                      compute='_compute_totals', store=False)
-    total_needed_sat = fields.Integer(string='Total Needed (sat)', 
+    total_needed_sat = fields.Integer(string='Total Needed (sat)',
                                       compute='_compute_totals', store=False)
-    total_needed_btc = fields.Float(string='Total Needed (BTC)', 
+    total_needed_btc = fields.Float(string='Total Needed (BTC)',
                                     compute='_compute_totals', store=False)
 
     @api.depends('output_line_ids.amount_btc', 'target_fee_rate')
@@ -49,16 +50,16 @@ class WizardCreateTransaction(models.TransientModel):
             # Calculate total output
             total_btc = sum(line.amount_btc for line in record.output_line_ids)
             total_sat = int(total_btc * 100000000)
-            
+
             # Estimate transaction size and fee
             num_outputs = len(record.output_line_ids)
             if num_outputs > 0 and record.multisig_wallet_id:
                 # Rough estimation: base + outputs + multisig overhead
-                estimated_size = 50 + (num_outputs * 35) + (record.multisig_wallet_id.m_of_n_threshold * 75)
+                estimated_size = 50 + (num_outputs * 35) + (record.multisig_wallet_id.m_of_n_threshold * 75)  # noqa: E501
                 estimated_fee_sat = int(estimated_size * record.target_fee_rate)
             else:
                 estimated_fee_sat = 0
-            
+
             record.total_output_btc = total_btc
             record.total_output_sat = total_sat
             record.estimated_fee_sat = estimated_fee_sat
@@ -70,20 +71,20 @@ class WizardCreateTransaction(models.TransientModel):
     def action_create_transaction(self):
         """Create the transaction and PSBT"""
         self.ensure_one()
-        
+
         if not self.output_line_ids:
-            raise ValidationError("At least one output is required")
-        
+            raise ValidationError("At least one output is required") from None
+
         if not self.multisig_wallet_id.is_complete:
-            raise ValidationError("Multisig wallet configuration is incomplete")
-        
+            raise ValidationError("Multisig wallet configuration is incomplete") from None  # noqa: E501
+
         # Validate all outputs
         for line in self.output_line_ids:
             if not line.recipient_address:
-                raise ValidationError("All outputs must have a recipient address")
+                raise ValidationError("All outputs must have a recipient address") from None  # noqa: E501
             if line.amount_btc <= 0:
-                raise ValidationError("All outputs must have a positive amount")
-        
+                raise ValidationError("All outputs must have a positive amount") from None  # noqa: E501
+
         try:
             # Create transaction record
             transaction = self.env['crypto.bitcoin.transaction'].create({
@@ -98,7 +99,7 @@ class WizardCreateTransaction(models.TransientModel):
                 'target_fee_rate': self.target_fee_rate,
                 'created_by_id': self.env.user.partner_id.id,
             })
-            
+
             # Prepare outputs for PSBT creation
             outputs = []
             for line in self.output_line_ids:
@@ -106,20 +107,20 @@ class WizardCreateTransaction(models.TransientModel):
                     'address': line.recipient_address.strip(),
                     'amount': int(line.amount_btc * 100000000)  # Convert to satoshis
                 })
-            
+
             # Create PSBT using utility
             bip32_utils = self.env['crypto.bip32.utils']
             psbt_result = bip32_utils.create_psbt(
-                self.multisig_wallet_id, 
-                outputs, 
+                self.multisig_wallet_id,
+                outputs,
                 self.target_fee_rate
             )
-            
+
             # Create transaction lines for outputs
             for i, line in enumerate(self.output_line_ids):
                 # Get or create address record for the recipient
-                address_record = self._get_or_create_address(line.recipient_address.strip())
-                
+                address_record = self._get_or_create_address(line.recipient_address.strip())  # noqa: E501
+
                 self.env['crypto.bitcoin.transaction.line'].create({
                     'transaction_id': transaction.id,
                     'line_type': 'output',
@@ -128,7 +129,7 @@ class WizardCreateTransaction(models.TransientModel):
                     'sequence': i + 1,
                     'description': line.description or f'Output {i + 1}',
                 })
-            
+
             # Update transaction with PSBT data
             transaction.write({
                 'psbt_base64': psbt_result['psbt_base64'],
@@ -136,7 +137,7 @@ class WizardCreateTransaction(models.TransientModel):
                 'fee': psbt_result['estimated_fee'] / 100000000,    # Convert to BTC
                 'status': 'unsigned_psbt'
             })
-            
+
             # Return action to view the created transaction
             return {
                 'type': 'ir.actions.act_window',
@@ -146,10 +147,10 @@ class WizardCreateTransaction(models.TransientModel):
                 'view_mode': 'form',
                 'target': 'current',
             }
-            
+
         except Exception as e:
-            _logger.error(f"Failed to create transaction: {str(e)}")
-            raise ValidationError(f"Transaction creation failed: {str(e)}")
+            _logger.error(f"Failed to create transaction: {e!s}")
+            raise ValidationError(f"Transaction creation failed: {e!s}")
 
     def _get_or_create_address(self, address_str):
         """
@@ -160,21 +161,21 @@ class WizardCreateTransaction(models.TransientModel):
             existing_address = self.env['crypto.bitcoin.address'].search([
                 ('address', '=', address_str)
             ], limit=1)
-            
+
             if existing_address:
                 return existing_address
-            
+
             # Create new address record
             address_data = {
                 'address': address_str,
                 'type': 'receive',
                 'notes': 'Created from transaction wizard',
             }
-            
+
             return self.env['crypto.bitcoin.address'].create(address_data)
-            
+
         except Exception as e:
-            _logger.warning(f"Failed to create address record for {address_str}: {str(e)}")
+            _logger.warning(f"Failed to create address record for {address_str}: {e!s}")
             return None
 
 
@@ -182,17 +183,17 @@ class WizardCreateTransactionLine(models.TransientModel):
     _name = 'wizard.create.transaction.line'
     _description = 'Transaction Output Line'
 
-    wizard_id = fields.Many2one('wizard.create.transaction', string='Wizard', 
+    wizard_id = fields.Many2one('wizard.create.transaction', string='Wizard',
                                 required=True, ondelete='cascade')
-    
+
     recipient_address = fields.Char(string='Recipient Address', required=True,
                                     help="Bitcoin address to send to")
     amount_btc = fields.Float(string='Amount (BTC)', required=True, digits=(16, 8),
                               help="Amount to send in BTC")
-    amount_sat = fields.Integer(string='Amount (sat)', 
+    amount_sat = fields.Integer(string='Amount (sat)',
                                 compute='_compute_amount_sat', store=False,
                                 help="Amount in satoshis")
-    description = fields.Char(string='Description', 
+    description = fields.Char(string='Description',
                               help="Optional description for this output")
 
     @api.depends('amount_btc')
@@ -207,20 +208,20 @@ class WizardCreateTransactionLine(models.TransientModel):
         for record in self:
             if record.recipient_address:
                 address = record.recipient_address.strip()
-                if not (address.startswith('1') or address.startswith('3') or address.startswith('bc1')):
-                    raise ValidationError(f"Invalid Bitcoin address format: {address}")
-                
+                if not (address.startswith('1') or address.startswith('3') or address.startswith('bc1')):  # noqa: E501
+                    raise ValidationError(f"Invalid Bitcoin address format: {address}") from None  # noqa: E501
+
                 # Basic length checks
                 if address.startswith('1') and len(address) < 26:
-                    raise ValidationError(f"P2PKH address too short: {address}")
+                    raise ValidationError(f"P2PKH address too short: {address}") from None  # noqa: E501
                 elif address.startswith('3') and len(address) < 26:
-                    raise ValidationError(f"P2SH address too short: {address}")
+                    raise ValidationError(f"P2SH address too short: {address}") from None  # noqa: E501
                 elif address.startswith('bc1') and len(address) < 14:
-                    raise ValidationError(f"Bech32 address too short: {address}")
+                    raise ValidationError(f"Bech32 address too short: {address}") from None  # noqa: E501
 
     @api.constrains('amount_btc')
     def _check_amount_positive(self):
         """Ensure amount is positive"""
         for record in self:
             if record.amount_btc <= 0:
-                raise ValidationError("Transaction amount must be positive")
+                raise ValidationError("Transaction amount must be positive") from None

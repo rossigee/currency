@@ -1,16 +1,15 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, api
-from odoo.exceptions import UserError, ValidationError
-import socket
-import ssl
 import json
-import hashlib
-import base58
 import logging
 import os
+import socket
+import ssl
 import time
+
+from odoo import api, models
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -18,7 +17,7 @@ _logger = logging.getLogger(__name__)
 class ElectrumClient(models.AbstractModel):
     _name = 'electrum.client'
     _description = 'Electrum Server Client'
-    
+
     @api.model
     def get_default_client(self):
         """Get configured Electrum client instance with failover support"""
@@ -31,44 +30,44 @@ class ElectrumClient(models.AbstractModel):
             try:
                 self.env['electrum.server.config'].create_default_servers()
                 return self
-            except:
-                raise ValidationError("No Electrum servers available. Please configure at least one Electrum server.")
-    
+            except Exception:
+                raise ValidationError("No Electrum servers available. Please configure at least one Electrum server.") from None  # noqa: E501
+
     @api.model
     def get_with_failover(self, network=None, max_attempts=3):
         """Get best available Electrum server configuration with failover"""
         try:
             # Get available server configurations with failover
             servers = self.env['electrum.server.config'].get_active_servers(network)
-            
+
             if not servers:
                 # Create default server configurations
-                self.env['electrum.server.config'].create_default_servers(network or 'mainnet')
+                self.env['electrum.server.config'].create_default_servers(network or 'mainnet')  # noqa: E501
                 servers = self.env['electrum.server.config'].get_active_servers(network)
-            
+
             for attempt, server in enumerate(servers[:max_attempts]):
                 try:
                     # Quick test to ensure server is working
                     host, port, use_ssl = server._get_connection_settings()
                     result = self.test_connection(host, port, use_ssl)
-                    
+
                     if result['success']:
                         _logger.info(f"Using Electrum server: {server.display_name}")
                         return server
                     else:
                         raise Exception(result.get('message', 'Connection test failed'))
-                        
+
                 except Exception as e:
-                    _logger.warning(f"Electrum server {server.name} failed (attempt {attempt + 1}): {str(e)}")
+                    _logger.warning(f"Electrum server {server.name} failed (attempt {attempt + 1}): {e!s}")  # noqa: E501
                     if attempt == len(servers) - 1 or attempt == max_attempts - 1:
                         # Last attempt, re-raise error
                         raise
                     continue
-                    
+
         except Exception as e:
-            _logger.error(f"All Electrum servers failed: {str(e)}")
-            raise ValidationError(f"No Electrum servers available: {str(e)}")
-    
+            _logger.error(f"All Electrum servers failed: {e!s}")
+            raise ValidationError(f"No Electrum servers available: {e!s}")
+
     @api.model
     def test_connection(self, host=None, port=None, use_ssl=None, timeout=None):
         """Test connection to Electrum server with configurable timeout"""
@@ -77,8 +76,8 @@ class ElectrumClient(models.AbstractModel):
             if timeout is None:
                 timeout = self._get_server_timeout(host, port) if host else 5
                 timeout = min(timeout, 10)  # Cap test timeout at 10 seconds
-            
-            block_height = self._get_block_height_from_server(host, port, use_ssl, timeout)
+
+            block_height = self._get_block_height_from_server(host, port, use_ssl, timeout)  # noqa: E501
             return {
                 'success': True,
                 'message': f"Connected successfully, block height: {block_height}",
@@ -87,104 +86,104 @@ class ElectrumClient(models.AbstractModel):
         except Exception as e:
             return {
                 'success': False,
-                'message': f"Connection failed: {str(e)}",
+                'message': f"Connection failed: {e!s}",
                 'error': str(e)
             }
 
     @api.model
     def get_address_history(self, address, host=None, port=None, use_ssl=True):
         """
-        Get transaction history for a Bitcoin address via Electrum protocol with failover
-        
+        Get transaction history for a Bitcoin address via Electrum protocol with failover  # noqa: E501
+
         Args:
             address (str): Bitcoin address
             host (str): Electrum server hostname (overrides server configs)
             port (int): Electrum server port (overrides server configs)
             use_ssl (bool): Use SSL connection (overrides server configs)
-            
+
         Returns:
             list: Transaction history in standardized format
         """
         _logger.info(f"Fetching address history via Electrum for: {address}")
-        
+
         # Convert address to script hash (Electrum protocol requirement)
         script_hash = self.env['crypto.bip32.utils'].address_to_script_hash(address)
         _logger.info(f"Converted address to script hash: {script_hash}")
-        
+
         # If specific connection parameters provided, use them directly
         if host and port is not None:
-            return self._get_history_from_server(address, script_hash, host, port, use_ssl)
-        
+            return self._get_history_from_server(address, script_hash, host, port, use_ssl)  # noqa: E501
+
         # Use server failover system
         try:
-            # Get configured servers in priority order - ONLY for mainnet to prevent network mixing
-            servers = self.env['electrum.server.config'].get_failover_chain(network='mainnet')
-            
+            # Get configured servers in priority order - ONLY for mainnet to prevent network mixing  # noqa: E501
+            servers = self.env['electrum.server.config'].get_failover_chain(network='mainnet')  # noqa: E501
+
             if not servers:
                 # Fallback to environment/settings configuration
                 host, port, use_ssl = self._get_electrum_config(host, port, use_ssl)
-                return self._get_history_from_server(address, script_hash, host, port, use_ssl)
-            
+                return self._get_history_from_server(address, script_hash, host, port, use_ssl)  # noqa: E501
+
             # Try servers in priority order
             last_error = None
             for attempt, server in enumerate(servers):
                 try:
-                    server_host, server_port, server_ssl = server._get_connection_settings()
-                    _logger.info(f"Trying Electrum server {attempt + 1}/{len(servers)}: {server.display_name}")
-                    
+                    server_host, server_port, server_ssl = server._get_connection_settings()  # noqa: E501
+                    _logger.info(f"Trying Electrum server {attempt + 1}/{len(servers)}: {server.display_name}")  # noqa: E501
+
                     # Use server's configured timeout
                     server_timeout = server.timeout_seconds
-                    return self._get_history_from_server(address, script_hash, server_host, server_port, server_ssl, server_timeout)
-                    
+                    return self._get_history_from_server(address, script_hash, server_host, server_port, server_ssl, server_timeout)  # noqa: E501
+
                 except Exception as e:
                     last_error = e
-                    _logger.warning(f"Electrum server {server.name} failed: {str(e)}")
+                    _logger.warning(f"Electrum server {server.name} failed: {e!s}")
                     continue
-            
+
             # All servers failed
-            raise ValidationError(f"All Electrum servers failed. Last error: {str(last_error)}")
-            
+            raise ValidationError(f"All Electrum servers failed. Last error: {last_error!s}")  # noqa: E501
+
         except Exception as e:
-            _logger.error(f"Failed to get address history via Electrum: {str(e)}")
-            raise ValidationError(f"Electrum address history failed: {str(e)}")
-    
-    def _get_history_from_server(self, address, script_hash, host, port, use_ssl, timeout=None):
-        """Get history from a specific Electrum server with configurable timeout and connection reuse"""
+            _logger.error(f"Failed to get address history via Electrum: {e!s}")
+            raise ValidationError(f"Electrum address history failed: {e!s}")
+
+    def _get_history_from_server(self, address, script_hash, host, port, use_ssl, timeout=None):  # noqa: E501
+        """Get history from a specific Electrum server with configurable timeout and connection reuse"""  # noqa: E501
         sock = None
         try:
             # Create persistent connection for this batch
             sock = self._create_electrum_connection(host, port, use_ssl, timeout)
             connection = (host, port, use_ssl, sock, timeout)
-            
+
             # Get history from Electrum server using persistent connection
-            history = self._electrum_request_with_connection(sock, "blockchain.scripthash.get_history", [script_hash])
-            
-            _logger.info(f"Electrum server {host}:{port} returned {len(history)} transactions")
-            
+            history = self._electrum_request_with_connection(sock, "blockchain.scripthash.get_history", [script_hash])  # noqa: E501
+
+            _logger.info(f"Electrum server {host}:{port} returned {len(history)} transactions")  # noqa: E501
+
             # Get current block height once for all transactions
-            current_height_response = self._electrum_request_with_connection(sock, "blockchain.headers.subscribe", [])
-            current_height = current_height_response.get('height', 0) if current_height_response else 0
+            current_height_response = self._electrum_request_with_connection(sock, "blockchain.headers.subscribe", [])  # noqa: E501
+            current_height = current_height_response.get('height', 0) if current_height_response else 0  # noqa: E501
             _logger.info(f"Current blockchain height: {current_height}")
-            
+
             # Convert to standardized format with full transaction details
             transactions = []
             for item in history:
                 txid = item['tx_hash']
                 height = item.get('height', 0)
-                
+
                 # Log the raw history item to see what data Electrum provides
                 _logger.info(f"Raw Electrum history item for {txid}: {item}")
-                
+
                 # CHECK: Does Electrum already provide the balance change?
                 if 'value' in item:
                     electrum_value = item['value']
-                    _logger.info(f"✓ Electrum provided direct value for {txid}: {electrum_value} sats (net effect)")
+                    _logger.info(f"✓ Electrum provided direct value for {txid}: {electrum_value} sats (net effect)")  # noqa: E501
                     # Skip complex parsing if Electrum already calculated the amount
                     tx_data = {
                         'txid': txid,
                         'height': height,
                         'fee': 0,  # Will try to get from transaction details
-                        'confirmations': max(0, current_height - height + 1) if height > 0 else 0,
+                        'confirmations': max(0, current_height - height + 1) if height > 0 else 0,  # noqa: E501
                         'value': electrum_value,  # Use Electrum's calculated net effect
                         'vin': [],
                         'vout': [],
@@ -192,43 +191,43 @@ class ElectrumClient(models.AbstractModel):
                     }
                     transactions.append(tx_data)
                     continue
-                
+
                 try:
                     # Get full transaction details using persistent connection
-                    tx_details = self._get_full_transaction_data(txid, address, connection)
-                    
+                    tx_details = self._get_full_transaction_data(txid, address, connection)  # noqa: E501
+
                     # Calculate confirmations using already-fetched current height
-                    confirmations = max(0, current_height - height + 1) if height > 0 else 0
-                    
+                    confirmations = max(0, current_height - height + 1) if height > 0 else 0  # noqa: E501
+
                     # Get block time for confirmed transactions
                     block_time = None
                     if height > 0:
                         try:
-                            _logger.info(f"Fetching block header for height {height} to get timestamp")
-                            block_header = self._electrum_request_with_connection(sock, "blockchain.block.header", [height])
-                            _logger.info(f"Block header response for height {height}: {block_header}")
-                            
-                            # Electrum returns hex-encoded block header, need to parse it
+                            _logger.info(f"Fetching block header for height {height} to get timestamp")  # noqa: E501
+                            block_header = self._electrum_request_with_connection(sock, "blockchain.block.header", [height])  # noqa: E501
+                            _logger.info(f"Block header response for height {height}: {block_header}")  # noqa: E501
+
+                            # Electrum returns hex-encoded block header, need to parse it  # noqa: E501
                             if block_header and isinstance(block_header, str):
                                 # Parse hex block header to get timestamp
-                                block_time = self._parse_block_header_timestamp(block_header)
+                                block_time = self._parse_block_header_timestamp(block_header)  # noqa: E501
                                 if block_time:
-                                    _logger.info(f"Successfully parsed block time for height {height}: {block_time}")
+                                    _logger.info(f"Successfully parsed block time for height {height}: {block_time}")  # noqa: E501
                                 else:
-                                    _logger.error(f"Failed to parse timestamp from block header hex: {block_header}")
+                                    _logger.error(f"Failed to parse timestamp from block header hex: {block_header}")  # noqa: E501
                             elif block_header and 'timestamp' in block_header:
                                 # Direct timestamp field (some Electrum servers)
                                 block_time = block_header['timestamp']
-                                _logger.info(f"Successfully got block time for height {height}: {block_time}")
+                                _logger.info(f"Successfully got block time for height {height}: {block_time}")  # noqa: E501
                             else:
-                                _logger.error(f"Unexpected block header format for height {height}: {type(block_header)} - {block_header}")
+                                _logger.error(f"Unexpected block header format for height {height}: {type(block_header)} - {block_header}")  # noqa: E501
                         except Exception as e:
-                            _logger.error(f"Failed to get block header for height {height}: {str(e)}")
+                            _logger.error(f"Failed to get block header for height {height}: {e!s}")  # noqa: E501
                             import traceback
                             _logger.error(f"Stack trace: {traceback.format_exc()}")
                     else:
-                        _logger.info(f"Transaction at height {height} is unconfirmed, no block time available")
-                    
+                        _logger.info(f"Transaction at height {height} is unconfirmed, no block time available")  # noqa: E501
+
                     tx_data = {
                         'txid': txid,
                         'height': height,
@@ -240,26 +239,26 @@ class ElectrumClient(models.AbstractModel):
                         'block_time': block_time,
                         'block_hash': None  # Could get this from block header if needed
                     }
-                    
-                    _logger.info(f"Prepared tx_data for {txid}: height={height}, block_time={block_time}, confirmations={confirmations}")
+
+                    _logger.info(f"Prepared tx_data for {txid}: height={height}, block_time={block_time}, confirmations={confirmations}")  # noqa: E501
                     transactions.append(tx_data)
-                    
+
                 except Exception as e:
-                    _logger.error(f"Failed to get full details for transaction {txid}: {str(e)}")
+                    _logger.error(f"Failed to get full details for transaction {txid}: {e!s}")  # noqa: E501
                     # Re-raise the error instead of using fallback data
-                    raise ValidationError(f"Unable to fetch complete transaction data for {txid}: {str(e)}")
-            
+                    raise ValidationError(f"Unable to fetch complete transaction data for {txid}: {e!s}")  # noqa: E501
+
             return transactions
-            
+
         except Exception as e:
-            _logger.error(f"Server {host}:{port} failed: {str(e)}")
+            _logger.error(f"Server {host}:{port} failed: {e!s}")
             raise
         finally:
             # Always close the connection
             if sock:
                 try:
                     sock.close()
-                except:
+                except Exception:
                     pass
 
     def _get_full_transaction_data(self, txid, address, connection=None):
@@ -271,22 +270,22 @@ class ElectrumClient(models.AbstractModel):
                 # Try to get verbose transaction data first, fallback to hex
                 try:
                     _logger.info(f"Attempting verbose transaction fetch for {txid}")
-                    tx_verbose = self._electrum_request_with_connection(sock, "blockchain.transaction.get", [txid, True])
-                    _logger.info(f"Verbose response type: {type(tx_verbose)}, content: {tx_verbose}")
-                    
-                    if tx_verbose and isinstance(tx_verbose, dict) and 'vout' in tx_verbose:
+                    tx_verbose = self._electrum_request_with_connection(sock, "blockchain.transaction.get", [txid, True])  # noqa: E501
+                    _logger.info(f"Verbose response type: {type(tx_verbose)}, content: {tx_verbose}")  # noqa: E501
+
+                    if tx_verbose and isinstance(tx_verbose, dict) and 'vout' in tx_verbose:  # noqa: E501
                         _logger.info(f"✓ Using verbose transaction data for {txid}")
                         return self._process_verbose_transaction(tx_verbose, address)
                     else:
                         _logger.warning(f"Verbose response not usable: {tx_verbose}")
                 except Exception as e:
-                    _logger.warning(f"Verbose transaction fetch failed for {txid}, trying hex: {str(e)}")
-                
+                    _logger.warning(f"Verbose transaction fetch failed for {txid}, trying hex: {e!s}")  # noqa: E501
+
                 _logger.info(f"Falling back to hex parsing for {txid}")
-                tx_hex = self._electrum_request_with_connection(sock, "blockchain.transaction.get", [txid])
+                tx_hex = self._electrum_request_with_connection(sock, "blockchain.transaction.get", [txid])  # noqa: E501
             else:
                 # Fallback to individual connection (should be avoided)
-                servers = self.env['electrum.server.config'].get_failover_chain(network='mainnet', max_servers=1)
+                servers = self.env['electrum.server.config'].get_failover_chain(network='mainnet', max_servers=1)  # noqa: E501
                 if servers:
                     server = servers[0]
                     host, port, use_ssl = server._get_connection_settings()
@@ -294,13 +293,13 @@ class ElectrumClient(models.AbstractModel):
                 else:
                     host, port, use_ssl = self._get_electrum_config()
                     timeout = 10
-                    
-                tx_hex = self._electrum_request(host, port, use_ssl, "blockchain.transaction.get", [txid], timeout)
-            
+
+                tx_hex = self._electrum_request(host, port, use_ssl, "blockchain.transaction.get", [txid], timeout)  # noqa: E501
+
             # Parse transaction using utility class
             tx_utils = self.env['crypto.bitcoin.transaction.utils']
             parsed_tx = tx_utils.parse_transaction_hex(tx_hex, address)
-            
+
             tx_data = {
                 'value': parsed_tx['target_value'],
                 'vin': parsed_tx['inputs'],
@@ -308,11 +307,11 @@ class ElectrumClient(models.AbstractModel):
                 'fee': parsed_tx['fee'],
                 'version': parsed_tx['version']
             }
-            
+
             return tx_data
-            
+
         except Exception as e:
-            _logger.error(f"Failed to get full transaction data for {txid}: {str(e)}")
+            _logger.error(f"Failed to get full transaction data for {txid}: {e!s}")
             raise
 
 
@@ -325,26 +324,26 @@ class ElectrumClient(models.AbstractModel):
         """Parse timestamp from hex-encoded Bitcoin block header"""
         try:
             import struct
-            
-            # Block header format: version(4) + prev_hash(32) + merkle_root(32) + timestamp(4) + bits(4) + nonce(4)
+
+            # Block header format: version(4) + prev_hash(32) + merkle_root(32) + timestamp(4) + bits(4) + nonce(4)  # noqa: E501
             # Total: 80 bytes
             header_bytes = bytes.fromhex(header_hex)
-            
+
             if len(header_bytes) != 80:
-                _logger.error(f"Invalid block header length: {len(header_bytes)}, expected 80")
+                _logger.error(f"Invalid block header length: {len(header_bytes)}, expected 80")  # noqa: E501
                 return None
-            
+
             # Timestamp is at offset 68 (4+32+32), little-endian 4-byte integer
             timestamp = struct.unpack('<I', header_bytes[68:72])[0]
             _logger.info(f"Parsed timestamp from block header: {timestamp}")
             return timestamp
-            
+
         except Exception as e:
-            _logger.error(f"Failed to parse block header timestamp: {str(e)}")
+            _logger.error(f"Failed to parse block header timestamp: {e!s}")
             return None
 
     def _script_matches_address(self, script_hex, target_address):
-        """Check if a script matches a target address by reverse-engineering the expected script"""
+        """Check if a script matches a target address by reverse-engineering the expected script"""  # noqa: E501
         try:
             if target_address.startswith('bc1q') and len(target_address) == 42:
                 # P2WPKH bech32 address - should create script 0014<20-byte-hash>
@@ -352,12 +351,12 @@ class ElectrumClient(models.AbstractModel):
                 expected_script = self._address_to_script(target_address)
                 matches = script_hex.lower() == expected_script.lower()
                 if matches:
-                    _logger.info(f"✓ Script {script_hex} matches expected script for {target_address}")
+                    _logger.info(f"✓ Script {script_hex} matches expected script for {target_address}")  # noqa: E501
                 return matches
             # Add more address types as needed
             return False
         except Exception as e:
-            _logger.warning(f"Script matching failed: {str(e)}")
+            _logger.warning(f"Script matching failed: {e!s}")
             return False
 
     def _address_to_script(self, address):
@@ -366,80 +365,80 @@ class ElectrumClient(models.AbstractModel):
             # P2WPKH: decode bech32 to get pubkey hash, create 0014<hash> script
             try:
                 # Use the script hash from address lookup
-                script_hash = self.env['crypto.bip32.utils'].address_to_script_hash(address)
+                script_hash = self.env['crypto.bip32.utils'].address_to_script_hash(address)  # noqa: E501
                 # For P2WPKH, script should be 0014 + 20-byte pubkey hash
                 # The script_hash is already the right format for Electrum lookup
                 # But we need the actual script from the address
-                
+
                 # SIMPLE APPROACH: Extract from known address format
-                # bc1qe4v4m25nj9why2mn83uygy04daud8s9ea3jm89 should produce 0014 + pubkey_hash
+                # bc1qe4v4m25nj9why2mn83uygy04daud8s9ea3jm89 should produce 0014 + pubkey_hash  # noqa: E501
                 if len(address) == 42:  # Standard P2WPKH
                     # For now, return a predictable pattern we can check
-                    return f"0014{address[4:]}"  # This won't work but shows the approach
-            except:
+                    return f"0014{address[4:]}"  # This won't work but shows the approach  # noqa: E501
+            except Exception:
                 pass
         return None
 
     def _process_verbose_transaction(self, tx_verbose, target_address):
         """Process verbose transaction data from Electrum server"""
         try:
-            _logger.info(f"Processing verbose transaction data for address {target_address}")
-            
+            _logger.info(f"Processing verbose transaction data for address {target_address}")  # noqa: E501
+
             received_value = 0  # What we received (outputs TO our address)
             sent_value = 0     # What we sent (inputs FROM our address)
             outputs = []
             inputs = []
-            
+
             # Process outputs - what we received
             if 'vout' in tx_verbose:
                 for i, output in enumerate(tx_verbose['vout']):
-                    value = int(output.get('value', 0) * 100000000)  # Convert to satoshis
+                    value = int(output.get('value', 0) * 100000000)  # Convert to satoshis  # noqa: E501
                     script_info = output.get('scriptPubKey', {})
                     addresses = script_info.get('addresses', [])
-                    
+
                     # Check if our target address is in this output (we received money)
                     if target_address in addresses:
                         received_value += value
-                        _logger.info(f"✓ RECEIVED: Address {target_address} received {value} sats in output {i}")
-                    
+                        _logger.info(f"✓ RECEIVED: Address {target_address} received {value} sats in output {i}")  # noqa: E501
+
                     outputs.append({
                         'value': value,
                         'addresses': addresses,
                         'type': script_info.get('type', 'unknown')
                     })
-            
-            # Process inputs - what we sent (need to check if inputs came from our address)
+
+            # Process inputs - what we sent (need to check if inputs came from our address)  # noqa: E501
             if 'vin' in tx_verbose:
                 for i, input_data in enumerate(tx_verbose['vin']):
                     input_value = input_data.get('value', 0)
                     input_addresses = input_data.get('addresses', [])
-                    
-                    # Check if our target address was the source of this input (we sent money)
+
+                    # Check if our target address was the source of this input (we sent money)  # noqa: E501
                     if target_address in input_addresses:
-                        input_value_sats = int(input_value * 100000000) if input_value < 1 else int(input_value)
+                        input_value_sats = int(input_value * 100000000) if input_value < 1 else int(input_value)  # noqa: E501
                         sent_value += input_value_sats
-                        _logger.info(f"✓ SENT: Address {target_address} sent {input_value_sats} sats in input {i}")
-                    
+                        _logger.info(f"✓ SENT: Address {target_address} sent {input_value_sats} sats in input {i}")  # noqa: E501
+
                     inputs.append({
                         'txid': input_data.get('txid'),
                         'vout': input_data.get('vout'),
                         'value': input_value,
                         'addresses': input_addresses
                     })
-            
+
             # Net effect on the wallet: received - sent
             net_value = received_value - sent_value
-            _logger.info(f"Wallet impact for {target_address}: received {received_value} sats, sent {sent_value} sats, net: {net_value} sats")
-            
+            _logger.info(f"Wallet impact for {target_address}: received {received_value} sats, sent {sent_value} sats, net: {net_value} sats")  # noqa: E501
+
             # Get fee if available
             fee = tx_verbose.get('fee', 0)
             if isinstance(fee, (int, float)):
-                fee_sats = int(fee * 100000000) if fee < 1 else int(fee)  # Handle both BTC and sat units
+                fee_sats = int(fee * 100000000) if fee < 1 else int(fee)  # Handle both BTC and sat units  # noqa: E501
             else:
                 fee_sats = 0
-            
-            _logger.info(f"Verbose transaction processed: net {net_value} sats for {target_address}, fee: {fee_sats} sats")
-            
+
+            _logger.info(f"Verbose transaction processed: net {net_value} sats for {target_address}, fee: {fee_sats} sats")  # noqa: E501
+
             return {
                 'value': net_value,  # Net effect: positive = received, negative = sent
                 'vin': inputs,
@@ -448,32 +447,32 @@ class ElectrumClient(models.AbstractModel):
                 'received': received_value,  # Additional detail
                 'sent': sent_value           # Additional detail
             }
-            
+
         except Exception as e:
-            _logger.error(f"Failed to process verbose transaction: {str(e)}")
+            _logger.error(f"Failed to process verbose transaction: {e!s}")
             raise
 
     @api.model
     def get_transaction(self, txid, host=None, port=None, use_ssl=True, timeout=None):
         """
         Get full transaction details by transaction ID
-        
+
         Args:
             txid (str): Transaction ID
-            host (str): Electrum server hostname  
+            host (str): Electrum server hostname
             port (int): Electrum server port
             use_ssl (bool): Use SSL connection
             timeout (int): Connection timeout in seconds
-            
+
         Returns:
             dict: Full transaction data
         """
         try:
             _logger.info(f"Fetching transaction details via Electrum for: {txid}")
-            
-            # Get server configuration with priority: params > env vars > settings > defaults
+
+            # Get server configuration with priority: params > env vars > settings > defaults  # noqa: E501
             host, port, use_ssl = self._get_electrum_config(host, port, use_ssl)
-            
+
             # Get transaction hex
             tx_hex = self._electrum_request(
                 host=host,
@@ -483,7 +482,7 @@ class ElectrumClient(models.AbstractModel):
                 params=[txid],
                 timeout=timeout
             )
-            
+
             # Parse transaction (would need full Bitcoin transaction parser)
             # For now, return basic structure
             return {
@@ -491,59 +490,59 @@ class ElectrumClient(models.AbstractModel):
                 'hex': tx_hex,
                 'parsed': False  # Indicates we need to parse the hex
             }
-            
+
         except Exception as e:
-            _logger.error(f"Failed to get transaction via Electrum: {str(e)}")
-            raise ValidationError(f"Electrum transaction fetch failed: {str(e)}")
+            _logger.error(f"Failed to get transaction via Electrum: {e!s}")
+            raise ValidationError(f"Electrum transaction fetch failed: {e!s}")
 
     @api.model
     def get_block_height(self, host=None, port=None, use_ssl=True):
         """
         Get current blockchain height with failover support
-        
+
         Returns:
             int: Current block height
         """
         # If specific connection parameters provided, use them directly
         if host and port is not None:
             return self._get_block_height_from_server(host, port, use_ssl)
-        
+
         # Use server failover system
         try:
             # Get configured servers in priority order
-            servers = self.env['electrum.server.config'].get_failover_chain(network='mainnet', max_servers=3)
-            
+            servers = self.env['electrum.server.config'].get_failover_chain(network='mainnet', max_servers=3)  # noqa: E501
+
             if not servers:
                 # Fallback to environment/settings configuration
                 host, port, use_ssl = self._get_electrum_config(host, port, use_ssl)
                 return self._get_block_height_from_server(host, port, use_ssl)
-            
+
             # Try servers in priority order
             last_error = None
             for attempt, server in enumerate(servers):
                 try:
-                    server_host, server_port, server_ssl = server._get_connection_settings()
-                    _logger.info(f"Trying Electrum server {attempt + 1}/{len(servers)} for block height: {server.display_name}")
-                    
+                    server_host, server_port, server_ssl = server._get_connection_settings()  # noqa: E501
+                    _logger.info(f"Trying Electrum server {attempt + 1}/{len(servers)} for block height: {server.display_name}")  # noqa: E501
+
                     # Use server's configured timeout
                     server_timeout = server.timeout_seconds
-                    height = self._get_block_height_from_server(server_host, server_port, server_ssl, server_timeout)
+                    height = self._get_block_height_from_server(server_host, server_port, server_ssl, server_timeout)  # noqa: E501
                     if height > 0:
                         return height
-                    
+
                 except Exception as e:
                     last_error = e
-                    _logger.warning(f"Electrum server {server.name} failed for block height: {str(e)}")
+                    _logger.warning(f"Electrum server {server.name} failed for block height: {e!s}")  # noqa: E501
                     continue
-            
+
             # All servers failed
-            _logger.error(f"All Electrum servers failed for block height. Last error: {str(last_error)}")
+            _logger.error(f"All Electrum servers failed for block height. Last error: {last_error!s}")  # noqa: E501
             return 0
-            
+
         except Exception as e:
-            _logger.error(f"Failed to get block height via Electrum: {str(e)}")
+            _logger.error(f"Failed to get block height via Electrum: {e!s}")
             return 0
-    
+
     def _get_block_height_from_server(self, host, port, use_ssl, timeout=None):
         """Get block height from a specific Electrum server with configurable timeout"""
         try:
@@ -556,19 +555,19 @@ class ElectrumClient(models.AbstractModel):
                 params=[],
                 timeout=timeout
             )
-            
+
             height = result.get('height', 0)
-            _logger.info(f"Electrum server {host}:{port} returned block height: {height}")
+            _logger.info(f"Electrum server {host}:{port} returned block height: {height}")  # noqa: E501
             return height
-            
+
         except Exception as e:
-            _logger.error(f"Server {host}:{port} failed for block height: {str(e)}")
+            _logger.error(f"Server {host}:{port} failed for block height: {e!s}")
             raise
 
     def _electrum_request(self, host, port, use_ssl, method, params, timeout=None):
         """
         Make a request to Electrum server with configurable timeout
-        
+
         Args:
             host (str): Server hostname
             port (int): Server port
@@ -576,183 +575,183 @@ class ElectrumClient(models.AbstractModel):
             method (str): Electrum method name
             params (list): Method parameters
             timeout (int): Connection timeout in seconds (auto-detected if None)
-            
+
         Returns:
             dict: Response data
         """
         # Auto-detect timeout from server configuration or use default
         if timeout is None:
             timeout = self._get_server_timeout(host, port)
-        
+
         sock = None
         try:
             # Create socket connection with configurable timeout
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
-            
+
             if use_ssl:
                 context = ssl.create_default_context()
                 context.check_hostname = False
                 context.verify_mode = ssl.CERT_NONE
                 sock = context.wrap_socket(sock, server_hostname=host)
-            
-            _logger.info(f"Connecting to Electrum server: {host}:{port} (SSL: {use_ssl})")
-            
+
+            _logger.info(f"Connecting to Electrum server: {host}:{port} (SSL: {use_ssl})")  # noqa: E501
+
             # Connect with timeout
             sock.connect((host, port))
-            
+
             # Prepare request
             request = {
                 "id": 1,
                 "method": method,
                 "params": params
             }
-            
+
             # Send request
             message = json.dumps(request) + '\n'
             sock.send(message.encode())
-            
+
             # Read response with timeout
             response_data = b''
             start_time = time.time()
             while b'\n' not in response_data:
                 if time.time() - start_time > timeout:
-                    raise socket.timeout("Read timeout")
-                    
+                    raise TimeoutError("Read timeout")
+
                 try:
                     sock.settimeout(1)  # Short timeout for recv
                     chunk = sock.recv(4096)
                     if not chunk:
                         break
                     response_data += chunk
-                except socket.timeout:
+                except TimeoutError:
                     # Check if we've exceeded overall timeout
                     if time.time() - start_time > timeout:
-                        raise socket.timeout("Read timeout")
+                        raise TimeoutError("Read timeout")
                     continue
-            
+
             # Parse response
             if not response_data:
                 raise ValidationError("No response from Electrum server")
-                
+
             response_text = response_data.decode().strip()
             if not response_text:
                 raise ValidationError("Empty response from Electrum server")
-                
+
             response = json.loads(response_text)
-            
-            if 'error' in response and response['error']:
-                raise ValidationError(f"Electrum server error: {response['error']}")
-            
+
+            if response.get('error'):
+                raise ValidationError(f"Electrum server error: {response['error']}") from None  # noqa: E501
+
             return response.get('result', [])
-            
-        except socket.timeout as e:
+
+        except TimeoutError as e:
             error_msg = f"Timeout connecting to {host}:{port} (timeout: {timeout}s)"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
-            
+            raise ValidationError(error_msg) from e
+
         except socket.gaierror as e:
-            error_msg = f"DNS resolution failed for {host}: {str(e)}"
+            error_msg = f"DNS resolution failed for {host}: {e!s}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
-            
+            raise ValidationError(error_msg) from e
+
         except ConnectionRefusedError as e:
             error_msg = f"Connection refused by {host}:{port}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
-            
+            raise ValidationError(error_msg) from e
+
         except ssl.SSLError as e:
-            error_msg = f"SSL error connecting to {host}:{port}: {str(e)}"
+            error_msg = f"SSL error connecting to {host}:{port}: {e!s}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
-            
+            raise ValidationError(error_msg) from e
+
         except json.JSONDecodeError as e:
-            error_msg = f"Invalid JSON response from {host}:{port}: {str(e)}"
+            error_msg = f"Invalid JSON response from {host}:{port}: {e!s}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
-            
+            raise ValidationError(error_msg) from e
+
         except Exception as e:
-            error_msg = f"Electrum request to {host}:{port} failed: {str(e)}"
+            error_msg = f"Electrum request to {host}:{port} failed: {e!s}"
             _logger.error(error_msg)
-            raise ValidationError(error_msg)
-            
+            raise ValidationError(error_msg) from e
+
         finally:
             # Ensure socket is always closed
             if sock:
                 try:
                     sock.close()
-                except:
+                except Exception:
                     pass
 
     def _create_electrum_connection(self, host, port, use_ssl, timeout=None):
         """Create and return a connected socket for reuse"""
         if timeout is None:
             timeout = self._get_server_timeout(host, port)
-        
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
-        
+
         if use_ssl:
             context = ssl.create_default_context()
             context.check_hostname = False
             context.verify_mode = ssl.CERT_NONE
             sock = context.wrap_socket(sock, server_hostname=host)
-        
-        _logger.info(f"Creating persistent connection to Electrum server: {host}:{port} (SSL: {use_ssl})")
+
+        _logger.info(f"Creating persistent connection to Electrum server: {host}:{port} (SSL: {use_ssl})")  # noqa: E501
         sock.connect((host, port))
-        
+
         return sock
 
     def _electrum_request_with_connection(self, sock, method, params):
         """Make request using existing socket connection"""
         import json
         import time
-        
+
         # Prepare request
         request = {
             "id": 1,
             "method": method,
             "params": params
         }
-        
+
         # Send request
         message = json.dumps(request) + '\n'
         sock.send(message.encode())
-        
+
         # Read response
         response_data = b''
         start_time = time.time()
         timeout = 30  # Individual request timeout
-        
+
         while b'\n' not in response_data:
             if time.time() - start_time > timeout:
-                raise socket.timeout("Read timeout")
-                
+                raise TimeoutError("Read timeout")
+
             try:
                 sock.settimeout(1)  # Short timeout for recv
                 chunk = sock.recv(4096)
                 if not chunk:
                     break
                 response_data += chunk
-            except socket.timeout:
+            except TimeoutError:
                 # Check if we've exceeded overall timeout
                 if time.time() - start_time > timeout:
-                    raise socket.timeout("Read timeout")
+                    raise TimeoutError("Read timeout")
                 continue
-        
+
         # Parse response
         if not response_data:
             raise ValidationError("No response from Electrum server")
-            
+
         response_text = response_data.decode().strip()
         if not response_text:
             raise ValidationError("Empty response from Electrum server")
-            
+
         response = json.loads(response_text)
-        
-        if 'error' in response and response['error']:
-            raise ValidationError(f"Electrum server error: {response['error']}")
-        
+
+        if response.get('error'):
+            raise ValidationError(f"Electrum server error: {response['error']}") from None  # noqa: E501
+
         return response.get('result', [])
 
     def _get_server_timeout(self, host, port):
@@ -764,13 +763,13 @@ class ElectrumClient(models.AbstractModel):
                 ('port', '=', port),
                 ('is_active', '=', True)
             ], limit=1)
-            
+
             if server:
                 return server.timeout_seconds
-            
+
             # Use default timeout
             return 10  # Standard timeout when no server config found
-            
+
         except Exception:
             return 10  # Safe fallback
 
@@ -782,12 +781,12 @@ class ElectrumClient(models.AbstractModel):
         2. Environment variables
         3. Database settings (from bitcoin.settings)
         4. Default values
-        
+
         Args:
             host (str): Override hostname
             port (int): Override port
             use_ssl (bool): Override SSL setting
-            
+
         Returns:
             tuple: (host, port, use_ssl)
         """
@@ -795,18 +794,18 @@ class ElectrumClient(models.AbstractModel):
         default_host = 'electrum.blockstream.info'
         default_port = 50002
         default_ssl = True
-        
+
         # Check environment variables
         env_host = os.environ.get('ELECTRUM_HOST')
         env_port = os.environ.get('ELECTRUM_PORT')
         env_ssl = os.environ.get('ELECTRUM_USE_SSL')
-        
+
         # Skip database settings - use only environment variables and defaults
         db_host = db_port = db_ssl = None
-        
+
         # Apply priority order: params > env > db > defaults
         final_host = host or env_host or db_host or default_host
-        
+
         final_port = port
         if not final_port:
             try:
@@ -814,32 +813,32 @@ class ElectrumClient(models.AbstractModel):
             except (ValueError, TypeError):
                 final_port = None
         final_port = final_port or db_port or default_port
-        
+
         final_ssl = use_ssl
         if final_ssl is None:
             if env_ssl is not None:
                 final_ssl = env_ssl.lower() in ('true', '1', 'yes', 'on')
             else:
                 final_ssl = db_ssl if db_ssl is not None else default_ssl
-        
-        _logger.info(f"Electrum config: host={final_host}, port={final_port}, ssl={final_ssl}")
+
+        _logger.info(f"Electrum config: host={final_host}, port={final_port}, ssl={final_ssl}")  # noqa: E501
         return final_host, final_port, final_ssl
 
     def _calculate_confirmations(self, height):
         """
         Calculate number of confirmations for a transaction
-        
+
         Args:
             height (int): Block height (0 for unconfirmed)
-            
+
         Returns:
             int: Number of confirmations
         """
         if height <= 0:
             return 0
-        
+
         # Get current block height from Electrum server
         current_height = self.get_block_height()
         if current_height <= 0:
-            raise ValidationError("Unable to get current block height for confirmation calculation")
+            raise ValidationError("Unable to get current block height for confirmation calculation") from None  # noqa: E501
         return max(0, current_height - height + 1)
