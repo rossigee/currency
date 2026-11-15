@@ -18,20 +18,20 @@ class BitcoinNodeConfig(models.Model):
 
     name = fields.Char(string='Configuration Name', required=True)
     display_name = fields.Char(string='Display Name', compute='_compute_display_name', store=True)
-    
+
     # Priority and Status
-    sequence = fields.Integer(string='Priority', default=10, 
+    sequence = fields.Integer(string='Priority', default=10,
                              help="Lower numbers = higher priority. Used for failover ordering.")
     is_active = fields.Boolean(string='Active', default=True,
                               help="Only active nodes are used for connections")
-    
+
     # Connection Settings
     rpc_host = fields.Char(string='RPC Host', required=True, default='localhost')
     rpc_port = fields.Integer(string='RPC Port', required=True, default=8332)
     rpc_user = fields.Char(string='RPC Username', required=True)
     rpc_password = fields.Char(string='RPC Password', required=True)
     use_ssl = fields.Boolean(string='Use SSL', default=False)
-    
+
     # Network
     network = fields.Selection([
         ('mainnet', 'Bitcoin Mainnet'),
@@ -39,7 +39,7 @@ class BitcoinNodeConfig(models.Model):
         ('regtest', 'Regtest'),
         ('signet', 'Signet')
     ], string='Network', required=True, default='mainnet')
-    
+
     # Health Monitoring
     connection_status = fields.Selection([
         ('unknown', 'Unknown'),
@@ -48,18 +48,18 @@ class BitcoinNodeConfig(models.Model):
         ('auth_failed', 'Authentication Failed'),
         ('timeout', 'Timeout')
     ], string='Status', default='unknown', readonly=True)
-    
+
     last_connected = fields.Datetime(string='Last Connected', readonly=True)
     last_check = fields.Datetime(string='Last Health Check', readonly=True)
     status_message = fields.Text(string='Status Message', readonly=True)
-    
+
     # Node Information (cached)
     node_version = fields.Char(string='Node Version', readonly=True)
     current_block_height = fields.Integer(string='Current Block Height', readonly=True)
     best_block_hash = fields.Char(string='Best Block Hash', readonly=True)
     chain = fields.Char(string='Chain', readonly=True)
     peer_count = fields.Integer(string='Peer Count', readonly=True)
-    
+
     # Performance Settings
     timeout_seconds = fields.Integer(string='Timeout (seconds)', default=30,
                                    help="Connection timeout for this node")
@@ -67,7 +67,7 @@ class BitcoinNodeConfig(models.Model):
                                help="Maximum retry attempts before marking as failed")
     cache_duration_minutes = fields.Integer(string='Cache Duration (minutes)', default=5,
                                           help="How long to cache blockchain info")
-    
+
     # Environment Variable Support
     use_env_variables = fields.Boolean(string='Use Environment Variables', default=False,
                                      help="Override connection settings with environment variables")
@@ -80,12 +80,12 @@ class BitcoinNodeConfig(models.Model):
         for record in self:
             status_icon = {
                 'connected': '🟢',
-                'error': '🔴', 
+                'error': '🔴',
                 'auth_failed': '🟡',
                 'timeout': '🟠',
                 'unknown': '⚪'
             }.get(record.connection_status, '⚪')
-            
+
             record.display_name = f"{status_icon} {record.name} ({record.rpc_host}:{record.rpc_port})"
 
     @api.constrains('sequence')
@@ -101,17 +101,17 @@ class BitcoinNodeConfig(models.Model):
         domain = [('is_active', '=', True)]
         if network:
             domain.append(('network', '=', network))
-        
+
         return self.search(domain, order='sequence, name')
 
     @api.model
     def get_best_node(self, network=None):
         """Get the best available node using failover logic"""
         nodes = self.get_active_nodes(network)
-        
+
         if not nodes:
             raise UserError(f"No active Bitcoin nodes configured for network: {network or 'any'}")
-        
+
         # Try nodes in priority order
         for node in nodes:
             try:
@@ -121,7 +121,7 @@ class BitcoinNodeConfig(models.Model):
             except Exception as e:
                 _logger.warning(f"Bitcoin node {node.name} failed quick test: {str(e)}")
                 continue
-        
+
         # If no nodes pass quick test, return highest priority node and let caller handle errors
         best_node = nodes[0]
         _logger.warning(f"No nodes passed quick test, using highest priority: {best_node.display_name}")
@@ -140,16 +140,16 @@ class BitcoinNodeConfig(models.Model):
     def test_connection(self):
         """Full connection test with status update"""
         self.ensure_one()
-        
+
         try:
             _logger.info(f"Testing Bitcoin node connection: {self.name}")
-            
+
             connector = self.get_connector()
-            
+
             # Test connection with comprehensive calls
             blockchain_info = connector._make_rpc_call('getblockchaininfo')
             network_info = connector._make_rpc_call('getnetworkinfo')
-            
+
             # Update node information
             self.write({
                 'connection_status': 'connected',
@@ -162,7 +162,7 @@ class BitcoinNodeConfig(models.Model):
                 'peer_count': network_info.get('connections', 0),
                 'status_message': f"Connected successfully. Chain: {blockchain_info.get('chain')}, Height: {blockchain_info.get('blocks', 0)}"
             })
-            
+
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -172,10 +172,10 @@ class BitcoinNodeConfig(models.Model):
                     'type': 'success'
                 }
             }
-            
+
         except Exception as e:
             error_message = self._parse_connection_error(str(e))
-            
+
             # Determine status based on error type
             if "authentication failed" in str(e).lower() or "401" in str(e):
                 status = 'auth_failed'
@@ -183,13 +183,13 @@ class BitcoinNodeConfig(models.Model):
                 status = 'timeout'
             else:
                 status = 'error'
-            
+
             self.write({
                 'connection_status': status,
                 'last_check': fields.Datetime.now(),
                 'status_message': error_message
             })
-            
+
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -217,10 +217,10 @@ class BitcoinNodeConfig(models.Model):
     def get_connector(self):
         """Get Bitcoin connector for this node configuration"""
         self.ensure_one()
-        
+
         # Get connection settings (with environment variable override)
         host, port, user, password, ssl = self._get_connection_settings()
-        
+
         # Look for existing connector
         connector = self.env['bitcoin.connector'].search([
             ('rpc_host', '=', host),
@@ -228,10 +228,10 @@ class BitcoinNodeConfig(models.Model):
             ('rpc_user', '=', user),
             ('network', '=', self.network)
         ], limit=1)
-        
+
         if connector:
             return connector
-        
+
         # Create new connector
         connector = self.env['bitcoin.connector'].create({
             'name': f'{self.name} - Connector',
@@ -244,7 +244,7 @@ class BitcoinNodeConfig(models.Model):
             'is_active': True,
             'cache_duration_minutes': self.cache_duration_minutes
         })
-        
+
         return connector
 
     def _get_connection_settings(self):
@@ -261,7 +261,7 @@ class BitcoinNodeConfig(models.Model):
             user = self.rpc_user
             password = self.rpc_password
             ssl = self.use_ssl
-            
+
         return host, port, user, password, ssl
 
     def action_refresh_status(self):
@@ -272,14 +272,14 @@ class BitcoinNodeConfig(models.Model):
     def health_check_all(self):
         """Run health check on all active nodes"""
         nodes = self.search([('is_active', '=', True)])
-        
+
         results = {
             'total': len(nodes),
             'connected': 0,
             'failed': 0,
             'details': []
         }
-        
+
         for node in nodes:
             try:
                 if node.test_connection_quick():
@@ -296,13 +296,13 @@ class BitcoinNodeConfig(models.Model):
                     'last_check': fields.Datetime.now(),
                     'status_message': str(e)
                 })
-            
+
             results['details'].append({
                 'name': node.name,
                 'status': status,
                 'priority': node.sequence
             })
-        
+
         return results
 
     @api.model
@@ -311,19 +311,19 @@ class BitcoinNodeConfig(models.Model):
         existing = self.search([('network', '=', network)], limit=1)
         if existing:
             return existing
-        
+
         # Try to get settings from environment
         host = os.environ.get('BITCOIN_RPC_HOST', 'localhost')
         port = int(os.environ.get('BITCOIN_RPC_PORT', '8332'))
         user = os.environ.get('BITCOIN_RPC_USER', '')
         password = os.environ.get('BITCOIN_RPC_PASSWORD', '')
-        
+
         if not user or not password:
             raise UserError(
                 "No Bitcoin node configured. Please create a node configuration or set environment variables:\n"
                 "BITCOIN_RPC_HOST, BITCOIN_RPC_PORT, BITCOIN_RPC_USER, BITCOIN_RPC_PASSWORD"
             )
-        
+
         node = self.create({
             'name': f'Default Bitcoin Node ({network.title()})',
             'rpc_host': host,
@@ -334,6 +334,6 @@ class BitcoinNodeConfig(models.Model):
             'sequence': 1,
             'is_active': True
         })
-        
+
         _logger.info(f"Created default Bitcoin node: {node.name}")
         return node

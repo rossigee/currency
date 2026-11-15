@@ -10,38 +10,38 @@ _logger = logging.getLogger(__name__)
 class WizardCreateMultisigPublicKey(models.TransientModel):
     _name = 'wizard.create.multisig.public.key'
     _description = 'Wizard to Create Cosigner Key'
-    
+
     @api.model
     def create(self, vals):
         """Override create to ensure private_key_id from context"""
         # Apply default from context if missing
         if 'private_key_id' not in vals and 'default_private_key_id' in self.env.context:
             vals['private_key_id'] = self.env.context['default_private_key_id']
-        
+
         # Create the wizard record (don't auto-execute)
         wizard = super().create(vals)
-        
+
         return wizard
 
     def write(self, vals):
         """Override write to auto-execute creation when form is saved"""
         result = super().write(vals)
-        
+
         # Auto-execute creation only if we have all required fields and no existing public key
-        if (not self.created_public_key_id and 
-            self.private_key_id and 
-            self.script_type and 
-            self.account_index is not False and 
+        if (not self.created_public_key_id and
+            self.private_key_id and
+            self.script_type and
+            self.account_index is not False and
             self.cosigner_index is not False):
             self._execute_multisig_creation()
-            
+
         return result
 
     # Source private key
-    private_key_id = fields.Many2one('crypto.bitcoin.private.key', string='Private Key', 
+    private_key_id = fields.Many2one('crypto.bitcoin.private.key', string='Private Key',
                                    required=True, readonly=True)
     private_key_name = fields.Char(related='private_key_id.name', readonly=True)
-    
+
     # Multisig details
     account_index = fields.Integer(string='Account Index', required=True, default=0,
                                  help="BIP48 account index (0-2147483647). Each account needs a unique index.")
@@ -53,29 +53,29 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
        help="Multisig script type for BIP48 derivation")
     cosigner_index = fields.Integer(string='Cosigner Index', required=True, default=0,
                                   help="Index of this cosigner in the multisig setup (0-based)")
-    
+
     # Wallet assignment
-    multisig_wallet_id = fields.Many2one('crypto.bitcoin.multisig.wallet', 
+    multisig_wallet_id = fields.Many2one('crypto.bitcoin.multisig.wallet',
                                        string='Assign to Multisig Wallet',
                                        help="Optional: Assign this key to a specific multisig wallet")
-    name_suffix = fields.Char(string='Name Suffix', 
+    name_suffix = fields.Char(string='Name Suffix',
                              help="Optional custom suffix for the public key name")
-    
+
     # Management
     suggest_next_account = fields.Boolean(string='Auto-suggest Next Account', default=True,
                                         help="Automatically suggest the next available account index")
     next_available_account = fields.Integer(string='Next Available Account', compute='_compute_next_account')
     existing_multisig_keys = fields.Text(string='Existing Multisig Keys', compute='_compute_existing_keys')
-    
+
     # Derivation preview
     derivation_path = fields.Char(string='Derivation Path', compute='_compute_derivation_info')
-    
+
     # Options
     notes = fields.Text(string='Notes', help="Optional notes about this cosigner key")
     create_sample_addresses = fields.Boolean(string='Generate Sample Addresses', default=True,
                                            help="Generate a few sample addresses to verify derivation")
     sample_address_count = fields.Integer(string='Sample Address Count', default=3)
-    
+
     # Results (shown after creation)
     created_public_key_id = fields.Many2one('crypto.bitcoin.public.key', string='Created Public Key', readonly=True)
     derived_xpub = fields.Char(string='Derived XPUB', readonly=True)
@@ -100,7 +100,7 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
                     ('script_type', '=', record.script_type),
                     ('cosigner_index', '=', record.cosigner_index)
                 ], order='account_index desc', limit=1)
-                
+
                 if existing_keys:
                     record.next_available_account = existing_keys.account_index + 1
                 else:
@@ -117,7 +117,7 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
                     ('private_key_id', '=', record.private_key_id.id),
                     ('key_type', '=', 'multisig')
                 ], order='account_index, script_type, cosigner_index')
-                
+
                 if existing:
                     lines = []
                     for key in existing:
@@ -147,14 +147,14 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
         # Validate account index range
         if self.account_index < 0 or self.account_index > 2147483647:
             raise ValidationError("Account index must be between 0 and 2147483647")
-            
+
         # Validate cosigner index range
         if self.cosigner_index < 0 or self.cosigner_index > 99:
             raise ValidationError("Cosigner index must be between 0 and 99")
-            
-        # Check for duplicate multisig key  
+
+        # Check for duplicate multisig key
         _logger.info(f"Validating multisig key: account={self.account_index}, script_type={self.script_type}, cosigner={self.cosigner_index}")
-        
+
         existing_key = self.env['crypto.bitcoin.public.key'].search([
             ('private_key_id', '=', self.private_key_id.id),
             ('key_type', '=', 'multisig'),
@@ -170,10 +170,10 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
     def _execute_multisig_creation(self):
         """Execute the multisig public key creation (called automatically on save)"""
         self.ensure_one()
-        
+
         try:
             self._validate_inputs()
-            
+
             # Create multisig public key using private key method
             multisig_public_key = self.private_key_id.create_multisig_public_key(
                 account_index=self.account_index,
@@ -182,24 +182,24 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
                 multisig_wallet_id=self.multisig_wallet_id.id if self.multisig_wallet_id else None,
                 name_suffix=self.name_suffix
             )
-            
+
             # Add notes if provided
             if self.notes:
                 multisig_public_key.notes = self.notes
-                
+
             # Store reference for display
             self.created_public_key_id = multisig_public_key.id
             self.derived_xpub = multisig_public_key.xpub
-            
+
             # Generate sample addresses if requested
             if self.create_sample_addresses and self.sample_address_count > 0:
                 self._generate_sample_addresses()
-            
+
             # Prepare success message
             self._prepare_success_message()
-            
+
             _logger.info(f"Multisig public key creation completed successfully")
-            
+
         except ValidationError as e:
             _logger.error(f"Validation error in multisig public key creation: {str(e)}")
             raise
@@ -211,7 +211,7 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
         """Generate sample receive addresses for display"""
         sample_lines = []
         sample_lines.append(f"📋 Sample Receive Addresses ({self.derivation_path}/0/x):")
-        
+
         try:
             for i in range(min(self.sample_address_count, 3)):  # Limit to 3 samples for now
                 try:
@@ -221,7 +221,7 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
                     sample_lines.append(f"  {i}: {addr_data['address']}")
                 except Exception as e:
                     sample_lines.append(f"  {i}: Error - {str(e)}")
-                    
+
             self.sample_addresses = "\n".join(sample_lines)
         except Exception as e:
             _logger.warning(f"Could not generate sample addresses: {str(e)}")
@@ -230,7 +230,7 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
     def _prepare_success_message(self):
         """Prepare the success message for display"""
         script_name = dict(self._fields['script_type'].selection).get(self.script_type, self.script_type.upper())
-        
+
         self.success_message = f"""
 ✅ Cosigner Key Created Successfully!
 
@@ -256,10 +256,10 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
     def action_view_public_key(self):
         """View the created public key record"""
         self.ensure_one()
-        
+
         if not self.created_public_key_id:
             raise ValidationError("No public key created yet")
-            
+
         return {
             'type': 'ir.actions.act_window',
             'name': f'Multisig Public Key - Account {self.account_index}',
@@ -272,7 +272,7 @@ class WizardCreateMultisigPublicKey(models.TransientModel):
     def action_create_another(self):
         """Create another multisig public key"""
         self.ensure_one()
-        
+
         return {
             'type': 'ir.actions.act_window',
             'name': 'Create Another Multisig Public Key',

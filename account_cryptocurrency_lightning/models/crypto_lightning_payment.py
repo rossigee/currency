@@ -289,7 +289,7 @@ class CryptoLightningPayment(models.Model):
             if self.ln_payment_ref_current:
                 values_to_update['ln_payment_ref'] = self.ln_payment_ref_current
             else:
-                raise UserError("Failed to generate payment request. Please check the Lightning address configuration.")
+                raise UserError(_("Failed to generate payment request. Please check the Lightning address configuration."))
 
             if self.ln_payment_qrcode_current:
                 values_to_update['ln_payment_qrcode'] = self.ln_payment_qrcode_current

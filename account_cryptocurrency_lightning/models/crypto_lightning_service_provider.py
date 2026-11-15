@@ -314,7 +314,7 @@ class CryptoLightningServiceProvider(models.Model):
             if not record.rest_url or not record.macaroon:
                 record.transaction_html = "<p class='text-muted'>No REST URL or macaroon configured</p>"
                 continue
-                
+
             try:
                 transactions = record._fetch_transactions_from_lnd()
                 record.transaction_html = record._format_transactions_as_html(transactions)
@@ -329,11 +329,11 @@ class CryptoLightningServiceProvider(models.Model):
         # Get macaroon from vault if not already loaded
         if not self.macaroon:
             self._compute_vault_values()
-            
+
         vault_data = self._get_data_from_vault(self.token_uuid)
         macaroon = vault_data.get('macaroon')
         if not macaroon:
-            raise ValidationError("No macaroon available for service provider")
+            raise ValidationError(_("No macaroon available for service provider"))
 
         # Convert macaroon to hex if needed
         if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):
@@ -397,7 +397,7 @@ class CryptoLightningServiceProvider(models.Model):
         """Format transactions list as HTML table"""
         if not transactions:
             return "<p class='text-muted'>No transactions found</p>"
-        
+
         html = """
         <div class="table-responsive">
             <table class="table table-striped table-sm">
@@ -413,10 +413,10 @@ class CryptoLightningServiceProvider(models.Model):
                 </thead>
                 <tbody>
         """
-        
+
         for tx in transactions:
             tx_type = tx.get('type', '').title()
-            
+
             # Format date
             if tx.get('creation_date'):
                 import datetime
@@ -431,7 +431,7 @@ class CryptoLightningServiceProvider(models.Model):
                 date_str = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M')
             else:
                 date_str = 'Unknown'
-            
+
             # Format amount
             amount = tx.get('amount_sat', tx.get('value', 0))
             try:
@@ -439,7 +439,7 @@ class CryptoLightningServiceProvider(models.Model):
                 amount_str = f"{amount_int:,}"
             except (ValueError, TypeError):
                 amount_str = str(amount) if amount else "0"
-            
+
             # Format status/settled
             if tx_type == 'Invoice':
                 status = "✅ Settled" if tx.get('settled') else "⏳ Pending"
@@ -447,7 +447,7 @@ class CryptoLightningServiceProvider(models.Model):
             else:
                 status = tx.get('status', 'Unknown').replace('_', ' ').title()
                 status_class = "text-success" if status == 'Succeeded' else "text-warning"
-            
+
             # Format fee
             fee = tx.get('fee_sat', 0)
             try:
@@ -455,7 +455,7 @@ class CryptoLightningServiceProvider(models.Model):
                 fee_str = f"{fee_int:,}" if fee_int > 0 else "-"
             except (ValueError, TypeError):
                 fee_str = str(fee) if fee else "-"
-            
+
             # Format memo/hash
             memo = tx.get('memo', '')
             payment_hash = tx.get('payment_hash', '')
@@ -465,10 +465,10 @@ class CryptoLightningServiceProvider(models.Model):
                 memo_display = payment_hash[:12] + "..."
             else:
                 memo_display = "-"
-            
+
             # Add row color based on type
             row_class = "table-success" if tx_type == 'Invoice' else "table-info"
-            
+
             html += f"""
                     <tr class="{row_class}">
                         <td><span class="badge badge-{'success' if tx_type == 'Invoice' else 'primary'}">{tx_type}</span></td>
@@ -479,13 +479,13 @@ class CryptoLightningServiceProvider(models.Model):
                         <td class="text-muted small">{memo_display}</td>
                     </tr>
             """
-        
+
         html += """
                 </tbody>
             </table>
         </div>
         """
-        
+
         return html
 
     def action_fetch_transactions(self):

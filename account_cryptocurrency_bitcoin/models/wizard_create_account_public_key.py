@@ -10,50 +10,50 @@ _logger = logging.getLogger(__name__)
 class WizardCreateAccountPublicKey(models.TransientModel):
     _name = 'wizard.create.account.public.key'
     _description = 'Wizard to Create Account-Level Public Key'
-    
+
     @api.model
     def create(self, vals):
         """Override create to ensure private_key_id from context and execute account creation"""
         # Apply default from context if missing
         if 'private_key_id' not in vals and 'default_private_key_id' in self.env.context:
             vals['private_key_id'] = self.env.context['default_private_key_id']
-        
+
         # Create the wizard record first
         wizard = super().create(vals)
-        
+
         # Then execute the account public key creation
         wizard._execute_account_creation()
-        
+
         return wizard
 
     # Source private key
-    private_key_id = fields.Many2one('crypto.bitcoin.private.key', string='Private Key', 
+    private_key_id = fields.Many2one('crypto.bitcoin.private.key', string='Private Key',
                                    required=True, readonly=True)
     private_key_name = fields.Char(related='private_key_id.name', readonly=True)
-    
+
     # Account details
     account_index = fields.Integer(string='Account Index', required=True, default=0,
                                  help="BIP44 account index (0-2147483647). Each account needs a unique index.")
     partner_id = fields.Many2one('res.partner', string='Assign to Partner',
                                help="Optional: Assign this account to a specific partner for payment processing")
-    name_suffix = fields.Char(string='Name Suffix', 
+    name_suffix = fields.Char(string='Name Suffix',
                              help="Optional custom suffix for the public key name")
-    
+
     # Account management
     suggest_next_account = fields.Boolean(string='Auto-suggest Next Account', default=True,
                                         help="Automatically suggest the next available account index")
     next_available_account = fields.Integer(string='Next Available Account', compute='_compute_next_account')
     existing_accounts = fields.Text(string='Existing Account Keys', compute='_compute_existing_accounts')
-    
+
     # Derivation preview
     derivation_path = fields.Char(string='Derivation Path', compute='_compute_derivation_info')
-    
+
     # Options
     notes = fields.Text(string='Notes', help="Optional notes about this account public key")
     create_sample_addresses = fields.Boolean(string='Generate Sample Addresses', default=True,
                                            help="Generate a few sample addresses to verify derivation")
     sample_address_count = fields.Integer(string='Sample Address Count', default=3)
-    
+
     # Results (shown after creation)
     created_public_key_id = fields.Many2one('crypto.bitcoin.public.key', string='Created Public Key', readonly=True)
     derived_xpub = fields.Char(string='Derived XPUB', readonly=True)
@@ -76,7 +76,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
                     ('private_key_id', '=', record.private_key_id.id),
                     ('key_type', '=', 'account')
                 ], order='account_index desc', limit=1)
-                
+
                 if existing_accounts:
                     record.next_available_account = existing_accounts.account_index + 1
                 else:
@@ -93,7 +93,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
                     ('private_key_id', '=', record.private_key_id.id),
                     ('key_type', '=', 'account')
                 ], order='account_index')
-                
+
                 if existing:
                     lines = []
                     for account in existing:
@@ -119,7 +119,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
         # Validate account index range
         if self.account_index < 0 or self.account_index > 2147483647:
             raise ValidationError("Account index must be between 0 and 2147483647")
-            
+
         # Check for duplicate account index
         existing_account = self.env['crypto.bitcoin.public.key'].search([
             ('private_key_id', '=', self.private_key_id.id),
@@ -132,34 +132,34 @@ class WizardCreateAccountPublicKey(models.TransientModel):
     def _execute_account_creation(self):
         """Execute the account public key creation (called automatically on save)"""
         self.ensure_one()
-        
+
         try:
             self._validate_inputs()
-            
+
             # Create account public key using private key method
             account_public_key = self.private_key_id.create_account_public_key(
                 account_index=self.account_index,
                 partner_id=self.partner_id.id if self.partner_id else None,
                 name_suffix=self.name_suffix
             )
-            
+
             # Add notes if provided
             if self.notes:
                 account_public_key.notes = self.notes
-                
+
             # Store reference for display
             self.created_public_key_id = account_public_key.id
             self.derived_xpub = account_public_key.xpub
-            
+
             # Generate sample addresses if requested
             if self.create_sample_addresses and self.sample_address_count > 0:
                 self._generate_sample_addresses()
-            
+
             # Prepare success message
             self._prepare_success_message()
-            
+
             _logger.info(f"Account public key creation completed successfully")
-            
+
         except ValidationError as e:
             _logger.error(f"Validation error in account public key creation: {str(e)}")
             raise
@@ -171,7 +171,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
         """Generate sample receive addresses for display"""
         sample_lines = []
         sample_lines.append(f"📋 Sample Receive Addresses ({self.derivation_path}/0/x):")
-        
+
         try:
             for i in range(min(self.sample_address_count, 3)):  # Limit to 3 samples for now
                 try:
@@ -181,7 +181,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
                     sample_lines.append(f"  {i}: {addr_data['address']}")
                 except Exception as e:
                     sample_lines.append(f"  {i}: Error - {str(e)}")
-                    
+
             self.sample_addresses = "\n".join(sample_lines)
         except Exception as e:
             _logger.warning(f"Could not generate sample addresses: {str(e)}")
@@ -211,11 +211,11 @@ class WizardCreateAccountPublicKey(models.TransientModel):
     def action_create_account_public_key(self):
         """Legacy method - now just calls the execution method and returns form"""
         self.ensure_one()
-        
+
         # Execute the creation if not already done
         if not self.created_public_key_id:
             self._execute_account_creation()
-        
+
         # Return action to show results
         return {
             'type': 'ir.actions.act_window',
@@ -230,10 +230,10 @@ class WizardCreateAccountPublicKey(models.TransientModel):
     def action_view_public_key(self):
         """View the created public key record"""
         self.ensure_one()
-        
+
         if not self.created_public_key_id:
             raise ValidationError("No public key created yet")
-            
+
         return {
             'type': 'ir.actions.act_window',
             'name': f'Account Public Key - Account {self.account_index}',
@@ -246,7 +246,7 @@ class WizardCreateAccountPublicKey(models.TransientModel):
     def action_create_another(self):
         """Create another account public key"""
         self.ensure_one()
-        
+
         return {
             'type': 'ir.actions.act_window',
             'name': 'Create Another Account Public Key',

@@ -1,21 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <!-- Email Template for Multisig Signature Request -->
-    <template id="email_template_multisig_signature_request" name="Multisig Wallet: Signature Request" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_multisig_signature"/>
-            <field name="subject">Action Required: Bitcoin Multisig Wallet Setup - ${object.workflow_id.wallet_name}</field>
-            <field name="email_from">${(object.workflow_id.initiated_by.email_formatted or user.email_formatted) | safe}</field>
+    <template
+        id="email_template_multisig_signature_request"
+        name="Multisig Wallet: Signature Request"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_multisig_signature" />
+            <field
+            name="subject"
+        >Action Required: Bitcoin Multisig Wallet Setup - ${object.workflow_id.wallet_name}</field>
+            <field
+            name="email_from"
+        >${(object.workflow_id.initiated_by.email_formatted or user.email_formatted) | safe}</field>
             <field name="email_to">${object.signer_email | safe}</field>
             <field name="body_html" type="html">
 <![CDATA[
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px;">
         <h2 style="color: #333;">Bitcoin Multisig Wallet Setup Request</h2>
-        
+
         <p>Dear ${object.name},</p>
-        
+
         <p>You have been designated as <strong>Cosigner #${object.cosigner_index}</strong> for a new Bitcoin multisig wallet:</p>
-        
+
         <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
@@ -40,16 +49,16 @@
                 </tr>
             </table>
         </div>
-        
+
         <h3>Action Required:</h3>
         <p>Please provide your extended public key (xPub) and digitally sign the wallet configuration.</p>
-        
+
         <div style="text-align: center; margin: 30px 0;">
             <a href="${object.get_portal_url()}" style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 Complete Signature Request
             </a>
         </div>
-        
+
         <h4>Required Information:</h4>
         <ul>
             <li>Your hardware wallet's extended public key (xPub) for derivation path: <code>${object.workflow_id.derivation_path}</code></li>
@@ -57,7 +66,7 @@
             <li>Master fingerprint (8 characters)</li>
             <li>Last 4 digits of device serial number (for identification)</li>
         </ul>
-        
+
         <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 20px 0;">
             <strong>⚠️ Security Reminder:</strong>
             <ul style="margin: 5px 0;">
@@ -67,13 +76,13 @@
                 <li>Use a secure connection when accessing the signature portal</li>
             </ul>
         </div>
-        
+
         <p>If you have any questions or concerns, please contact the workflow initiator:</p>
         <p><strong>${object.workflow_id.initiated_by.name}</strong><br/>
         ${object.workflow_id.initiated_by.email}</p>
-        
+
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;"/>
-        
+
         <p style="font-size: 12px; color: #666;">
             This is an automated message from the Bitcoin Multisig Wallet Management System.<br/>
             Workflow ID: ${object.workflow_id.name}<br/>
@@ -86,21 +95,30 @@
         </template>
 
         <!-- Email Template for Workflow Completion -->
-        <template id="email_template_multisig_workflow_complete" name="Multisig Wallet: Setup Complete" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_multisig_workflow"/>
+        <template
+        id="email_template_multisig_workflow_complete"
+        name="Multisig Wallet: Setup Complete"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_multisig_workflow" />
             <field name="subject">Multisig Wallet Created: ${object.wallet_name}</field>
-            <field name="email_from">${(object.initiated_by.email_formatted or user.email_formatted) | safe}</field>
-            <field name="partner_to">${','.join([str(sig.signer_partner_id.id) for sig in object.signature_ids if sig.signer_partner_id])}</field>
+            <field
+            name="email_from"
+        >${(object.initiated_by.email_formatted or user.email_formatted) | safe}</field>
+            <field
+            name="partner_to"
+        >${','.join([str(sig.signer_partner_id.id) for sig in object.signature_ids if sig.signer_partner_id])}</field>
             <field name="body_html" type="html">
 <![CDATA[
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px;">
         <h2 style="color: #28a745;">✅ Multisig Wallet Successfully Created</h2>
-        
+
         <p>Dear Cosigners,</p>
-        
+
         <p>The Bitcoin multisig wallet <strong>"${object.wallet_name}"</strong> has been successfully created with all required signatures.</p>
-        
+
         <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <h3>Wallet Details:</h3>
             <table style="width: 100%; border-collapse: collapse;">
@@ -118,7 +136,7 @@
                 </tr>
             </table>
         </div>
-        
+
         <h3>Next Steps:</h3>
         <ol>
             <li>Download and securely store the BSMS file from the wallet record</li>
@@ -126,22 +144,22 @@
             <li>Verify the first receive address matches across all devices</li>
             <li>Perform a test transaction with a small amount</li>
         </ol>
-        
+
         <div style="text-align: center; margin: 30px 0;">
-            <a href="${base_url}/web#id=${object.multisig_wallet_id.id}&view_type=form&model=crypto.bitcoin.multisig.wallet" 
+            <a href="${base_url}/web#id=${object.multisig_wallet_id.id}&view_type=form&model=crypto.bitcoin.multisig.wallet"
                style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 View Wallet Details
             </a>
         </div>
-        
+
         <div style="background-color: #d4edda; padding: 10px; border-radius: 5px; margin: 20px 0;">
             <strong>✓ Security Verification:</strong>
             <p>Form Data Hash: <code>${object.form_data_hash}</code></p>
             <p>Please verify this matches the hash shown during your signature process.</p>
         </div>
-        
+
         <p>Thank you for participating in this secure multisig wallet setup.</p>
-        
+
         <p>Best regards,<br/>
         ${object.initiated_by.name}</p>
     </div>
@@ -151,16 +169,23 @@
         </template>
 
         <!-- Email Template for Balance Alerts -->
-        <template id="email_template_balance_alert" name="Bitcoin Balance Alert" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
-            <field name="subject">🚨 Bitcoin Balance Alert: ${object.multisig_wallet_id.name}</field>
+        <template
+        id="email_template_balance_alert"
+        name="Bitcoin Balance Alert"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor" />
+            <field
+            name="subject"
+        >🚨 Bitcoin Balance Alert: ${object.multisig_wallet_id.name}</field>
             <field name="email_from">${(user.email_formatted) | safe}</field>
             <field name="body_html" type="html">
 <![CDATA[
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px;">
         <% alert = ctx.get('alert_id') and env['crypto.bitcoin.balance.alert'].browse(ctx['alert_id']) or False %>
-        
+
         <% if alert and alert.alert_type == 'critical' %>
             <div style="background-color: #dc3545; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 20px;">
                 <h2 style="margin: 0; color: white;">🚨 CRITICAL BALANCE ALERT 🚨</h2>
@@ -182,7 +207,7 @@
                 <h2 style="margin: 0; color: white;">📊 BALANCE MONITORING ALERT</h2>
             </div>
         <% endif %>
-        
+
         <% if alert %>
             <div style="background-color: #fff; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 5px solid #dc3545;">
                 <h3 style="color: #dc3545; margin-top: 0;">Alert Details</h3>
@@ -190,7 +215,7 @@
                 <p style="color: #666; margin: 5px 0;">Time: ${alert.alert_date.strftime('%B %d, %Y at %I:%M %p UTC')}</p>
             </div>
         <% endif %>
-        
+
         <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <h3>Wallet Information</h3>
             <table style="width: 100%; border-collapse: collapse;">
@@ -216,7 +241,7 @@
                 </tr>
             </table>
         </div>
-        
+
         <% if object.monitor_type == 'threshold' %>
             <div style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <h4>Threshold Configuration</h4>
@@ -231,7 +256,7 @@
                 <% endif %>
             </div>
         <% endif %>
-        
+
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <h4 style="color: #856404; margin-top: 0;">Recommended Actions</h4>
             <% if alert and alert.alert_type == 'critical' %>
@@ -268,20 +293,20 @@
                 </ul>
             <% endif %>
         </div>
-        
+
         <div style="text-align: center; margin: 30px 0;">
-            <a href="${base_url}/web#id=${object.id}&view_type=form&model=crypto.bitcoin.balance.monitor" 
+            <a href="${base_url}/web#id=${object.id}&view_type=form&model=crypto.bitcoin.balance.monitor"
                style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 View Monitor Details
             </a>
-            <a href="${base_url}/web#id=${object.multisig_wallet_id.id}&view_type=form&model=crypto.bitcoin.multisig.wallet" 
+            <a href="${base_url}/web#id=${object.multisig_wallet_id.id}&view_type=form&model=crypto.bitcoin.multisig.wallet"
                style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin-left: 10px;">
                 View Wallet
             </a>
         </div>
-        
+
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;"/>
-        
+
         <p style="font-size: 12px; color: #666; text-align: center;">
             This is an automated message from the Bitcoin Balance Monitoring System.<br/>
             Monitor: ${object.name} | Last Check: ${object.last_check_date.strftime('%B %d, %Y at %I:%M %p UTC') if object.last_check_date else 'Never'}<br/>
@@ -294,9 +319,16 @@
         </template>
 
         <!-- Email Template for Daily Balance Summary -->
-        <template id="email_template_balance_summary" name="Daily Bitcoin Balance Summary" model="mail.template" noupdate="1">
-            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
-            <field name="subject">📊 Daily Bitcoin Balance Summary - ${object.multisig_wallet_id.name}</field>
+        <template
+        id="email_template_balance_summary"
+        name="Daily Bitcoin Balance Summary"
+        model="mail.template"
+        noupdate="1"
+    >
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor" />
+            <field
+            name="subject"
+        >📊 Daily Bitcoin Balance Summary - ${object.multisig_wallet_id.name}</field>
             <field name="email_from">${(user.email_formatted) | safe}</field>
             <field name="body_html" type="html">
 <![CDATA[
@@ -305,7 +337,7 @@
         <div style="background-color: #007bff; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 20px;">
             <h2 style="margin: 0; color: white;">📊 Daily Balance Summary</h2>
         </div>
-        
+
         <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <h3>Wallet: ${object.multisig_wallet_id.name}</h3>
             <table style="width: 100%; border-collapse: collapse;">
@@ -335,7 +367,7 @@
                 </tr>
             </table>
         </div>
-        
+
         <% recent_alerts = object.alert_history_ids.filtered(lambda a: (datetime.now() - a.alert_date).days <= 1) %>
         <% if recent_alerts %>
             <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
@@ -353,14 +385,14 @@
                 <p style="color: #155724; margin: 0;">✅ No alerts in the past 24 hours</p>
             </div>
         <% endif %>
-        
+
         <div style="text-align: center; margin: 30px 0;">
-            <a href="${base_url}/web#id=${object.multisig_wallet_id.id}&view_type=form&model=crypto.bitcoin.multisig.wallet" 
+            <a href="${base_url}/web#id=${object.multisig_wallet_id.id}&view_type=form&model=crypto.bitcoin.multisig.wallet"
                style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 View Wallet Details
             </a>
         </div>
-        
+
         <p style="font-size: 12px; color: #666; text-align: center;">
             This is your daily balance summary from the Bitcoin Monitoring System.
         </p>

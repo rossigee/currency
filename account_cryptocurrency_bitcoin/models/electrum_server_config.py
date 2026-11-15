@@ -17,18 +17,18 @@ class ElectrumServerConfig(models.Model):
 
     name = fields.Char(string='Configuration Name', required=True)
     display_name = fields.Char(string='Display Name', compute='_compute_display_name', store=True)
-    
+
     # Priority and Status
     sequence = fields.Integer(string='Priority', default=10,
                              help="Lower numbers = higher priority. Used for failover ordering.")
     is_active = fields.Boolean(string='Active', default=True,
                               help="Only active servers are used for connections")
-    
+
     # Connection Settings
     host = fields.Char(string='Server Host', required=True, default='electrum.blockstream.info')
     port = fields.Integer(string='Server Port', required=True, default=50002)
     use_ssl = fields.Boolean(string='Use SSL', default=True)
-    
+
     # Network
     network = fields.Selection([
         ('mainnet', 'Bitcoin Mainnet'),
@@ -36,7 +36,7 @@ class ElectrumServerConfig(models.Model):
         ('regtest', 'Regtest'),
         ('signet', 'Signet')
     ], string='Network', required=True, default='mainnet')
-    
+
     # Health Monitoring
     connection_status = fields.Selection([
         ('unknown', 'Unknown'),
@@ -45,22 +45,22 @@ class ElectrumServerConfig(models.Model):
         ('timeout', 'Timeout'),
         ('ssl_error', 'SSL Error')
     ], string='Status', default='unknown', readonly=True)
-    
+
     last_connected = fields.Datetime(string='Last Connected', readonly=True)
     last_check = fields.Datetime(string='Last Health Check', readonly=True)
     status_message = fields.Text(string='Status Message', readonly=True)
-    
+
     # Server Information (cached)
     server_version = fields.Char(string='Server Version', readonly=True)
     protocol_version = fields.Char(string='Protocol Version', readonly=True)
     current_block_height = fields.Integer(string='Current Block Height', readonly=True)
-    
+
     # Performance Settings
     timeout_seconds = fields.Integer(string='Timeout (seconds)', default=30,
                                    help="Connection timeout for this server")
     max_retries = fields.Integer(string='Max Retries', default=3,
                                help="Maximum retry attempts before marking as failed")
-    
+
     # Server Type
     server_type = fields.Selection([
         ('public', 'Public Server'),
@@ -68,13 +68,13 @@ class ElectrumServerConfig(models.Model):
         ('tor', 'Tor Hidden Service')
     ], string='Server Type', default='public',
        help="Type of Electrum server for categorization")
-    
+
     # Environment Variable Support
     use_env_variables = fields.Boolean(string='Use Environment Variables', default=False,
                                      help="Override connection settings with environment variables")
     env_prefix = fields.Char(string='Environment Variable Prefix', default='ELECTRUM',
                            help="Prefix for environment variables (e.g., ELECTRUM_HOST)")
-    
+
     # Rate Limiting
     rate_limit_requests_per_second = fields.Float(string='Rate Limit (req/sec)', default=10.0,
                                                  help="Maximum requests per second to this server")
@@ -90,9 +90,9 @@ class ElectrumServerConfig(models.Model):
                 'ssl_error': '🟡',
                 'unknown': '⚪'
             }.get(record.connection_status, '⚪')
-            
+
             ssl_indicator = '🔒' if record.use_ssl else '🔓'
-            
+
             record.display_name = f"{status_icon} {record.name} ({record.host}:{record.port}) {ssl_indicator}"
 
     @api.constrains('sequence')
@@ -113,7 +113,7 @@ class ElectrumServerConfig(models.Model):
     def create_default_servers(self, network='mainnet'):
         """Create default Electrum server configurations"""
         _logger.info(f"Creating default Electrum servers for {network}")
-        
+
         # Define default servers for different networks
         default_servers = {
             'mainnet': [
@@ -127,10 +127,10 @@ class ElectrumServerConfig(models.Model):
                 {'name': 'ElectrumX Testnet', 'host': 'testnet.qtornado.com', 'port': 51002, 'use_ssl': True, 'sequence': 20},
             ]
         }
-        
+
         servers_data = default_servers.get(network, default_servers['mainnet'])
         created_count = 0
-        
+
         for server_data in servers_data:
             # Check if server already exists
             existing = self.search([
@@ -138,7 +138,7 @@ class ElectrumServerConfig(models.Model):
                 ('port', '=', server_data['port']),
                 ('network', '=', network)
             ])
-            
+
             if not existing:
                 server_vals = {
                     'name': server_data['name'],
@@ -149,11 +149,11 @@ class ElectrumServerConfig(models.Model):
                     'network': network,
                     'is_active': True
                 }
-                
+
                 new_server = self.create(server_vals)
                 created_count += 1
                 _logger.info(f"Created default Electrum server: {new_server.display_name}")
-        
+
         return created_count
 
     @api.model
@@ -162,17 +162,17 @@ class ElectrumServerConfig(models.Model):
         domain = [('is_active', '=', True)]
         if network:
             domain.append(('network', '=', network))
-        
+
         return self.search(domain, order='sequence, name')
 
     @api.model
     def get_best_server(self, network=None):
         """Get the best available server using failover logic"""
         servers = self.get_active_servers(network)
-        
+
         if not servers:
             raise UserError(f"No active Electrum servers configured for network: {network or 'any'}")
-        
+
         # Try servers in priority order
         for server in servers:
             try:
@@ -182,7 +182,7 @@ class ElectrumServerConfig(models.Model):
             except Exception as e:
                 _logger.warning(f"Electrum server {server.name} failed quick test: {str(e)}")
                 continue
-        
+
         # If no servers pass quick test, return highest priority server and let caller handle errors
         best_server = servers[0]
         _logger.warning(f"No servers passed quick test, using highest priority: {best_server.display_name}")
@@ -193,11 +193,11 @@ class ElectrumServerConfig(models.Model):
         try:
             # Get connection settings
             host, port, use_ssl = self._get_connection_settings()
-            
+
             # Use Electrum client for quick test
             electrum_client = self.env['electrum.client']
             result = electrum_client.test_connection(host, port, use_ssl)
-            
+
             return result['success']
         except Exception:
             return False
@@ -205,23 +205,23 @@ class ElectrumServerConfig(models.Model):
     def test_connection(self):
         """Full connection test with status update"""
         self.ensure_one()
-        
+
         try:
             _logger.info(f"Testing Electrum server connection: {self.name}")
-            
+
             # Get connection settings
             host, port, use_ssl = self._get_connection_settings()
-            
+
             # Test connection
             electrum_client = self.env['electrum.client']
             result = electrum_client.test_connection(host, port, use_ssl)
-            
+
             if result['success']:
                 # Try to get additional server info
                 try:
                     # Get block height for validation
                     block_height = electrum_client.get_block_height(host, port, use_ssl)
-                    
+
                     self.write({
                         'connection_status': 'connected',
                         'last_connected': fields.Datetime.now(),
@@ -229,7 +229,7 @@ class ElectrumServerConfig(models.Model):
                         'current_block_height': block_height,
                         'status_message': f"Connected successfully. Block height: {block_height}"
                     })
-                    
+
                     return {
                         'type': 'ir.actions.client',
                         'tag': 'display_notification',
@@ -239,7 +239,7 @@ class ElectrumServerConfig(models.Model):
                             'type': 'success'
                         }
                     }
-                    
+
                 except Exception as e:
                     # Connection worked but couldn't get additional info
                     self.write({
@@ -248,7 +248,7 @@ class ElectrumServerConfig(models.Model):
                         'last_check': fields.Datetime.now(),
                         'status_message': "Connected successfully (limited server info)"
                     })
-                    
+
                     return {
                         'type': 'ir.actions.client',
                         'tag': 'display_notification',
@@ -262,13 +262,13 @@ class ElectrumServerConfig(models.Model):
                 # Connection failed
                 error_message = result.get('message', 'Unknown error')
                 status = self._determine_error_status(result.get('error', ''))
-                
+
                 self.write({
                     'connection_status': status,
                     'last_check': fields.Datetime.now(),
                     'status_message': error_message
                 })
-                
+
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
@@ -279,17 +279,17 @@ class ElectrumServerConfig(models.Model):
                         'sticky': True
                     }
                 }
-                
+
         except Exception as e:
             error_message = self._parse_connection_error(str(e))
             status = self._determine_error_status(str(e))
-            
+
             self.write({
                 'connection_status': status,
                 'last_check': fields.Datetime.now(),
                 'status_message': error_message
             })
-            
+
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -333,7 +333,7 @@ class ElectrumServerConfig(models.Model):
             host = self.host
             port = self.port
             use_ssl = self.use_ssl
-            
+
         return host, port, use_ssl
 
     def action_refresh_status(self):
@@ -344,14 +344,14 @@ class ElectrumServerConfig(models.Model):
     def health_check_all(self):
         """Run health check on all active servers"""
         servers = self.search([('is_active', '=', True)])
-        
+
         results = {
             'total': len(servers),
             'connected': 0,
             'failed': 0,
             'details': []
         }
-        
+
         for server in servers:
             try:
                 if server.test_connection_quick():
@@ -368,14 +368,14 @@ class ElectrumServerConfig(models.Model):
                     'last_check': fields.Datetime.now(),
                     'status_message': str(e)
                 })
-            
+
             results['details'].append({
                 'name': server.name,
                 'status': status,
                 'priority': server.sequence,
                 'server_type': server.server_type
             })
-        
+
         return results
 
     @api.model
@@ -384,7 +384,7 @@ class ElectrumServerConfig(models.Model):
         existing = self.search([('network', '=', network)], limit=1)
         if existing:
             return existing
-        
+
         # Default public servers
         default_servers = {
             'mainnet': [
@@ -396,15 +396,15 @@ class ElectrumServerConfig(models.Model):
                 {'name': 'Blockstream Testnet', 'host': 'electrum.blockstream.info', 'port': 60002, 'ssl': True, 'seq': 1},
             ]
         }
-        
+
         servers_to_create = default_servers.get(network, [])
         created_servers = []
-        
+
         for server_config in servers_to_create:
             # Check environment variables for override
             env_host = os.environ.get('ELECTRUM_HOST')
             env_port = os.environ.get('ELECTRUM_PORT')
-            
+
             server = self.create({
                 'name': server_config['name'],
                 'host': env_host or server_config['host'],
@@ -416,11 +416,11 @@ class ElectrumServerConfig(models.Model):
                 'is_active': True
             })
             created_servers.append(server)
-            
+
         if created_servers:
             _logger.info(f"Created {len(created_servers)} default Electrum servers for {network}")
             return created_servers[0]  # Return highest priority server
-        
+
         raise UserError(f"No default Electrum servers available for network: {network}")
 
     @api.model
