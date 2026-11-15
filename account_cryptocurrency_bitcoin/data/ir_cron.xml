@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Cron job to check expired multisig workflows -->
+        <record id="ir_cron_check_expired_multisig_workflows" model="ir.cron">
+            <field name="name">Bitcoin: Check Expired Multisig Workflows</field>
+            <field name="model_id" ref="model_crypto_bitcoin_multisig_workflow"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_expired_workflows()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron job to check balance monitors -->
+        <record id="ir_cron_check_balance_monitors" model="ir.cron">
+            <field name="name">Bitcoin: Check Balance Monitors</field>
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_all_balances()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <!-- Cron job for daily balance summaries -->
+        <record id="ir_cron_daily_balance_summary" model="ir.cron">
+            <field name="name">Bitcoin: Send Daily Balance Summaries</field>
+            <field name="model_id" ref="model_crypto_bitcoin_balance_monitor"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_daily_summaries()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="False"/>
+        </record>
+
+        <!-- Action to create workflow from multisig wallet view -->
+        <record id="action_create_multisig_workflow" model="ir.actions.act_window">
+            <field name="name">Create Setup Workflow</field>
+            <field name="res_model">crypto.bitcoin.multisig.workflow</field>
+            <field name="view_mode">form</field>
+            <field name="target">current</field>
+            <field name="context">{
+                'default_wallet_name': context.get('default_name', ''),
+                'default_m_threshold': context.get('default_m_of_n_threshold', 2),
+                'default_n_total': context.get('default_total_cosigners', 3),
+                'default_script_type': context.get('default_script_type', 'p2wsh'),
+            }</field>
+        </record>
+
+        <!-- Balance Monitor Action -->
+        <record id="crypto_bitcoin_balance_monitor_action" model="ir.actions.act_window">
+            <field name="name">Balance Monitors</field>
+            <field name="res_model">crypto.bitcoin.balance.monitor</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="context">{'search_default_active': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new balance monitor
+                </p>
+                <p>
+                    Monitor your multisig wallets for balance changes, thresholds, and spending patterns.
+                    Get automated alerts via email when conditions are met.
+                </p>
+            </field>
+        </record>
+
+        <!-- Action to create balance monitor from wallet view -->
+        <record id="action_create_balance_monitor" model="ir.actions.act_window">
+            <field name="name">Create Balance Monitor</field>
+            <field name="res_model">crypto.bitcoin.balance.monitor</field>
+            <field name="view_mode">form</field>
+            <field name="target">current</field>
+            <field name="context">{
+                'default_multisig_wallet_id': context.get('default_multisig_wallet_id'),
+                'default_name': context.get('default_name', 'New Monitor'),
+                'default_monitor_type': 'threshold',
+                'default_priority': 'medium',
+            }</field>
+        </record>
+
+        <!-- Balance Alert Action -->
+        <record id="crypto_bitcoin_balance_alert_action" model="ir.actions.act_window">
+            <field name="name">Balance Alerts</field>
+            <field name="res_model">crypto.bitcoin.balance.alert</field>
+            <field name="view_mode">tree</field>
+            <field name="context">{'search_default_unacknowledged': 1}</field>
+        </record>
+
+        <!-- Balance History Action -->
+        <record id="crypto_bitcoin_balance_history_action" model="ir.actions.act_window">
+            <field name="name">Balance History</field>
+            <field name="res_model">crypto.bitcoin.balance.history</field>
+            <field name="view_mode">tree,graph</field>
+        </record>
+    </data>
+</odoo>
