@@ -1,18 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
 
         <!-- Bitcoin Queue Job Tree View -->
         <record id="bitcoin_queue_job_tree_view" model="ir.ui.view">
             <field name="name">bitcoin.queue.job.tree</field>
             <field name="model">queue.job</field>
-            <field name="inherit_id" ref="queue_job.view_queue_job_tree"/>
+            <field name="inherit_id" ref="queue_job.view_queue_job_tree" />
             <field name="arch" type="xml">
                 <xpath expr="//tree" position="attributes">
                     <attribute name="create">false</attribute>
                     <attribute name="decoration-success">state == 'done'</attribute>
                     <attribute name="decoration-danger">state == 'failed'</attribute>
-                    <attribute name="decoration-warning">state in ('pending', 'enqueued')</attribute>
+                    <attribute
+                    name="decoration-warning"
+                >state in ('pending', 'enqueued')</attribute>
                     <attribute name="decoration-info">state == 'started'</attribute>
                 </xpath>
                 <!-- Make state mandatory (always visible) with enhanced styling -->
@@ -20,11 +21,13 @@
                     <attribute name="widget">badge</attribute>
                     <attribute name="decoration-success">state == 'done'</attribute>
                     <attribute name="decoration-danger">state == 'failed'</attribute>
-                    <attribute name="decoration-warning">state in ('pending', 'enqueued')</attribute>
+                    <attribute
+                    name="decoration-warning"
+                >state in ('pending', 'enqueued')</attribute>
                     <attribute name="decoration-info">state == 'started'</attribute>
                     <!-- No optional attribute = always visible -->
                 </xpath>
-                
+
                 <!-- Set optional fields as requested -->
                 <xpath expr="//field[@name='uuid']" position="attributes">
                     <attribute name="optional">hide</attribute>
@@ -38,7 +41,7 @@
                 <xpath expr="//field[@name='model_name']" position="attributes">
                     <attribute name="optional">hide</attribute>
                 </xpath>
-                
+
                 <!-- Make existing fields optional instead of adding duplicates -->
                 <xpath expr="//field[@name='date_done']" position="attributes">
                     <attribute name="string">Execution Time</attribute>
@@ -51,50 +54,89 @@
         <record id="bitcoin_queue_job_form_view" model="ir.ui.view">
             <field name="name">bitcoin.queue.job.form</field>
             <field name="model">queue.job</field>
-            <field name="inherit_id" ref="queue_job.view_queue_job_form"/>
+            <field name="inherit_id" ref="queue_job.view_queue_job_form" />
             <field name="arch" type="xml">
                 <!-- Add status header -->
                 <xpath expr="//sheet" position="before">
                     <!-- Success status -->
-                    <div class="alert alert-success" role="alert" 
-                         invisible="state != &quot;done&quot;">
+                    <div
+                    class="alert alert-success"
+                    role="alert"
+                    invisible="state != &quot;done&quot;"
+                >
                         <strong>✅ Job Completed Successfully</strong>
                         <div>
-                            <strong>Completed:</strong> <field name="date_done" readonly="1" nolabel="1"/>
+                            <strong>Completed:</strong> <field
+                            name="date_done"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </div>
                         <div invisible="not result">
-                            <strong>Result:</strong> <field name="result" readonly="1" nolabel="1"/>
+                            <strong>Result:</strong> <field
+                            name="result"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </div>
                         <div invisible="result">
-                            <strong>⚠️ No result returned</strong> - Job may have failed silently or returned early
+                            <strong
+                        >⚠️ No result returned</strong> - Job may have failed silently or returned early
                         </div>
                     </div>
-                    
+
                     <!-- Failed status -->
-                    <div class="alert alert-danger" role="alert" 
-                         invisible="state != &quot;failed&quot;">
+                    <div
+                    class="alert alert-danger"
+                    role="alert"
+                    invisible="state != &quot;failed&quot;"
+                >
                         <strong>❌ Job Failed</strong>
                         <div>
-                            <strong>Failed:</strong> <field name="date_done" readonly="1" nolabel="1"/>
+                            <strong>Failed:</strong> <field
+                            name="date_done"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </div>
                         <div invisible="not result">
-                            <strong>Error:</strong> <field name="result" readonly="1" nolabel="1"/>
+                            <strong>Error:</strong> <field
+                            name="result"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </div>
                     </div>
-                    
+
                     <!-- Pending/In Progress status -->
-                    <div class="alert alert-info" role="alert" 
-                         invisible="state not in ['pending', 'enqueued', 'started']">
-                        <strong>🔄 Job Status:</strong> <field name="state" readonly="1" nolabel="1" widget="badge"/>
+                    <div
+                    class="alert alert-info"
+                    role="alert"
+                    invisible="state not in ['pending', 'enqueued', 'started']"
+                >
+                        <strong>🔄 Job Status:</strong> <field
+                        name="state"
+                        readonly="1"
+                        nolabel="1"
+                        widget="badge"
+                    />
                         <div invisible="not date_enqueued">
-                            <strong>Enqueued:</strong> <field name="date_enqueued" readonly="1" nolabel="1"/>
+                            <strong>Enqueued:</strong> <field
+                            name="date_enqueued"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </div>
                         <div invisible="not date_started">
-                            <strong>Started:</strong> <field name="date_started" readonly="1" nolabel="1"/>
+                            <strong>Started:</strong> <field
+                            name="date_started"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </div>
                     </div>
                 </xpath>
-                
+
                 <!-- Make timing fields invisible (used only in alerts above) -->
                 <xpath expr="//field[@name='date_created']" position="attributes">
                     <attribute name="invisible">1</attribute>
@@ -108,7 +150,7 @@
                 <xpath expr="//field[@name='date_done']" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
-                
+
             </field>
         </record>
 
@@ -119,9 +161,12 @@
             <field name="view_mode">tree,form</field>
             <field name="domain">[('func_string', 'ilike', 'bitcoin')]</field>
             <field name="context">{}</field>
-            <field name="view_ids" eval="[(5, 0, 0),
+            <field
+            name="view_ids"
+            eval="[(5, 0, 0),
                                           (0, 0, {'view_mode': 'tree', 'view_id': ref('bitcoin_queue_job_tree_view')}),
-                                          (0, 0, {'view_mode': 'form', 'view_id': ref('bitcoin_queue_job_form_view')})]"/>
+                                          (0, 0, {'view_mode': 'form', 'view_id': ref('bitcoin_queue_job_form_view')})]"
+        />
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     No Bitcoin Jobs Found
@@ -132,5 +177,4 @@
             </field>
         </record>
 
-    </data>
 </odoo>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="wizard_bitcoin_xpub_view_form" model="ir.ui.view">
         <field name="name">wizard.bitcoin.xpub.form</field>
@@ -6,12 +6,17 @@
         <field name="arch" type="xml">
             <form string="Bitcoin XPUB Wizard">
                 <group>
-                    <field name="name"/>
-                    <field name="xpub"/>
+                    <field name="name" />
+                    <field name="xpub" />
                 </group>
                 <footer>
-                    <button string="Save" type="object" name="validate_and_save_xpub" class="btn-primary"/>
-                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                    <button
+                        string="Save"
+                        type="object"
+                        name="validate_and_save_xpub"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" special="cancel" class="btn-secondary" />
                 </footer>
             </form>
         </field>

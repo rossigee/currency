@@ -31,12 +31,12 @@ class CryptoLightningPaymentProcessor(models.Model):
             # Step 1: Create payment request on recipient's LN node
             payment_request = self.create_payment_request(address)
             if not payment_request:
-                raise UserError("Failed to create payment request.")
+                raise UserError(_("Failed to create payment request."))
 
             # Step 2: Submit payment to LSP for payment
             payment_result = self.submit_payment_to_lsp(payment_request, amount_sats)
             if not payment_result:
-                raise UserError("Failed to submit payment to LSP.")
+                raise UserError(_("Failed to submit payment to LSP."))
 
             # Log successful payment processing
             self.env['ir.logging'].sudo().create({
