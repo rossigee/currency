@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
         <!-- Tree View -->
         <record id="crypto_btc_price_service_view_tree" model="ir.ui.view">
             <field name="name">crypto.btc.price.service.tree</field>
             <field name="model">crypto.btc.price.service</field>
             <field name="arch" type="xml">
-                <tree string="BTC Price Services" decoration-muted="not active">
+                <tree decoration-muted="not active">
                     <field name="sequence" widget="handle" />
                     <field name="name" />
                     <field name="service_type" />
@@ -27,42 +26,42 @@
                 <form string="BTC Price Service">
                     <header>
                         <button
-                            name="action_test_service"
-                            string="Test Service"
-                            type="object"
-                            class="btn-primary"
-                        />
+                        name="action_test_service"
+                        string="Test Service"
+                        type="object"
+                        class="btn-primary"
+                    />
                         <button
-                            name="action_clear_cache"
-                            string="Clear Cache"
-                            type="object"
-                        />
+                        name="action_clear_cache"
+                        string="Clear Cache"
+                        type="object"
+                    />
                     </header>
 
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button
-                                class="oe_stat_button"
-                                icon="fa-check-circle"
-                                invisible="success_count == 0"
-                            >
+                            class="oe_stat_button"
+                            icon="fa-check-circle"
+                            invisible="success_count == 0"
+                        >
                                 <field
-                                    name="success_count"
-                                    widget="statinfo"
-                                    string="Successful"
-                                />
+                                name="success_count"
+                                widget="statinfo"
+                                string="Successful"
+                            />
                             </button>
 
                             <button
-                                class="oe_stat_button"
-                                icon="fa-times-circle"
-                                invisible="error_count == 0"
-                            >
+                            class="oe_stat_button"
+                            icon="fa-times-circle"
+                            invisible="error_count == 0"
+                        >
                                 <field
-                                    name="error_count"
-                                    widget="statinfo"
-                                    string="Failed"
-                                />
+                                name="error_count"
+                                widget="statinfo"
+                                string="Failed"
+                            />
                             </button>
                         </div>
 
@@ -75,9 +74,9 @@
                             </group>
                             <group string="API Configuration">
                                 <field
-                                    name="api_url"
-                                    required="service_type == 'coingecko'"
-                                />
+                                name="api_url"
+                                required="service_type == 'coingecko'"
+                            />
                                 <field name="api_key" password="True" />
                                 <field name="timeout_seconds" />
                                 <field name="rate_limit_seconds" />
@@ -97,20 +96,20 @@
 
                         <group string="Last Error" invisible="not last_error">
                             <field
-                                name="last_error"
-                                widget="text"
-                                readonly="1"
-                                nolabel="1"
-                            />
+                            name="last_error"
+                            widget="text"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </group>
 
                         <group string="Cached Data" invisible="not cached_prices">
                             <field
-                                name="cached_prices"
-                                widget="text"
-                                readonly="1"
-                                nolabel="1"
-                            />
+                            name="cached_prices"
+                            widget="text"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </group>
                     </sheet>
                 </form>
@@ -133,5 +132,4 @@
                 </p>
             </field>
         </record>
-    </data>
 </odoo>

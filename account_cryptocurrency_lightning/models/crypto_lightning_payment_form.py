@@ -1,7 +1,7 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 try:
@@ -16,15 +16,15 @@ except ImportError:
                 return func
             return decorator
 
-import logging
-import requests
-import qrcode
-import io
 import base64
+import io
 import json
+import logging
+
+import qrcode
+import requests
 
 from .lnd_rest_client import LndRestClient
-
 
 _logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class CryptoLightningPaymentForm(models.TransientModel):
     _name = 'crypto.lightning.payment.form'
     _description = 'Lightning Payment Form Wizard'
 
-    address_id = fields.Many2one('crypto.lightning.address', string='Lightning Address', required=False)
+    address_id = fields.Many2one('crypto.lightning.address', string='Lightning Address', required=False)  # noqa: E501
     amount = fields.Float(string='Amount', required=True, default=0.0)
     currency_id = fields.Many2one('res.currency', string='Currency', required=True)
 
@@ -43,7 +43,7 @@ class CryptoLightningPaymentForm(models.TransientModel):
     ln_payment_ref = fields.Text(string='LN payment ref', readonly=True)
     ln_payment_qrcode = fields.Binary(string='LN payment QR Code', readonly=True)
 
-    lsp_id = fields.Many2one('crypto.lightning.service.provider', string='Lightning Service Provider', required=True)
+    lsp_id = fields.Many2one('crypto.lightning.service.provider', string='Lightning Service Provider', required=True)  # noqa: E501
 
     # Payment status tracking
     payment_status = fields.Selection([
@@ -59,17 +59,17 @@ class CryptoLightningPaymentForm(models.TransientModel):
     payment_job_uuid = fields.Char(string='Job UUID', readonly=True)
 
     # Additional transaction details
-    payment_creation_date = fields.Datetime(string='Payment Created', readonly=True, default=fields.Datetime.now)
+    payment_creation_date = fields.Datetime(string='Payment Created', readonly=True, default=fields.Datetime.now)  # noqa: E501
     payment_completion_date = fields.Datetime(string='Payment Completed', readonly=True)
-    payment_route_hops = fields.Integer(string='Route Hops', readonly=True, help='Number of hops in the payment route')
+    payment_route_hops = fields.Integer(string='Route Hops', readonly=True, help='Number of hops in the payment route')  # noqa: E501
     payment_total_time_lock = fields.Integer(string='Total Time Lock', readonly=True)
-    decoded_invoice_details = fields.Text(string='Invoice Details', readonly=True, help='Decoded BOLT11 invoice information')
+    decoded_invoice_details = fields.Text(string='Invoice Details', readonly=True, help='Decoded BOLT11 invoice information')  # noqa: E501
     payment_attempt_id = fields.Char(string='Payment Attempt ID', readonly=True)
 
 
     @api.model
     def default_get(self, fields):
-        res = super(CryptoLightningPaymentForm, self).default_get(fields)
+        res = super().default_get(fields)
 
         # Default to company currency
         res['currency_id'] = self.env.company.currency_id.id
@@ -102,7 +102,7 @@ class CryptoLightningPaymentForm(models.TransientModel):
         :raises UserError: If payment request creation fails.
         """
         try:
-            form = super(CryptoLightningPaymentForm, self).create(vals)
+            form = super().create(vals)
 
             # Obtain latest BTC price (once)
             form._get_exchange_rate()
@@ -112,7 +112,7 @@ class CryptoLightningPaymentForm(models.TransientModel):
                 try:
                     # Get payment request from recipient's LN
                     processor = self.env['crypto.lightning.payment.processor']
-                    payment_request = processor.create_payment_request(form.address_id.address)
+                    payment_request = processor.create_payment_request(form.address_id.address)  # noqa: E501
                     if payment_request:
                         form.callback_url = payment_request['callback']
                         # Generate QR code if we have all required details
@@ -120,12 +120,12 @@ class CryptoLightningPaymentForm(models.TransientModel):
                             form._onchange_currency_amount()
                 except Exception as e:
                     # Log the error but don't fail creation
-                    _logger.warning(f"Failed to create payment request for address {form.address_id.address}: {str(e)}")
+                    _logger.warning(f"Failed to create payment request for address {form.address_id.address}: {e!s}")  # noqa: E501
 
             return form
 
         except Exception as e:
-            raise UserError(f"An error occurred while creating the payment form: {str(e)}")
+            raise UserError(f"An error occurred while creating the payment form: {e!s}")
 
     @api.onchange('address_id')
     def _onchange_address_id(self):
@@ -133,20 +133,20 @@ class CryptoLightningPaymentForm(models.TransientModel):
         if self.address_id and not self.callback_url:
             try:
                 processor = self.env['crypto.lightning.payment.processor']
-                payment_request = processor.create_payment_request(self.address_id.address)
+                payment_request = processor.create_payment_request(self.address_id.address)  # noqa: E501
                 if payment_request:
                     self.callback_url = payment_request['callback']
                     # Generate QR code if we have all required details
                     if self.amount and self.currency_id and self.btc_price:
                         self._onchange_currency_amount()
             except Exception as e:
-                _logger.warning(f"Failed to create payment request for address {self.address_id.address}: {str(e)}")
+                _logger.warning(f"Failed to create payment request for address {self.address_id.address}: {e!s}")  # noqa: E501
 
     @api.onchange('currency_id')
     def _get_exchange_rate(self):
         if self.currency_id is not None:
             try:
-                self.btc_price = self.env['crypto.btc.price.service'].get_btc_price(self.currency_id.name)
+                self.btc_price = self.env['crypto.btc.price.service'].get_btc_price(self.currency_id.name)  # noqa: E501
             except Exception:
                 self.btc_price = 0.0
 
@@ -189,7 +189,7 @@ class CryptoLightningPaymentForm(models.TransientModel):
             return
 
         # Determine requested amount in company base currency
-        base_amount = self.currency_id._convert(self.amount, self.env.company.currency_id, self.env.company, fields.Date.today())
+        base_amount = self.currency_id._convert(self.amount, self.env.company.currency_id, self.env.company, fields.Date.today())  # noqa: E501
         self.satoshis = int((base_amount / self.btc_price) * 100000000)
         self._generate_payment_ref()
 
@@ -201,16 +201,16 @@ class CryptoLightningPaymentForm(models.TransientModel):
 
         # Validate required fields for payment
         if not self.address_id:
-            raise UserError("Please select a Lightning Address before proceeding with payment.")
+            raise UserError("Please select a Lightning Address before proceeding with payment.") from None  # noqa: E501
 
         if not self.amount or self.amount <= 0:
-            raise UserError("Please enter a valid payment amount.")
+            raise UserError("Please enter a valid payment amount.") from None
 
         if not self.currency_id:
-            raise UserError("Please select a currency.")
+            raise UserError("Please select a currency.") from None
 
         if not self.lsp_id:
-            raise UserError("No Lightning Service Provider selected.")
+            raise UserError("No Lightning Service Provider selected.") from None
 
         # Create permanent payment record
         permanent_payment = self.env['crypto.lightning.payment'].create({
@@ -240,20 +240,20 @@ class CryptoLightningPaymentForm(models.TransientModel):
         Background job to process Lightning payment via LND.
         This method runs in a separate worker process.
         """
-        _logger.info(f"Starting Lightning payment processing for payment form {self.id}")
+        _logger.info(f"Starting Lightning payment processing for payment form {self.id}")  # noqa: E501
 
         try:
             # Get service provider details
             service_provider = self.lsp_id
 
             # Get macaroon from vault
-            vault_data = service_provider._get_data_from_vault(service_provider.token_uuid)
+            vault_data = service_provider._get_data_from_vault(service_provider.token_uuid)  # noqa: E501
             macaroon = vault_data.get('macaroon')
             if not macaroon:
-                raise Exception("No macaroon available for service provider")
+                raise Exception("No macaroon available for service provider") from None
 
             # Convert macaroon to hex if needed
-            if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):
+            if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):  # noqa: E501
                 macaroon_hex = macaroon
             else:
                 macaroon_bytes = base64.b64decode(macaroon)
@@ -282,11 +282,11 @@ class CryptoLightningPaymentForm(models.TransientModel):
 
                 # Set fee limit (e.g., 1% of payment amount or max 1000 sats)
                 amount_sat = int(decoded.get('num_satoshis', 0))
-                fee_limit_sat = min(max(amount_sat // 100, 1), 1000)  # 1% with min 1, max 1000 sats
+                fee_limit_sat = min(max(amount_sat // 100, 1), 1000)  # 1% with min 1, max 1000 sats  # noqa: E501
 
                 # Execute payment
-                _logger.info(f"Paying invoice for {amount_sat} sats with fee limit {fee_limit_sat} sats")
-                payment_result = client.pay_invoice(self.ln_payment_ref.decode(), fee_limit_sat)
+                _logger.info(f"Paying invoice for {amount_sat} sats with fee limit {fee_limit_sat} sats")  # noqa: E501
+                payment_result = client.pay_invoice(self.ln_payment_ref.decode(), fee_limit_sat)  # noqa: E501
 
                 # Update payment status based on result
                 if payment_result.get('payment_error'):
@@ -297,7 +297,7 @@ class CryptoLightningPaymentForm(models.TransientModel):
                         'payment_completion_date': fields.Datetime.now(),
                         'decoded_invoice_details': json.dumps(decoded_info, indent=2)
                     })
-                    _logger.error(f"Lightning payment failed: {payment_result['payment_error']}")
+                    _logger.error(f"Lightning payment failed: {payment_result['payment_error']}")  # noqa: E501
 
                 else:
                     # Payment successful - extract route details
@@ -337,11 +337,11 @@ class CryptoLightningPaymentForm(models.TransientModel):
                         'payment_creation_date': self.payment_creation_date,
                         'payment_completion_date': completion_date,
                         'decoded_invoice_details': json.dumps(decoded_info, indent=2),
-                        'ln_payment_ref': self.ln_payment_ref.decode() if isinstance(self.ln_payment_ref, bytes) else self.ln_payment_ref,
+                        'ln_payment_ref': self.ln_payment_ref.decode() if isinstance(self.ln_payment_ref, bytes) else self.ln_payment_ref,  # noqa: E501
                         'ln_payment_qrcode': self.ln_payment_qrcode,
                     })
 
-                    _logger.info(f"Lightning payment successful: {payment_result.get('payment_hash')} via {len(hops)} hops")
+                    _logger.info(f"Lightning payment successful: {payment_result.get('payment_hash')} via {len(hops)} hops")  # noqa: E501
 
             finally:
                 client.close()

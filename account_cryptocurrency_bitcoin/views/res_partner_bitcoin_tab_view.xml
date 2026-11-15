@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
         <record id="view_partner_form_inherit_bitcoin_tab" model="ir.ui.view">
             <field name="name">res.partner.form.inherit.bitcoin</field>
             <field name="model">res.partner</field>
@@ -8,13 +7,12 @@
             <field name="arch" type="xml">
                 <notebook position="inside">
                     <page
-                        string="Bitcoin"
-                        groups="account_cryptocurrency_bitcoin.group_bitcoin_user"
-                    >
+                    string="Bitcoin"
+                    groups="account_cryptocurrency_bitcoin.group_bitcoin_user"
+                >
                         <field name="bitcoin_wallet_ids" />
                     </page>
                 </notebook>
             </field>
         </record>
-    </data>
 </odoo>

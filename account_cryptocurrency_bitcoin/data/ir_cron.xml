@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
-    <data noupdate="1">
+<odoo noupdate="1">
         <!-- Cron job to check expired multisig workflows -->
         <record id="ir_cron_check_expired_multisig_workflows" model="ir.cron">
             <field name="name">Bitcoin: Check Expired Multisig Workflows</field>
@@ -56,9 +55,9 @@
 
         <!-- Balance Monitor Action -->
         <record
-            id="crypto_bitcoin_balance_monitor_action"
-            model="ir.actions.act_window"
-        >
+        id="crypto_bitcoin_balance_monitor_action"
+        model="ir.actions.act_window"
+    >
             <field name="name">Balance Monitors</field>
             <field name="res_model">crypto.bitcoin.balance.monitor</field>
             <field name="view_mode">tree,kanban,form</field>
@@ -98,12 +97,11 @@
 
         <!-- Balance History Action -->
         <record
-            id="crypto_bitcoin_balance_history_action"
-            model="ir.actions.act_window"
-        >
+        id="crypto_bitcoin_balance_history_action"
+        model="ir.actions.act_window"
+    >
             <field name="name">Balance History</field>
             <field name="res_model">crypto.bitcoin.balance.history</field>
             <field name="view_mode">tree,graph</field>
         </record>
-    </data>
 </odoo>

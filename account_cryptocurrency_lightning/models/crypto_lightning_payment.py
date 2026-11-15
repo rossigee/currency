@@ -1,14 +1,16 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api
-from odoo.exceptions import UserError
-import requests
-import qrcode
-import io
 import base64
+import io
 import json
 import logging
+
+import qrcode
+import requests
+
+from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 try:
     from odoo.addons.queue_job.models.base import job
@@ -34,16 +36,16 @@ class CryptoLightningPayment(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     # Basic payment information
-    address_id = fields.Many2one('crypto.lightning.address', string='Lightning Address', required=True)
-    partner_id = fields.Many2one('res.partner', string='Partner', related='address_id.owner_id', store=True, readonly=True)
+    address_id = fields.Many2one('crypto.lightning.address', string='Lightning Address', required=True)  # noqa: E501
+    partner_id = fields.Many2one('res.partner', string='Partner', related='address_id.owner_id', store=True, readonly=True)  # noqa: E501
     amount = fields.Float(string='Amount', required=True)
-    currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.company.currency_id)
+    currency_id = fields.Many2one('res.currency', string='Currency', required=True, default=lambda self: self.env.company.currency_id)  # noqa: E501
     btc_price = fields.Float(string='BTC Price at Time of Payment', readonly=True)
-    btc_current_price = fields.Float(string='BTC Current Price', compute='_compute_btc_current_price', readonly=True)
+    btc_current_price = fields.Float(string='BTC Current Price', compute='_compute_btc_current_price', readonly=True)  # noqa: E501
     satoshis = fields.Integer(string='Amount (satoshis)', required=True)
-    satoshis_current = fields.Integer(string='Amount (satoshis) at Current Rate', compute='_compute_satoshis_current', readonly=True)
-    lsp_id = fields.Many2one('crypto.lightning.service.provider', string='Lightning Service Provider', required=True,
-                          default=lambda self: self.env['crypto.lightning.service.provider'].search([], limit=1))
+    satoshis_current = fields.Integer(string='Amount (satoshis) at Current Rate', compute='_compute_satoshis_current', readonly=True)  # noqa: E501
+    lsp_id = fields.Many2one('crypto.lightning.service.provider', string='Lightning Service Provider', required=True,  # noqa: E501
+                          default=lambda self: self.env['crypto.lightning.service.provider'].search([], limit=1))  # noqa: E501
 
     # Payment status and tracking
     payment_status = fields.Selection([
@@ -52,8 +54,8 @@ class CryptoLightningPayment(models.Model):
         ('success', 'Payment Successful'),
         ('failed', 'Payment Failed'),
     ], string='Payment Status', default='draft', readonly=True, tracking=True)
-    last_state_change = fields.Datetime(string='Last State Change', readonly=True, default=fields.Datetime.now, tracking=True)
-    state_change_user_id = fields.Many2one('res.users', string='State Changed By', readonly=True, default=lambda self: self.env.user)
+    last_state_change = fields.Datetime(string='Last State Change', readonly=True, default=fields.Datetime.now, tracking=True)  # noqa: E501
+    state_change_user_id = fields.Many2one('res.users', string='State Changed By', readonly=True, default=lambda self: self.env.user)  # noqa: E501
 
     # Transaction details
     payment_hash = fields.Char(string='Payment Hash', readonly=True, index=True)
@@ -63,8 +65,8 @@ class CryptoLightningPayment(models.Model):
     payment_job_uuid = fields.Char(string='Job UUID', readonly=True)
 
     # Timing information
-    creation_date = fields.Datetime(string='Created', readonly=True, default=fields.Datetime.now)
-    payment_creation_date = fields.Datetime(string='Payment Created', readonly=True, default=fields.Datetime.now)
+    creation_date = fields.Datetime(string='Created', readonly=True, default=fields.Datetime.now)  # noqa: E501
+    payment_creation_date = fields.Datetime(string='Payment Created', readonly=True, default=fields.Datetime.now)  # noqa: E501
     completion_date = fields.Datetime(string='Completed', readonly=True)
     payment_completion_date = fields.Datetime(string='Payment Completed', readonly=True)
 
@@ -75,24 +77,24 @@ class CryptoLightningPayment(models.Model):
     # Technical details
     decoded_invoice_details = fields.Text(string='Invoice Details', readonly=True)
     ln_payment_ref = fields.Text(string='Payment Request', readonly=True)
-    ln_payment_ref_current = fields.Text(string='Current Payment Request', compute='_compute_current_payment_ref', readonly=True)
+    ln_payment_ref_current = fields.Text(string='Current Payment Request', compute='_compute_current_payment_ref', readonly=True)  # noqa: E501
     ln_payment_qrcode = fields.Binary(string='Payment QR Code', readonly=True)
-    ln_payment_qrcode_current = fields.Binary(string='Current Payment QR Code', compute='_compute_current_qrcode', readonly=True)
+    ln_payment_qrcode_current = fields.Binary(string='Current Payment QR Code', compute='_compute_current_qrcode', readonly=True)  # noqa: E501
     payment_attempt_id = fields.Char(string='Payment Attempt ID', readonly=True)
     callback_url = fields.Text(string='Callback URL', readonly=True)
-    callback_url_current = fields.Text(string='Current Callback URL', compute='_compute_current_callback_url', readonly=True)
+    callback_url_current = fields.Text(string='Current Callback URL', compute='_compute_current_callback_url', readonly=True)  # noqa: E501
 
     # Notes and attachments
     notes = fields.Html(string='Internal Notes', help='Internal notes for this payment')
-    attachment_count = fields.Integer(string='Attachment Count', compute='_compute_attachment_count')
+    attachment_count = fields.Integer(string='Attachment Count', compute='_compute_attachment_count')  # noqa: E501
 
     # Scheduled payment link
     scheduled_payment_id = fields.Many2one('crypto.lightning.scheduled.payment',
                                           string='Scheduled Payment', readonly=True,
-                                          help='Link to scheduled payment if this was auto-generated')
+                                          help='Link to scheduled payment if this was auto-generated')  # noqa: E501
 
     # Display name
-    display_name = fields.Char(string='Payment Reference', compute='_compute_display_name', store=True)
+    display_name = fields.Char(string='Payment Reference', compute='_compute_display_name', store=True)  # noqa: E501
 
     @api.depends('currency_id')
     def _compute_btc_current_price(self):
@@ -100,7 +102,7 @@ class CryptoLightningPayment(models.Model):
         for record in self:
             if record.currency_id:
                 try:
-                    record.btc_current_price = record.env['crypto.btc.price.service'].get_btc_price(record.currency_id.name)
+                    record.btc_current_price = record.env['crypto.btc.price.service'].get_btc_price(record.currency_id.name)  # noqa: E501
                 except Exception:
                     record.btc_current_price = 0.0
             else:
@@ -120,7 +122,7 @@ class CryptoLightningPayment(models.Model):
                         fields.Date.today()
                     )
                     # Convert to satoshis using current BTC price
-                    record.satoshis_current = int((base_amount / record.btc_current_price) * 100000000)
+                    record.satoshis_current = int((base_amount / record.btc_current_price) * 100000000)  # noqa: E501
                 except Exception:
                     record.satoshis_current = 0
             else:
@@ -133,8 +135,8 @@ class CryptoLightningPayment(models.Model):
             if record.payment_status == 'draft' and record.address_id:
                 try:
                     processor = record.env['crypto.lightning.payment.processor']
-                    payment_request = processor.create_payment_request(record.address_id.address)
-                    record.callback_url_current = payment_request.get('callback') if payment_request else False
+                    payment_request = processor.create_payment_request(record.address_id.address)  # noqa: E501
+                    record.callback_url_current = payment_request.get('callback') if payment_request else False  # noqa: E501
                 except Exception:
                     record.callback_url_current = False
             else:
@@ -145,7 +147,7 @@ class CryptoLightningPayment(models.Model):
         """Generate current payment request for draft payments"""
         for record in self:
             if (record.payment_status == 'draft' and
-                record.address_id and record.satoshis_current > 0 and record.callback_url_current):
+                record.address_id and record.satoshis_current > 0 and record.callback_url_current):  # noqa: E501
                 try:
                     msats = record.satoshis_current * 1000
                     lnurl = f"{record.callback_url_current}?amount={msats}"
@@ -209,8 +211,8 @@ class CryptoLightningPayment(models.Model):
     def _compute_display_name(self):
         for record in self:
             if record.address_id and record.amount:
-                address_name = record.address_id.address[:20] + ('...' if len(record.address_id.address) > 20 else '')
-                record.display_name = f"{record.amount} {record.currency_id.name} to {address_name}"
+                address_name = record.address_id.address[:20] + ('...' if len(record.address_id.address) > 20 else '')  # noqa: E501
+                record.display_name = f"{record.amount} {record.currency_id.name} to {address_name}"  # noqa: E501
             else:
                 record.display_name = f"Payment #{record.id or 'New'}"
 
@@ -224,46 +226,46 @@ class CryptoLightningPayment(models.Model):
         try:
             # Validate required fields for payment
             if not self.address_id:
-                raise UserError("Please select a Lightning Address before proceeding with payment.")
+                raise UserError("Please select a Lightning Address before proceeding with payment.") from None  # noqa: E501
 
             if not self.amount or self.amount <= 0:
-                raise UserError("Please enter a valid payment amount.")
+                raise UserError("Please enter a valid payment amount.") from None
 
             if not self.currency_id:
-                raise UserError("Please select a currency.")
+                raise UserError("Please select a currency.") from None
 
             if self.payment_status != 'draft':
-                raise UserError("Payment has already been processed or is in progress.")
+                raise UserError("Payment has already been processed or is in progress.") from None  # noqa: E501
 
             # Validate that we have a service provider
             if not self.lsp_id:
-                raise UserError("No Lightning Service Provider selected.")
+                raise UserError("No Lightning Service Provider selected.") from None
 
             if not self.lsp_id.rest_url:
-                raise UserError("Lightning Service Provider has no REST URL configured.")
+                raise UserError("Lightning Service Provider has no REST URL configured.") from None  # noqa: E501
 
-            # Force computation of current values if not available with detailed error checking
+            # Force computation of current values if not available with detailed error checking  # noqa: E501
             if not self.btc_current_price or self.btc_current_price <= 0:
                 self._compute_btc_current_price()
                 if not self.btc_current_price or self.btc_current_price <= 0:
-                    raise UserError("Unable to get current BTC price. Please check your internet connection and try again.")
+                    raise UserError("Unable to get current BTC price. Please check your internet connection and try again.") from None  # noqa: E501
 
             if not self.satoshis_current or self.satoshis_current <= 0:
                 self._compute_satoshis_current()
                 if not self.satoshis_current or self.satoshis_current <= 0:
-                    raise UserError(f"Unable to calculate satoshi amount. Current BTC price: {self.btc_current_price}, Amount: {self.amount} {self.currency_id.name}")
+                    raise UserError(f"Unable to calculate satoshi amount. Current BTC price: {self.btc_current_price}, Amount: {self.amount} {self.currency_id.name}") from None  # noqa: E501
 
             if not self.callback_url_current:
                 self._compute_current_callback_url()
                 if not self.callback_url_current:
-                    raise UserError(f"Unable to get callback URL from Lightning address: {self.address_id.address}. Please check the address is valid and accessible.")
+                    raise UserError(f"Unable to get callback URL from Lightning address: {self.address_id.address}. Please check the address is valid and accessible.")  # noqa: E501
 
             if not self.ln_payment_ref_current:
                 self._compute_current_payment_ref()
                 if not self.ln_payment_ref_current:
-                    raise UserError(f"Failed to generate payment request from callback URL: {self.callback_url_current}. Amount: {self.satoshis_current} sats. Please check the Lightning address configuration.")
+                    raise UserError(f"Failed to generate payment request from callback URL: {self.callback_url_current}. Amount: {self.satoshis_current} sats. Please check the Lightning address configuration.")  # noqa: E501
 
-            # Store computed values before changing status (freeze the exchange rate/amounts)
+            # Store computed values before changing status (freeze the exchange rate/amounts)  # noqa: E501
             values_to_update = {
                 'payment_status': 'pending',
                 'payment_error': False,
@@ -276,12 +278,12 @@ class CryptoLightningPayment(models.Model):
             if self.btc_current_price and self.btc_current_price > 0:
                 values_to_update['btc_price'] = self.btc_current_price
             else:
-                raise UserError("Unable to get current BTC price. Please check your internet connection.")
+                raise UserError("Unable to get current BTC price. Please check your internet connection.") from None  # noqa: E501
 
             if self.satoshis_current and self.satoshis_current > 0:
                 values_to_update['satoshis'] = self.satoshis_current
             else:
-                raise UserError("Unable to calculate satoshi amount. Please check the amount and currency.")
+                raise UserError("Unable to calculate satoshi amount. Please check the amount and currency.") from None  # noqa: E501
 
             if self.callback_url_current:
                 values_to_update['callback_url'] = self.callback_url_current
@@ -289,7 +291,7 @@ class CryptoLightningPayment(models.Model):
             if self.ln_payment_ref_current:
                 values_to_update['ln_payment_ref'] = self.ln_payment_ref_current
             else:
-                raise UserError("Failed to generate payment request. Please check the Lightning address configuration.")
+                raise UserError("Failed to generate payment request. Please check the Lightning address configuration.") from None  # noqa: E501
 
             if self.ln_payment_qrcode_current:
                 values_to_update['ln_payment_qrcode'] = self.ln_payment_qrcode_current
@@ -305,16 +307,16 @@ class CryptoLightningPayment(models.Model):
                 # If job creation fails, revert status but keep the frozen values
                 self.write({
                     'payment_status': 'draft',
-                    'payment_error': f"Failed to start background job: {str(job_error)}"
+                    'payment_error': f"Failed to start background job: {job_error!s}"
                 })
-                raise UserError(f"Failed to start payment processing job: {str(job_error)}")
+                raise UserError(f"Failed to start payment processing job: {job_error!s}")  # noqa: E501
 
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': 'Payment Started',
-                    'message': 'Lightning payment is being processed in the background. You will be notified when complete.',
+                    'message': 'Lightning payment is being processed in the background. You will be notified when complete.',  # noqa: E501
                     'type': 'info',
                     'sticky': False,
                 }
@@ -324,14 +326,14 @@ class CryptoLightningPayment(models.Model):
             # Log the error and show user-friendly message
             import logging
             _logger = logging.getLogger(__name__)
-            _logger.error(f"Payment initiation failed for payment {self.id}: {str(e)}")
+            _logger.error(f"Payment initiation failed for payment {self.id}: {e!s}")
 
             # If it's already a UserError, just re-raise it
             if isinstance(e, UserError):
                 raise
             else:
                 # For other exceptions, wrap in UserError
-                raise UserError(f"Payment initiation failed: {str(e)}")
+                raise UserError(f"Payment initiation failed: {e!s}")
 
     @job(default_channel='root.lightning')
     def _process_lightning_payment(self):
@@ -352,13 +354,13 @@ class CryptoLightningPayment(models.Model):
             service_provider = self.lsp_id
 
             # Get macaroon from vault
-            vault_data = service_provider._get_data_from_vault(service_provider.token_uuid)
+            vault_data = service_provider._get_data_from_vault(service_provider.token_uuid)  # noqa: E501
             macaroon = vault_data.get('macaroon')
             if not macaroon:
-                raise Exception("No macaroon available for service provider")
+                raise Exception("No macaroon available for service provider") from None
 
             # Convert macaroon to hex if needed
-            if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):
+            if len(macaroon) % 2 == 0 and all(c in '0123456789abcdefABCDEF' for c in macaroon):  # noqa: E501
                 macaroon_hex = macaroon
             else:
                 macaroon_bytes = base64.b64decode(macaroon)
@@ -392,10 +394,10 @@ class CryptoLightningPayment(models.Model):
 
                 # Set fee limit (e.g., 1% of payment amount or max 1000 sats)
                 amount_sat = int(decoded.get('num_satoshis', 0))
-                fee_limit_sat = min(max(amount_sat // 100, 1), 1000)  # 1% with min 1, max 1000 sats
+                fee_limit_sat = min(max(amount_sat // 100, 1), 1000)  # 1% with min 1, max 1000 sats  # noqa: E501
 
                 # Execute payment
-                _logger.info(f"Paying invoice for {amount_sat} sats with fee limit {fee_limit_sat} sats")
+                _logger.info(f"Paying invoice for {amount_sat} sats with fee limit {fee_limit_sat} sats")  # noqa: E501
                 payment_result = client.pay_invoice(payment_ref, fee_limit_sat)
 
                 # Update payment status based on result
@@ -410,7 +412,7 @@ class CryptoLightningPayment(models.Model):
                         'last_state_change': fields.Datetime.now(),
                         'state_change_user_id': self.env.user.id,
                     })
-                    _logger.error(f"Lightning payment failed: {payment_result['payment_error']}")
+                    _logger.error(f"Lightning payment failed: {payment_result['payment_error']}")  # noqa: E501
 
                     # Send failure notification to LSP mail channel
                     self._send_payment_notification('failed')
@@ -439,7 +441,7 @@ class CryptoLightningPayment(models.Model):
                         'state_change_user_id': self.env.user.id,
                     })
 
-                    _logger.info(f"Lightning payment successful: {payment_result.get('payment_hash')} via {len(hops)} hops")
+                    _logger.info(f"Lightning payment successful: {payment_result.get('payment_hash')} via {len(hops)} hops")  # noqa: E501
 
                     # Send success notification to LSP mail channel
                     self._send_payment_notification('success')
@@ -485,7 +487,7 @@ class CryptoLightningPayment(models.Model):
                 message_body = f"""
                 <p><strong>⚡ Lightning Payment Successful</strong></p>
                 <ul>
-                <li><strong>Amount:</strong> {self.amount} {self.currency_id.name} ({self.satoshis} sats)</li>
+                <li><strong>Amount:</strong> {self.amount} {self.currency_id.name} ({self.satoshis} sats)</li>  # noqa: E501
                 <li><strong>To:</strong> {self.address_id.address}</li>
                 <li><strong>LSP:</strong> {self.lsp_id.name}</li>
                 <li><strong>Fee:</strong> {self.fee_paid_sat} sats</li>
@@ -494,21 +496,21 @@ class CryptoLightningPayment(models.Model):
                 <li><strong>Completion:</strong> {self.completion_date}</li>
                 """
                 if self.scheduled_payment_id:
-                    message_body += f"<li><strong>Scheduled Payment:</strong> {self.scheduled_payment_id.name}</li>"
+                    message_body += f"<li><strong>Scheduled Payment:</strong> {self.scheduled_payment_id.name}</li>"  # noqa: E501
                 message_body += "</ul>"
 
             else:  # failed
                 message_body = f"""
                 <p><strong>❌ Lightning Payment Failed</strong></p>
                 <ul>
-                <li><strong>Amount:</strong> {self.amount} {self.currency_id.name} ({self.satoshis} sats)</li>
+                <li><strong>Amount:</strong> {self.amount} {self.currency_id.name} ({self.satoshis} sats)</li>  # noqa: E501
                 <li><strong>To:</strong> {self.address_id.address}</li>
                 <li><strong>LSP:</strong> {self.lsp_id.name}</li>
                 <li><strong>Error:</strong> {self.payment_error}</li>
                 <li><strong>Failed At:</strong> {self.completion_date}</li>
                 """
                 if self.scheduled_payment_id:
-                    message_body += f"<li><strong>Scheduled Payment:</strong> {self.scheduled_payment_id.name}</li>"
+                    message_body += f"<li><strong>Scheduled Payment:</strong> {self.scheduled_payment_id.name}</li>"  # noqa: E501
                 message_body += "</ul>"
 
             # Post message to channel with proper message type
@@ -517,8 +519,8 @@ class CryptoLightningPayment(models.Model):
                 message_type='comment'
             )
 
-            _logger.info(f"Payment notification sent to channel {self.lsp_id.mail_channel_id.name}")
+            _logger.info(f"Payment notification sent to channel {self.lsp_id.mail_channel_id.name}")  # noqa: E501
 
         except Exception as e:
-            _logger.warning(f"Failed to send payment notification: {str(e)}")
-            # Don't raise exception - notification failure shouldn't block payment processing
+            _logger.warning(f"Failed to send payment notification: {e!s}")
+            # Don't raise exception - notification failure shouldn't block payment processing  # noqa: E501

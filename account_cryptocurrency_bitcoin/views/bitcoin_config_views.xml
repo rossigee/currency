@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
 
         <!-- Bitcoin Node Configuration Views -->
         <record id="bitcoin_node_config_view_tree" model="ir.ui.view">
             <field name="name">bitcoin.node.config.tree</field>
             <field name="model">bitcoin.node.config</field>
             <field name="arch" type="xml">
-                <tree
-                    string="Bitcoin Node Configurations"
-                    default_order="sequence, name"
-                >
+                <tree default_order="sequence, name">
                     <field name="sequence" widget="handle" />
                     <field name="display_name" />
                     <field name="rpc_host" />
@@ -18,21 +14,21 @@
                     <field name="network" />
                     <field name="is_active" widget="boolean" />
                     <field
-                        name="connection_status"
-                        widget="badge"
-                        decoration-success="connection_status == 'connected'"
-                        decoration-danger="connection_status in ('error', 'auth_failed', 'timeout')"
-                        decoration-muted="connection_status == 'unknown'"
-                    />
+                    name="connection_status"
+                    widget="badge"
+                    decoration-success="connection_status == 'connected'"
+                    decoration-danger="connection_status in ('error', 'auth_failed', 'timeout')"
+                    decoration-muted="connection_status == 'unknown'"
+                />
                     <field name="current_block_height" />
                     <field name="last_connected" />
                     <button
-                        name="test_connection"
-                        string="Test"
-                        type="object"
-                        class="btn-sm btn-secondary"
-                        icon="fa-plug"
-                    />
+                    name="test_connection"
+                    string="Test"
+                    type="object"
+                    class="btn-sm btn-secondary"
+                    icon="fa-plug"
+                />
                 </tree>
             </field>
         </record>
@@ -44,41 +40,41 @@
                 <form string="Bitcoin Node Configuration">
                     <header>
                         <button
-                            name="test_connection"
-                            string="Test Connection"
-                            type="object"
-                            class="btn-primary"
-                        />
+                        name="test_connection"
+                        string="Test Connection"
+                        type="object"
+                        class="btn-primary"
+                    />
                         <button
-                            name="action_refresh_status"
-                            string="Refresh Status"
-                            type="object"
-                            class="btn-secondary"
-                        />
+                        name="action_refresh_status"
+                        string="Refresh Status"
+                        type="object"
+                        class="btn-secondary"
+                    />
                         <field name="connection_status" widget="statusbar" />
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button
-                                name="action_refresh_status"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-refresh"
-                            >
+                            name="action_refresh_status"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-refresh"
+                        >
                                 <field
-                                    name="last_check"
-                                    string="Last Check"
-                                    widget="relative"
-                                />
+                                name="last_check"
+                                string="Last Check"
+                                widget="relative"
+                            />
                             </button>
                         </div>
-                        
+
                         <div class="oe_title">
                             <h1>
                                 <field name="name" placeholder="Configuration Name" />
                             </h1>
                         </div>
-                        
+
                         <group>
                             <group string="Priority &amp; Status">
                                 <field name="sequence" />
@@ -93,7 +89,7 @@
                                 <field name="use_ssl" />
                             </group>
                         </group>
-                        
+
                         <group string="Performance Settings">
                             <group>
                                 <field name="timeout_seconds" />
@@ -103,16 +99,16 @@
                             <group string="Environment Variables">
                                 <field name="use_env_variables" />
                                 <field
-                                    name="env_prefix"
-                                    invisible="not use_env_variables"
-                                />
+                                name="env_prefix"
+                                invisible="not use_env_variables"
+                            />
                             </group>
                         </group>
-                        
+
                         <group
-                            string="Node Information"
-                            invisible="connection_status != &quot;connected&quot;"
-                        >
+                        string="Node Information"
+                        invisible="connection_status != &quot;connected&quot;"
+                    >
                             <group>
                                 <field name="node_version" readonly="1" />
                                 <field name="current_block_height" readonly="1" />
@@ -124,14 +120,14 @@
                                 <field name="best_block_hash" readonly="1" />
                             </group>
                         </group>
-                        
+
                         <group string="Status" invisible="not status_message">
                             <field
-                                name="status_message"
-                                widget="text"
-                                readonly="1"
-                                nolabel="1"
-                            />
+                            name="status_message"
+                            widget="text"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </group>
                     </sheet>
                 </form>
@@ -143,10 +139,7 @@
             <field name="name">electrum.server.config.tree</field>
             <field name="model">electrum.server.config</field>
             <field name="arch" type="xml">
-                <tree
-                    string="Electrum Server Configurations"
-                    default_order="sequence, name"
-                >
+                <tree default_order="sequence, name">
                     <field name="sequence" widget="handle" />
                     <field name="display_name" />
                     <field name="host" />
@@ -156,21 +149,21 @@
                     <field name="server_type" />
                     <field name="is_active" widget="boolean" />
                     <field
-                        name="connection_status"
-                        widget="badge"
-                        decoration-success="connection_status == 'connected'"
-                        decoration-danger="connection_status in ('error', 'timeout', 'ssl_error')"
-                        decoration-muted="connection_status == 'unknown'"
-                    />
+                    name="connection_status"
+                    widget="badge"
+                    decoration-success="connection_status == 'connected'"
+                    decoration-danger="connection_status in ('error', 'timeout', 'ssl_error')"
+                    decoration-muted="connection_status == 'unknown'"
+                />
                     <field name="current_block_height" />
                     <field name="last_connected" />
                     <button
-                        name="test_connection"
-                        string="Test"
-                        type="object"
-                        class="btn-sm btn-secondary"
-                        icon="fa-plug"
-                    />
+                    name="test_connection"
+                    string="Test"
+                    type="object"
+                    class="btn-sm btn-secondary"
+                    icon="fa-plug"
+                />
                 </tree>
             </field>
         </record>
@@ -182,41 +175,41 @@
                 <form string="Electrum Server Configuration">
                     <header>
                         <button
-                            name="test_connection"
-                            string="Test Connection"
-                            type="object"
-                            class="btn-primary"
-                        />
+                        name="test_connection"
+                        string="Test Connection"
+                        type="object"
+                        class="btn-primary"
+                    />
                         <button
-                            name="action_refresh_status"
-                            string="Refresh Status"
-                            type="object"
-                            class="btn-secondary"
-                        />
+                        name="action_refresh_status"
+                        string="Refresh Status"
+                        type="object"
+                        class="btn-secondary"
+                    />
                         <field name="connection_status" widget="statusbar" />
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button
-                                name="action_refresh_status"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-refresh"
-                            >
+                            name="action_refresh_status"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-refresh"
+                        >
                                 <field
-                                    name="last_check"
-                                    string="Last Check"
-                                    widget="relative"
-                                />
+                                name="last_check"
+                                string="Last Check"
+                                widget="relative"
+                            />
                             </button>
                         </div>
-                        
+
                         <div class="oe_title">
                             <h1>
                                 <field name="name" placeholder="Configuration Name" />
                             </h1>
                         </div>
-                        
+
                         <group>
                             <group string="Priority &amp; Status">
                                 <field name="sequence" />
@@ -230,7 +223,7 @@
                                 <field name="use_ssl" />
                             </group>
                         </group>
-                        
+
                         <group string="Performance Settings">
                             <group>
                                 <field name="timeout_seconds" />
@@ -240,16 +233,16 @@
                             <group string="Environment Variables">
                                 <field name="use_env_variables" />
                                 <field
-                                    name="env_prefix"
-                                    invisible="not use_env_variables"
-                                />
+                                name="env_prefix"
+                                invisible="not use_env_variables"
+                            />
                             </group>
                         </group>
-                        
+
                         <group
-                            string="Server Information"
-                            invisible="connection_status != &quot;connected&quot;"
-                        >
+                        string="Server Information"
+                        invisible="connection_status != &quot;connected&quot;"
+                    >
                             <group>
                                 <field name="server_version" readonly="1" />
                                 <field name="protocol_version" readonly="1" />
@@ -259,14 +252,14 @@
                                 <field name="last_connected" readonly="1" />
                             </group>
                         </group>
-                        
+
                         <group string="Status" invisible="not status_message">
                             <field
-                                name="status_message"
-                                widget="text"
-                                readonly="1"
-                                nolabel="1"
-                            />
+                            name="status_message"
+                            widget="text"
+                            readonly="1"
+                            nolabel="1"
+                        />
                         </group>
                     </sheet>
                 </form>
@@ -304,5 +297,4 @@
             </field>
         </record>
 
-    </data>
 </odoo>
