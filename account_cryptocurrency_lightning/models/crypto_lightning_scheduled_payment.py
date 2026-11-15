@@ -177,14 +177,14 @@ class CryptoLightningScheduledPayment(models.Model):
 
         try:
             from cron_descriptor import ExpressionDescriptor
-            
+
             descriptor = ExpressionDescriptor(
                 expression=cron_expr,
                 use_24hour_time_format=True
             )
-            
+
             return descriptor.get_description()
-            
+
         except Exception as e:
             _logger.warning(f"Error generating cron description for '{cron_expr}': {e}")
             return f"Custom schedule: {cron_expr}"
@@ -294,17 +294,17 @@ class CryptoLightningScheduledPayment(models.Model):
 
         try:
             from cron_converter import Cron
-            
+
             # Create cron object and schedule from current time
             cron = Cron(self.cron_expression)
             schedule = cron.schedule(current_datetime)
-            
+
             # Get next execution time
             next_execution = schedule.next()
-            
+
             # Ensure it's a datetime object (cron-converter returns datetime)
             return next_execution
-            
+
         except Exception as e:
             _logger.error(f"Error parsing cron expression '{self.cron_expression}': {e}")
             # Fallback: return False to indicate invalid cron expression

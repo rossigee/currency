@@ -11,9 +11,11 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form" />
         <field name="arch" type="xml">
             <xpath expr="//setting[@id='update_exchange_rates']" position="after">
-                <setting id="currency_rates_autoupdate_setting"
-                         string="Update Exchange Rates Automatically"
-                         help="Update exchange rates automatically using OCA modules">
+                <setting
+                    id="currency_rates_autoupdate_setting"
+                    string="Update Exchange Rates Automatically"
+                    help="Update exchange rates automatically using OCA modules"
+                >
                     <field name="currency_rates_autoupdate" />
                     <span
                         class="fa fa-lg fa-building-o"

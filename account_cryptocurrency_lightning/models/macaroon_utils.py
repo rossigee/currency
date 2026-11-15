@@ -266,4 +266,3 @@ class MacaroonUtils:
                 'caveats': ['Valid LND macaroon detected'],
                 'caveat_count': 1
             }
-

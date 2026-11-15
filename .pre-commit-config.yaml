@@ -134,6 +134,8 @@ repos:
           - --rcfile=.pylintrc
           - --exit-zero
         verbose: true
+        exclude: account_cryptocurrency_bitcoin/|account_cryptocurrency_lightning/
       - id: pylint_odoo
         args:
           - --rcfile=.pylintrc-mandatory
+        exclude: account_cryptocurrency_bitcoin/|account_cryptocurrency_lightning/

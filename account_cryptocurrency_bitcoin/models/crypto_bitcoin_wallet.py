@@ -54,7 +54,7 @@ class CryptoBitcoinWallet(models.Model):
     def action_import_transactions(self):
         """Import transactions for all addresses in this wallet"""
         self.ensure_one()
-        
+
         # Prevent concurrent imports
         import_key = f"wallet_import_{self.id}"
         if hasattr(self.env, '_wallet_imports_running'):
@@ -71,10 +71,10 @@ class CryptoBitcoinWallet(models.Model):
                 }
         else:
             self.env._wallet_imports_running = set()
-        
+
         # Queue background job for transaction import
         job = self.with_delay(description=f"Import transactions for wallet {self.name}")._import_transactions_background()
-        
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -94,21 +94,21 @@ class CryptoBitcoinWallet(models.Model):
                     title="No Addresses"
                 )
                 return
-        
+
             # Main import logic
             total_created = 0
             total_updated = 0
             total_transactions = 0
             chunk_size = 5  # Show progress every 5 addresses
-            
+
             # Limit to first 50 addresses to prevent runaway processes
             addresses_to_check = self.address_ids[:50]
             if len(self.address_ids) > 50:
                 _logger.warning(f"Wallet has {len(self.address_ids)} addresses, limiting to first 50 for transaction import")
-            
+
             # Track processed addresses to detect duplicates
             processed_addresses = set()
-            
+
             for i, address in enumerate(addresses_to_check, 1):
                 # Check for duplicate addresses
                 if address.address in processed_addresses:
@@ -116,39 +116,39 @@ class CryptoBitcoinWallet(models.Model):
                     continue
                 processed_addresses.add(address.address)
                 _logger.info(f"Processing wallet address {i}/{len(addresses_to_check)}: {address.address}")
-                
+
                 result = self.env['crypto.bitcoin.transaction'].fetch_address_transactions(
-                    address.address, 
+                    address.address,
                     network='mainnet'  # TODO: Make this configurable
                 )
                 total_created += result['created']
                 total_updated += result['updated']
                 total_transactions += result['total']
-                
+
                 _logger.info(f"Address {address.address} complete: {result['created']} new, {result['updated']} updated, {result['total']} total")
-                
-                
+
+
                 # Add a small delay between addresses to avoid overwhelming the API
                 if i < len(addresses_to_check):  # Don't delay after the last address
                     time.sleep(0.5)
-            
+
             # Send completion notification to user
             message = f"Wallet transaction import complete!\n• {total_created} new transactions\n• {total_updated} updated transactions\n• {total_transactions} total found\n• {len(addresses_to_check)} addresses scanned"
-            
+
             self.env.user.notify_success(
                 message=message,
                 title="Transaction Import Complete"
             )
-            
+
             _logger.info(f"Background transaction import completed for wallet {self.name}: {total_created} new, {total_updated} updated")
-            
+
             # Return result summary for job queue display
             return f"✅ Import completed: {total_created} new, {total_updated} updated, {total_transactions} total transactions found across {len(addresses_to_check)} addresses"
-            
+
         except Exception as e:
             error_msg = f'Failed to import wallet transactions: {str(e)}'
             _logger.error(f"Background transaction import failed for wallet {self.name}: {str(e)}")
-            
+
             self.env.user.notify_danger(
                 message=error_msg,
                 title="Transaction Import Failed"

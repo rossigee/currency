@@ -11,7 +11,7 @@ class CryptoLightningAddress(models.Model):
     _name = 'crypto.lightning.address'
     _description = "Lightning Address"
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    
+
     _sql_constraints = [
         ('unique_lightning_address', 'unique(address)', 'Lightning address must be unique')
     ]
@@ -28,11 +28,11 @@ class CryptoLightningAddress(models.Model):
                                         help='LND service provider to fetch transaction data from',
                                         default=lambda self: self.env['crypto.lightning.service.provider'].search([], limit=1))
     notes = fields.Text(string='Notes')
-    
+
     # Related payments
     payment_ids = fields.One2many('crypto.lightning.payment', 'address_id', string='Lightning Payments')
     payment_count = fields.Integer(string='Payment Count', compute='_compute_payment_count')
-    
+
     # Attachments
     attachment_count = fields.Integer(string='Attachment Count', compute='_compute_attachment_count')
 

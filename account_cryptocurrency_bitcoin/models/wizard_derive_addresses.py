@@ -17,7 +17,7 @@ class WizardDeriveAddresses(models.TransientModel):
         ('change', 'Change Addresses (m/1/x)'),
         ('both', 'Both Receive and Change')
     ], string='Address Type', default='receive', required=True)
-    
+
     # Results
     derived_addresses_json = fields.Text(string='Derived Addresses (JSON)', readonly=True)
     derived_addresses_display = fields.Text(string='Derived Addresses', readonly=True)
@@ -31,13 +31,13 @@ class WizardDeriveAddresses(models.TransientModel):
     def action_derive_addresses(self):
         """Perform secure address derivation"""
         self.ensure_one()
-        
+
         if not self.public_key_id:
             raise ValidationError("Public key is required")
-            
+
         results = []
         display_lines = []
-        
+
         try:
             if self.address_type in ('receive', 'both'):
                 # Derive receive addresses
@@ -50,9 +50,9 @@ class WizardDeriveAddresses(models.TransientModel):
                 display_lines.append("=== RECEIVE ADDRESSES (m/0/x) ===")
                 for addr in receive_addrs:
                     display_lines.append(f"{addr['path']}: {addr['address']}")
-                    
+
             if self.address_type in ('change', 'both'):
-                # Derive change addresses  
+                # Derive change addresses
                 change_addrs = self.public_key_id.derive_addresses(
                     start_index=self.start_index,
                     count=self.count,
@@ -64,11 +64,11 @@ class WizardDeriveAddresses(models.TransientModel):
                 display_lines.append("=== CHANGE ADDRESSES (m/1/x) ===")
                 for addr in change_addrs:
                     display_lines.append(f"{addr['path']}: {addr['address']}")
-                    
+
             # Store results
             self.derived_addresses_json = json.dumps(results, indent=2)
             self.derived_addresses_display = "\n".join(display_lines)
-            
+
             # Return action to show results
             return {
                 'type': 'ir.actions.act_window',
@@ -79,17 +79,17 @@ class WizardDeriveAddresses(models.TransientModel):
                 'target': 'new',
                 'context': {'show_results': True}
             }
-            
+
         except Exception as e:
             raise ValidationError(f"Address derivation failed: {str(e)}")
 
     def action_export_addresses(self):
         """Export derived addresses as downloadable file"""
         self.ensure_one()
-        
+
         if not self.derived_addresses_json:
             raise ValidationError("No addresses to export. Please derive addresses first.")
-            
+
         # Create attachment for download
         attachment = self.env['ir.attachment'].create({
             'name': f'derived_addresses_{self.public_key_id.name}.json',
@@ -99,7 +99,7 @@ class WizardDeriveAddresses(models.TransientModel):
             'res_id': self.id,
             'mimetype': 'application/json'
         })
-        
+
         return {
             'type': 'ir.actions.act_url',
             'url': f'/web/content/{attachment.id}?download=true',
