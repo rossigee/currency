@@ -154,10 +154,8 @@ class WizardImportXpub(models.TransientModel):
 
                     details = []
                     details.append(f"XPUB Fingerprint: {record.calculated_fingerprint}")
-                    details.append(
-                        f"Master Fingerprint: {record.master_fingerprint or 'Not '
-                                                                            'provided'}"
-                    )
+                    fingerprint_text = record.master_fingerprint or "Not provided"
+                    details.append(f"Master Fingerprint: {fingerprint_text}")
                     details.append(
                         f"Fingerprint Match: {'✓' if record.fingerprint_match else '✗'}"
                     )
