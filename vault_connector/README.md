@@ -22,7 +22,6 @@ export VAULT_ADDR="https://your-vault-server:8200"
 export VAULT_TOKEN="your-vault-token"
 
 # Optional
-export VAULT_SKIP_VERIFY="true"              # Skip TLS verification (dev only)
 export VAULT_KV_STORE="my-custom-store"      # Custom KV store name
 ```
 

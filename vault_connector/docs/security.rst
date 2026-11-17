@@ -117,7 +117,7 @@ Network Security
 ----------------
 
 **TLS Configuration**
-    * Always use HTTPS in production (``VAULT_SKIP_VERIFY=false``)
+    * Always use HTTPS; Vault certificates are always verified
     * Use valid, trusted SSL certificates
     * Implement certificate pinning where possible
     * Monitor certificate expiration dates
@@ -142,7 +142,6 @@ Environment Security
     # /etc/odoo/vault.env
     VAULT_ADDR=https://vault.internal.company.com:8200
     VAULT_TOKEN=hvs.CAESIJ...
-    VAULT_SKIP_VERIFY=false
 
     # Set restrictive permissions
     chmod 600 /etc/odoo/vault.env
