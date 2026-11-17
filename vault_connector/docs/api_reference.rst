@@ -71,7 +71,6 @@ Check if Vault is accessible and unsealed.
 **Environment Variables Used**:
     * ``VAULT_ADDR`` (required)
     * ``VAULT_TOKEN`` (required)
-    * ``VAULT_SKIP_VERIFY`` (optional)
 
 **Error Conditions**:
     * Missing environment variables
@@ -236,15 +235,6 @@ The module requires several environment variables for configuration:
     **Security**: Keep secret, rotate regularly
 
 **Optional Variables**
-
-``VAULT_SKIP_VERIFY``
-    **Type**: Boolean string
-
-    **Description**: Skip TLS certificate verification
-
-    **Values**: ``"true"`` or ``"false"`` (default: ``"false"``)
-
-    **Security Warning**: Only use ``"true"`` in development
 
 ``VAULT_KV_STORE``
     **Type**: String

@@ -202,7 +202,6 @@ Configuration Issues
     * Self-signed certificates
     * Certificate chain incomplete
     * Certificate expired
-    * ``VAULT_SKIP_VERIFY`` misconfiguration
 
 *Solutions*::
 
@@ -211,9 +210,6 @@ Configuration Issues
 
     # Check certificate expiration
     echo | openssl s_client -connect vault.example.com:8200 2>/dev/null | openssl x509 -noout -dates
-
-    # Temporary bypass (development only)
-    export VAULT_SKIP_VERIFY=true
 
     # Fix certificate chain
     # Ensure intermediate certificates are included in server config

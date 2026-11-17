@@ -35,7 +35,6 @@ Configuration & Environment
 
   * ``VAULT_ADDR`` - Vault server URL (required)
   * ``VAULT_TOKEN`` - Authentication token (required)
-  * ``VAULT_SKIP_VERIFY`` - Skip TLS verification (optional, dev only)
   * ``VAULT_KV_STORE`` - Custom KV store name (optional)
 
 * Multi-tenant KV store naming based on database name

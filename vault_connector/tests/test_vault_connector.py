@@ -18,13 +18,12 @@ class TestVaultConnector(common.TransactionCase):
 
         # Store original environment
         self.original_env = {}
-        for key in ["VAULT_ADDR", "VAULT_TOKEN", "VAULT_SKIP_VERIFY", "VAULT_KV_STORE"]:
+        for key in ["VAULT_ADDR", "VAULT_TOKEN", "VAULT_KV_STORE"]:
             self.original_env[key] = os.environ.get(key)
 
         # Set up test environment variables
         os.environ["VAULT_ADDR"] = "https://vault.example.com:8200"
         os.environ["VAULT_TOKEN"] = "test-token-123"
-        os.environ["VAULT_SKIP_VERIFY"] = "false"
 
     def tearDown(self):
         # Restore original environment
@@ -262,15 +261,9 @@ class TestVaultConnector(common.TransactionCase):
             self.vault_connector.set_secret(secret_id, {"key": "value"})
         self.assertIn("Failed to set secret", str(cm.exception))
 
-    def test_vault_skip_verify_option(self):
-        """VAULT_SKIP_VERIFY is honoured for a loopback VAULT_ADDR"""
-        with (
-            patch.dict(
-                os.environ,
-                {"VAULT_SKIP_VERIFY": "true", "VAULT_ADDR": "https://127.0.0.1:8200"},
-            ),
-            patch("requests.get") as mock_get,
-        ):
+    def test_check_vault_status_verifies_tls(self):
+        """Vault requests always verify TLS certificates"""
+        with patch("requests.get") as mock_get:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_response.json.return_value = {"sealed": False}
@@ -280,10 +273,8 @@ class TestVaultConnector(common.TransactionCase):
 
             self.vault_connector.check_vault_status()
 
-            # Verify verify=False was passed to requests
-            calls = mock_get.call_args_list
-            self.assertFalse(calls[0][1]["verify"])
-            self.assertFalse(calls[1][1]["verify"])
+            for call in mock_get.call_args_list:
+                self.assertIs(call[1]["verify"], True)
 
     @patch(
         "odoo.addons.vault_connector.models.vault_connector.VaultConnector.check_vault_status"
@@ -352,17 +343,3 @@ class TestVaultConnector(common.TransactionCase):
     def test_get_kv_field_rejects_bad_path(self):
         with self.assertRaises(ValidationError):
             self.vault_connector.get_kv_field("tenants", "discord_url")
-
-    def test_tls_verify_defaults_to_true(self):
-        with patch.dict(os.environ, {}, clear=False):
-            os.environ.pop("VAULT_SKIP_VERIFY", None)
-            self.assertTrue(self.vault_connector._tls_verify("https://vault.example"))
-
-    def test_tls_verify_skip_allowed_only_for_loopback(self):
-        with patch.dict(os.environ, {"VAULT_SKIP_VERIFY": "true"}):
-            self.assertFalse(self.vault_connector._tls_verify("https://127.0.0.1:8200"))
-            self.assertFalse(self.vault_connector._tls_verify("http://localhost:8200"))
-            with self.assertRaises(ValidationError):
-                self.vault_connector._tls_verify("https://vault.example.com")
-            with self.assertRaises(ValidationError):
-                self.vault_connector._tls_verify(None)

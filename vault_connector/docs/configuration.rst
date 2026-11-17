@@ -33,11 +33,6 @@ These environment variables must be set for the module to function:
 Optional Variables
 ------------------
 
-``VAULT_SKIP_VERIFY``
-    Skip TLS certificate verification (development only).
-
-    **Default**: ``false``
-
     **Values**: ``true`` or ``false``
 
     **Security Warning**: Never use ``true`` in production environments
@@ -59,7 +54,6 @@ Add to your shell profile or systemd service file::
 
     export VAULT_ADDR="https://vault.company.com:8200"
     export VAULT_TOKEN="hvs.CAESIJ2B..."
-    export VAULT_SKIP_VERIFY="false"
 
 For systemd services, add to the ``[Service]`` section::
 
@@ -77,13 +71,11 @@ In ``docker-compose.yml``::
         environment:
           - VAULT_ADDR=https://vault.company.com:8200
           - VAULT_TOKEN=hvs.CAESIJ2B...
-          - VAULT_SKIP_VERIFY=false
 
 Or use an environment file (``.env``)::
 
     VAULT_ADDR=https://vault.company.com:8200
     VAULT_TOKEN=hvs.CAESIJ2B...
-    VAULT_SKIP_VERIFY=false
 
 Kubernetes
 ----------
@@ -163,7 +155,7 @@ For production deployments:
 
 1. **Use Valid Certificates**: Ensure Vault has proper TLS certificates
 2. **Certificate Chain**: Include intermediate certificates if needed
-3. **Certificate Verification**: Keep ``VAULT_SKIP_VERIFY=false``
+3. **Certificate Verification**: Vault certificates are always verified; use a certificate from a trusted CA
 
 Testing Configuration
 =====================
@@ -207,7 +199,7 @@ Common Configuration Issues
 
 **Certificate Errors**
     * Use valid TLS certificates in production
-    * Set ``VAULT_SKIP_VERIFY=true`` only for development
+    * Fix the certificate chain or trust the issuing CA; verification cannot be disabled
     * Check certificate chain is complete
 
 **Seal Status Errors**
