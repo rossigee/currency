@@ -222,7 +222,6 @@ class CryptoBip32Utils(models.AbstractModel):
             return xpub
 
         except Exception as e:
-            _logger.error(f"Failed to convert XPRV to XPUB: {str(e)}")
             raise ValidationError(_(f"XPRV to XPUB conversion failed: {str(e)}")) from e
 
     @api.model
@@ -304,7 +303,6 @@ class CryptoBip32Utils(models.AbstractModel):
             }
 
         except Exception as e:
-            _logger.error(f"Failed to derive BIP44 account: {str(e)}")
             raise ValidationError(_(f"Account derivation failed: {str(e)}")) from e
 
     @api.model
@@ -372,7 +370,6 @@ class CryptoBip32Utils(models.AbstractModel):
             }
 
         except Exception as e:
-            _logger.error(f"Failed to derive address from XPUB: {str(e)}")
             raise ValidationError(_(f"Address derivation failed: {str(e)}")) from e
 
     @api.model
@@ -503,7 +500,6 @@ class CryptoBip32Utils(models.AbstractModel):
             }
 
         except Exception as e:
-            _logger.error(f"Failed to derive BIP48 multisig: {str(e)}")
             raise ValidationError(_(f"Multisig derivation failed: {str(e)}")) from e
 
     @api.model
@@ -718,7 +714,6 @@ class CryptoBip32Utils(models.AbstractModel):
             }
 
         except Exception as e:
-            _logger.error(f"Failed to generate multisig address: {str(e)}")
             raise ValidationError(
                 _(f"Multisig address generation failed: " f"{str(e)}")
             ) from e
@@ -906,14 +901,10 @@ class CryptoBip32Utils(models.AbstractModel):
             }
 
         except ImportError:
-            _logger.error(
-                "embit library not available - install with: pip install embit"
-            )
             raise ValidationError(
                 _("Bitcoin PSBT library not available. Install 'embit' package.")
             ) from None
         except Exception as e:
-            _logger.error(f"Failed to create BIP-174 PSBT: {str(e)}")
             raise ValidationError(_(f"PSBT creation failed: {str(e)}")) from e
 
     @api.model
@@ -1189,7 +1180,6 @@ class CryptoBip32Utils(models.AbstractModel):
             # Re-raise ValidationError as-is
             raise
         except Exception as e:
-            _logger.error(f"Failed to parse script to address: {str(e)}")
             raise ValidationError(
                 _(f"Script parsing failed for {script_hex}: {str(e)}")
             ) from e
@@ -1337,7 +1327,6 @@ class CryptoBip32Utils(models.AbstractModel):
                 )
 
         except Exception as e:
-            _logger.error(f"Bech32 encoding failed: {str(e)}")
             raise ValidationError(
                 _(f"Bech32 encoding failed for witness version {witver}: {str(e)}")
             ) from e
@@ -1514,7 +1503,6 @@ class CryptoBip32Utils(models.AbstractModel):
             return script_hash[::-1].hex()  # Reverse and convert to hex
 
         except Exception as e:
-            _logger.error(f"Failed to convert address to script hash: {str(e)}")
             raise ValidationError(
                 _(f"Address to script hash conversion failed: {str(e)}")
             ) from e
