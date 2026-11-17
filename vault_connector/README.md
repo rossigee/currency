@@ -1,11 +1,12 @@
 # HashiCorp Vault Connector
 
-This module provides a secure connection interface to HashiCorp Vault for storing and retrieving sensitive data in Odoo.
+This module provides a secure connection interface to HashiCorp Vault for storing and
+retrieving sensitive data in Odoo.
 
 ## Features
 
 - **Vault Connectivity**: Secure connection to HashiCorp Vault servers
-- **Status Checking**: Real-time vault seal status and accessibility checks  
+- **Status Checking**: Real-time vault seal status and accessibility checks
 - **Secret Management**: Store and retrieve secrets from Vault KV stores
 - **Error Handling**: Comprehensive error categorization and user-friendly messages
 - **Environment Configuration**: Configurable via environment variables

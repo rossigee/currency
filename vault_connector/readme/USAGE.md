@@ -1,9 +1,9 @@
-## Vault Connector Usage Guide
+**Vault Connector Usage Guide**
 
 This guide provides step-by-step instructions and examples for using the
 HashiCorp Vault Connector in your Odoo modules.
 
-### 🚀 **Getting Started**
+**🚀 Getting Started**
 
 After installation and configuration, the Vault Connector provides a
 secure API for storing and retrieving secrets. The module operates as a
@@ -12,14 +12,14 @@ utility library for other modules to use.
 **Note**: This is a technical module designed for developers building
 secure Odoo applications.
 
-### 📋 **Basic API Usage**
+**📋 Basic API Usage**
 
 1.  **Import the Connector** → 2. **Store Secrets** → 3. **Retrieve
     Secrets** → 4. **Handle Errors**
 
-### 💡 **Core Concepts**
+**💡 Core Concepts**
 
-#### Understanding the Vault Connector
+**Understanding the Vault Connector**
 
 The Vault Connector provides a secure interface between Odoo and
 HashiCorp Vault for:
@@ -33,15 +33,15 @@ HashiCorp Vault for:
 - **UUID Enforcement**: Secret keys must be in valid UUID format,
   enforced by the connector to ensure uniqueness and security
 
-### 🔧 **API Reference**
+**🔧 API Reference**
 
-#### Importing the Connector
+**Importing the Connector**
 
 In your Odoo module, import the VaultConnector class:
 
     from odoo.addons.vault_connector.models.vault_connector import VaultConnector
 
-#### Basic Usage Pattern
+**Basic Usage Pattern**
 
 1.  **Create Connector Instance**:
 
@@ -75,9 +75,9 @@ In your Odoo module, import the VaultConnector class:
 
         # Note: The token must be a valid UUID. The connector will raise an exception if an invalid format is used.
 
-### 📚 **Advanced API Methods**
+**📚 Advanced API Methods**
 
-#### Available Methods
+**Available Methods**
 
 The VaultConnector provides these methods for secret management:
 
@@ -117,7 +117,7 @@ The VaultConnector provides these methods for secret management:
         # Handle other errors
         _logger.error(f"Unexpected error: {e}")
 
-#### Method Parameters and Returns
+**Method Parameters and Returns**
 
 **store_secret(data)**:
 
@@ -144,9 +144,9 @@ The VaultConnector provides these methods for secret management:
   - \`vault_url\`: Configured Vault URL
   - \`authenticated\`: Boolean authentication status
 
-### 🏗️ **Integration Examples**
+**🏗️ Integration Examples**
 
-#### Example 1: Secure API Key Storage
+**Example 1: Secure API Key Storage**
 
 Store third-party API keys securely in your Odoo module:
 
@@ -178,7 +178,7 @@ Store third-party API keys securely in your Odoo module:
             vault = VaultConnector()
             return vault.get_secret(self.vault_token)
 
-#### Example 2: Database Connection Strings
+**Example 2: Database Connection Strings**
 
 Securely manage database connections:
 
@@ -204,7 +204,7 @@ Securely manage database connections:
             data = vault.get_secret(self.vault_token)
             return data.get('connection_string')
 
-#### Example 3: Certificate Management
+**Example 3: Certificate Management**
 
 Store SSL certificates and private keys:
 
@@ -230,9 +230,9 @@ Store SSL certificates and private keys:
             vault = VaultConnector()
             return vault.get_secret(self.vault_token)
 
-### 🔒 **Security Best Practices**
+**🔒 Security Best Practices**
 
-#### Data Handling Guidelines
+**Data Handling Guidelines**
 
 **Never Store Secrets in Odoo**:
 
@@ -256,7 +256,7 @@ Store SSL certificates and private keys:
 - Provide meaningful error messages to users
 - Implement fallback mechanisms where appropriate
 
-#### Example Secure Implementation
+**Example Secure Implementation**
 
 Here's a secure pattern for handling secrets:
 
@@ -313,9 +313,9 @@ Here's a secure pattern for handling secrets:
                 _logger.error(f"Error retrieving secret: {str(e)}")
                 return None
 
-### 📋 **Common Workflows**
+**📋 Common Workflows**
 
-#### Workflow 1: API Key Management
+**Workflow 1: API Key Management**
 
 **Scenario**: Securely manage third-party API keys for payment
 processors
@@ -339,7 +339,7 @@ processors
 
         provider.store_api_credentials(new_api_key, new_secret_key)
 
-#### Workflow 2: Database Connection Security
+**Workflow 2: Database Connection Security**
 
 **Scenario**: Securely store database connection strings for
 integrations
@@ -361,7 +361,7 @@ integrations
 
 4.  **Monitor & Rotate**: Regular credential rotation for security
 
-#### Workflow 3: Certificate Management
+**Workflow 3: Certificate Management**
 
 **Scenario**: Manage SSL certificates and private keys for integrations
 
@@ -382,7 +382,7 @@ integrations
 
 4.  **Automated Deployment**: Update systems with new certificates
 
-#### Workflow 4: Multi-Environment Secrets
+**Workflow 4: Multi-Environment Secrets**
 
 **Scenario**: Different secrets for development, staging, and production
 
@@ -400,9 +400,9 @@ integrations
 
 4.  **Deployment Automation**: Automated secret deployment with CI/CD
 
-### 🔍 **Advanced Topics**
+**🔍 Advanced Topics**
 
-#### Performance Considerations
+**Performance Considerations**
 
 **Connection Pooling**: The VaultConnector creates new connections for
 each request. For high-volume applications, consider:
@@ -423,7 +423,7 @@ each request. For high-volume applications, consider:
 - Monitor connection performance
 - Set up alerts for Vault failures
 
-#### Custom Configuration
+**Custom Configuration**
 
 **Environment Variables**: Customize Vault connection:
 
@@ -438,7 +438,7 @@ each request. For high-volume applications, consider:
 - Vault clustering for high availability
 - Geographic distribution for global deployments
 
-#### Migration and Backup
+**Migration and Backup**
 
 **Secret Migration**: When changing Vault instances:
 
@@ -454,9 +454,9 @@ each request. For high-volume applications, consider:
 - Recovery procedures documentation
 - Test restoration processes
 
-### 📞 **Troubleshooting**
+**📞 Troubleshooting**
 
-#### Common Issues
+**Common Issues**
 
 **"Vault not accessible" Error**:
 
@@ -493,7 +493,7 @@ each request. For high-volume applications, consider:
 - Implement connection pooling if needed
 - Consider caching for frequently accessed secrets
 
-#### Debugging Tips
+**Debugging Tips**
 
 **Enable Debug Logging**: Add to Odoo configuration:
 
@@ -515,7 +515,7 @@ each request. For high-volume applications, consider:
     print("VAULT_ADDR:", os.environ.get('VAULT_ADDR'))
     print("VAULT_TOKEN:", os.environ.get('VAULT_TOKEN', 'Not set'))
 
-#### Getting Help
+**Getting Help**
 
 For advanced troubleshooting, check:
 

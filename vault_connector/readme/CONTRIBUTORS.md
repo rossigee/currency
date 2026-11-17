@@ -1,11 +1,11 @@
-## Contributors & Development
+**Contributors & Development**
 
 This document outlines the contributors to the HashiCorp Vault Connector
 module and provides guidelines for future development.
 
-### 👥 **Contributors**
+**👥 Contributors**
 
-#### Original Development
+**Original Development**
 
 **Ross Golder** \<ross@golder.org\>  
 - **Role**: Original Author & Lead Developer
@@ -25,9 +25,9 @@ module and provides guidelines for future development.
   - Error handling improvements
   - Code consolidation and optimization
 
-### 🏗️ **Development Guidelines**
+**🏗️ Development Guidelines**
 
-#### Code Standards
+**Code Standards**
 
 **Python Style**:  
 - Follow PEP 8 coding standards
@@ -47,7 +47,7 @@ module and provides guidelines for future development.
 - Implement proper error handling to prevent data leaks
 - Include audit logging for sensitive operations
 
-#### Vault Integration Standards
+**Vault Integration Standards**
 
 **Connection Handling**:  
 - **Environment Variables**: Use secure environment variable
@@ -62,9 +62,9 @@ module and provides guidelines for future development.
 - Proper HTTP status code handling
 - Timeout and retry mechanisms
 
-### 🔧 **Development Setup**
+**🔧 Development Setup**
 
-#### Local Development Environment
+**Local Development Environment**
 
 **Prerequisites**:
 
@@ -83,7 +83,7 @@ module and provides guidelines for future development.
 
     ./odoo-bin --addons-path=/path/to/addons --dev=all
 
-#### Testing Framework
+**Testing Framework**
 
 **Unit Tests**:  
 - Test secret storage and retrieval
@@ -103,9 +103,9 @@ module and provides guidelines for future development.
 - Connection security checks
 - Audit trail validation
 
-### 📝 **Contributing Guidelines**
+**📝 Contributing Guidelines**
 
-#### Code Contributions
+**Code Contributions**
 
 **Before Starting**:  
 1.  Create an issue describing the feature/bug
@@ -131,7 +131,7 @@ module and provides guidelines for future development.
 - Odoo conventions validation
 - Performance impact assessment
 
-#### Documentation Contributions
+**Documentation Contributions**
 
 **Documentation Areas**:  
 - User guides and tutorials
@@ -145,7 +145,7 @@ module and provides guidelines for future development.
 - Provide real-world examples
 - Keep security warnings prominent
 
-#### Security Contributions
+**Security Contributions**
 
 **Security Review Areas**:  
 - Vault integration security
@@ -159,9 +159,9 @@ module and provides guidelines for future development.
 - Include potential impact assessment
 - Allow time for responsible disclosure
 
-### 🎯 **Development Roadmap**
+**🎯 Development Roadmap**
 
-#### Planned Features
+**Planned Features**
 
 **Near-term (Next Release)**:  
 - Connection pooling for performance
@@ -181,7 +181,7 @@ module and provides guidelines for future development.
 - Integration with other secret stores
 - Enterprise compliance features
 
-#### Technical Debt
+**Technical Debt**
 
 **Current Areas for Improvement**:  
 - Enhanced connection management and pooling
@@ -195,9 +195,9 @@ module and provides guidelines for future development.
 - Enhanced caching for performance
 - Better separation of concerns
 
-### 🐛 **Issue Reporting**
+**🐛 Issue Reporting**
 
-#### Bug Reports
+**Bug Reports**
 
 **Before Reporting**:  
 1.  Check existing issues
@@ -229,7 +229,7 @@ module and provides guidelines for future development.
     - Screenshots if relevant
     - Configuration details
 
-#### Feature Requests
+**Feature Requests**
 
 **Request Template**:
 
@@ -243,9 +243,9 @@ module and provides guidelines for future development.
 
     **Alternatives**: Other ways to achieve the same goal
 
-### 🔒 **Security Policy**
+**🔒 Security Policy**
 
-#### Responsible Disclosure
+**Responsible Disclosure**
 
 **Security Vulnerability Reporting**:  
 - Email security issues to: <ross@golder.org>
@@ -260,7 +260,7 @@ module and provides guidelines for future development.
 4.  Coordinated disclosure
 5.  Public advisory if needed
 
-#### Security Best Practices
+**Security Best Practices**
 
 **For Contributors**:  
 - Never commit sensitive data
@@ -274,9 +274,9 @@ module and provides guidelines for future development.
 - Monitor access logs regularly
 - Follow security documentation
 
-### 📞 **Community & Support**
+**📞 Community & Support**
 
-#### Communication Channels
+**Communication Channels**
 
 **Development Discussion**:  
 - GitHub Issues: Technical discussions
@@ -288,7 +288,7 @@ module and provides guidelines for future development.
 - Community Forums: Peer support
 - Professional Support: Available for enterprise users
 
-#### Recognition
+**Recognition**
 
 **Contributor Recognition**:  
 - All contributors listed in this file
@@ -302,9 +302,9 @@ module and provides guidelines for future development.
 - Security reviews
 - User support and tutorials
 
-### 📋 **Release History**
+**📋 Release History**
 
-#### Version 16.0.1.0.0 (Current)
+**Version 16.0.1.0.0 (Current)**
 
 > - Initial public release
 > - Core Vault connector functionality
@@ -315,7 +315,7 @@ module and provides guidelines for future development.
 > - Environment variable configuration
 > - Comprehensive documentation
 
-#### Previous Development
+**Previous Development**
 
 > - Internal development and testing
 > - Security architecture design

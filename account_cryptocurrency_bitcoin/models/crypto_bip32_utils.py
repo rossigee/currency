@@ -534,18 +534,23 @@ class CryptoBip32Utils(models.AbstractModel):
         sha256_hash = hashlib.sha256(data).digest()
         try:
             # Use proper RIPEMD160 - required for Bitcoin compatibility
-            ripemd160_hash = hashlib.new("ripemd160", sha256_hash).digest()
-            return ripemd160_hash
+            return hashlib.new("ripemd160", sha256_hash).digest()
         except ValueError:
-            # RIPEMD160 is required for Bitcoin - cannot fallback safely
-            raise ValidationError(
-                _(
-                    "RIPEMD160 hash function is not available. "
-                    "This is required for Bitcoin address generation. "
-                    "Please install a Python version with RIPEMD160 support or use a "
-                    "crypto library that provides it."
-                )
-            ) from None
+            # Some OpenSSL 3 builds do not provide RIPEMD160 to hashlib;
+            # pycryptodome ships its own implementation
+            try:
+                from Crypto.Hash import RIPEMD160
+            except ImportError:
+                # RIPEMD160 is required for Bitcoin - cannot fallback safely
+                raise ValidationError(
+                    _(
+                        "RIPEMD160 hash function is not available. "
+                        "This is required for Bitcoin address generation. "
+                        "Please install a Python version with RIPEMD160 support "
+                        "or use a crypto library that provides it."
+                    )
+                ) from None
+            return RIPEMD160.new(sha256_hash).digest()
 
     @api.model
     def _convertbits(self, data, frombits, tobits, pad=True):

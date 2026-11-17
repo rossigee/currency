@@ -34,7 +34,7 @@ Configuration & Environment
 * Environment variable configuration support:
 
   * ``VAULT_ADDR`` - Vault server URL (required)
-  * ``VAULT_TOKEN`` - Authentication token (required)  
+  * ``VAULT_TOKEN`` - Authentication token (required)
   * ``VAULT_SKIP_VERIFY`` - Skip TLS verification (optional, dev only)
   * ``VAULT_KV_STORE`` - Custom KV store name (optional)
 

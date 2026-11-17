@@ -58,22 +58,22 @@ Vault Policies
 Recommended Vault policy for the Odoo service token::
 
     # Vault policy: odoo-policy.hcl
-    
+
     # Allow CRUD operations on designated KV stores
     path "odoo-*" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
-    
+
     # Allow token self-lookup for authentication verification
     path "auth/token/lookup-self" {
       capabilities = ["read"]
     }
-    
+
     # Deny access to sensitive Vault operations
     path "sys/*" {
       capabilities = ["deny"]
     }
-    
+
     # Deny access to other KV stores
     path "secret/*" {
       capabilities = ["deny"]
@@ -106,10 +106,10 @@ Token Management
 
     # Create new token
     NEW_TOKEN=$(vault token create -policy=odoo-policy -ttl=30d -format=json | jq -r '.auth.client_token')
-    
+
     # Update environment variable
     export VAULT_TOKEN=$NEW_TOKEN
-    
+
     # Restart Odoo service
     systemctl restart odoo
 
@@ -143,7 +143,7 @@ Environment Security
     VAULT_ADDR=https://vault.internal.company.com:8200
     VAULT_TOKEN=hvs.CAESIJ...
     VAULT_SKIP_VERIFY=false
-    
+
     # Set restrictive permissions
     chmod 600 /etc/odoo/vault.env
     chown odoo:odoo /etc/odoo/vault.env
@@ -160,7 +160,7 @@ Environment Security
         environment:
           - VAULT_TOKEN_FILE=/run/secrets/vault_token
           - VAULT_ADDR_FILE=/run/secrets/vault_addr
-    
+
     secrets:
       vault_token:
         external: true
@@ -179,7 +179,7 @@ Identified Threats
     * **Detection**: Monitor unusual access patterns in Vault logs
 
 **T2: Network Interception**
-    * **Risk**: Secrets intercepted in transit  
+    * **Risk**: Secrets intercepted in transit
     * **Mitigation**: TLS encryption, certificate validation
     * **Detection**: Network monitoring, certificate transparency logs
 
@@ -208,7 +208,7 @@ Enable comprehensive audit logging in Vault::
 
     # Enable file audit device
     vault audit enable file file_path=/var/log/vault/audit.log
-    
+
     # Enable syslog audit device (additional)
     vault audit enable syslog tag="vault" facility="local0"
 
@@ -231,7 +231,7 @@ Monitor Odoo logs for:
 
     # Monitor vault connector errors
     tail -f /var/log/odoo/odoo.log | grep "vault.connector"
-    
+
     # Count failed vault operations per hour
     grep "vault.connector.*error" /var/log/odoo/odoo.log | \
       awk '{print $1" "$2}' | cut -c1-13 | uniq -c
@@ -264,10 +264,10 @@ Token Compromise Response
 
     # Revoke specific token
     vault token revoke <TOKEN_ID>
-    
+
     # Revoke all tokens for accessor
     vault token revoke -accessor <ACCESSOR_ID>
-    
+
     # Create new token
     vault token create -policy=odoo-policy -display-name="odoo-service-new"
 

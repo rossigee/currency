@@ -16,7 +16,7 @@
         "queue_job",
     ],
     "external_dependencies": {
-        "python": ["mnemonic", "embit", "ecdsa", "base58"],
+        "python": ["mnemonic", "embit", "ecdsa", "base58", "pycryptodome"],
     },
     "data": [
         "security/res_groups.xml",

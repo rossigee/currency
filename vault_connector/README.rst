@@ -28,18 +28,15 @@ Vault Connector
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-HashiCorp Vault Connector for Odoo
-----------------------------------
+**HashiCorp Vault Connector for Odoo**
 
 A secure integration module that provides a robust connection interface
 between Odoo and HashiCorp Vault for storing and retrieving sensitive
 data like private keys, API tokens, certificates, and other secrets.
 
-🚀 **Key Features**
-~~~~~~~~~~~~~~~~~~~
+**🚀 Key Features**
 
-Secure Secret Storage
-^^^^^^^^^^^^^^^^^^^^^
+**Secure Secret Storage**
 
 - **Vault Integration**: Direct connection to HashiCorp Vault or OpenBao
   instances
@@ -49,8 +46,7 @@ Secure Secret Storage
   tokens
 - **Status Monitoring**: Real-time Vault connection status checking
 
-Data Protection
-^^^^^^^^^^^^^^^
+**Data Protection**
 
 - **No Plain Text Storage**: Secrets never stored in Odoo database
 - **UUID Token System**: Only unique identifiers stored in Odoo
@@ -59,8 +55,7 @@ Data Protection
 - **Audit Trails**: All secret access logged through Vault's audit
   system
 
-Developer-Friendly API
-^^^^^^^^^^^^^^^^^^^^^^
+**Developer-Friendly API**
 
 - **Simple Interface**: Easy-to-use methods for storing and retrieving
   secrets
@@ -68,27 +63,23 @@ Developer-Friendly API
 - **Configuration Management**: Environment variable-based configuration
 - **Extensible Design**: Clean API for other modules to build upon
 
-Enterprise Integration
-^^^^^^^^^^^^^^^^^^^^^^
+**Enterprise Integration**
 
 - **Production Ready**: Designed for enterprise Odoo deployments
 - **Scalable Architecture**: Supports high-availability Vault clusters
 - **Compliance Support**: Helps meet security and audit requirements
 - **Dependency Module**: Serves as foundation for other secure modules
 
-🔒 **Security & Architecture**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**🔒 Security & Architecture**
 
-Connection Security
-^^^^^^^^^^^^^^^^^^^
+**Connection Security**
 
 - **HTTPS Only**: All communications encrypted in transit
 - **Token Authentication**: Secure token-based access to Vault
 - **Network Isolation**: Supports private network configurations
 - **Certificate Validation**: Full TLS certificate verification
 
-Data Architecture
-^^^^^^^^^^^^^^^^^
+**Data Architecture**
 
 - **External Storage**: All sensitive data stored outside Odoo
 - **Token References**: Only UUID tokens maintained in database
@@ -96,87 +87,74 @@ Data Architecture
 - **Atomic Operations**: Consistent data operations with proper error
   handling
 
-Access Control
-^^^^^^^^^^^^^^
+**Access Control**
 
 - **Vault Policies**: Leverages Vault's native policy system
 - **Principle of Least Privilege**: Minimal required permissions
 - **Audit Logging**: Complete audit trail through Vault
 - **Token Management**: Proper token lifecycle management
 
-🏢 **Business Use Cases**
-~~~~~~~~~~~~~~~~~~~~~~~~~
+**🏢 Business Use Cases**
 
-Secure Configuration Management
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Secure Configuration Management**
 
 - Store API keys and tokens securely
 - Manage database connection strings
 - Protect certificate private keys
 - Secure third-party service credentials
 
-Compliance & Governance
-^^^^^^^^^^^^^^^^^^^^^^^
+**Compliance & Governance**
 
 - Meet security audit requirements
 - Implement proper secret rotation
 - Maintain audit trails for access
 - Support compliance frameworks
 
-Development & Operations
-^^^^^^^^^^^^^^^^^^^^^^^^
+**Development & Operations**
 
 - Separate secrets from code
 - Enable secure CI/CD pipelines
 - Support multiple environments
 - Facilitate secret sharing between teams
 
-Integration Foundation
-^^^^^^^^^^^^^^^^^^^^^^
+**Integration Foundation**
 
 - Serve as security layer for other modules
 - Enable cryptocurrency operations
 - Support secure payment processing
 - Foundation for custom security modules
 
-📋 **Requirements**
-~~~~~~~~~~~~~~~~~~~
+**📋 Requirements**
 
-Technical Prerequisites
-^^^^^^^^^^^^^^^^^^^^^^^
+**Technical Prerequisites**
 
 - **Odoo 16.0+**: Compatible with Odoo 16 and later versions
 - **Python Libraries**: requests package for HTTP operations
 - **HashiCorp Vault**: External Vault or OpenBao instance (v1.0+)
 - **Network Access**: HTTPS connectivity between Odoo and Vault
 
-Vault Configuration
-^^^^^^^^^^^^^^^^^^^
+**Vault Configuration**
 
 - **KV Secrets Engine**: Version 2 KV store enabled
 - **Authentication**: Valid Vault token with appropriate permissions
 - **Network Accessibility**: Vault reachable from Odoo server
 - **TLS Configuration**: Proper SSL/TLS certificates configured
 
-User Knowledge
-^^^^^^^^^^^^^^
+**User Knowledge**
 
 - **Vault Basics**: Understanding of Vault concepts and operation
 - **Secret Management**: Knowledge of secure secret handling practices
 - **Network Security**: Understanding of secure network configurations
 - **Odoo Administration**: Familiarity with Odoo module installation
 
-⚠️ **Security Warnings**
-~~~~~~~~~~~~~~~~~~~~~~~~
+**⚠️ Security Warnings**
 
-Production Deployment
-^^^^^^^^^^^^^^^^^^^^^
+**Production Deployment**
 
 **SECURITY CRITICAL**: This module handles sensitive data. Ensure proper
 security measures are in place before production use.
 
-Vault Security
-^^^^^^^^^^^^^^
+**Vault Security**
 
 - **Secure Vault Instance**: Use properly configured, secured Vault
   installation
@@ -186,8 +164,7 @@ Vault Security
 - **Access Monitoring**: Monitor Vault access logs for suspicious
   activity
 
-Configuration Security
-^^^^^^^^^^^^^^^^^^^^^^
+**Configuration Security**
 
 - **Environment Variables**: Store Vault credentials in secure
   environment variables
@@ -197,8 +174,7 @@ Configuration Security
 - **Regular Updates**: Keep Vault and this module updated with security
   patches
 
-🎯 **Getting Started**
-~~~~~~~~~~~~~~~~~~~~~~
+**🎯 Getting Started**
 
 See the CONFIGURE.rst file for detailed installation and setup
 instructions. See the USAGE.rst file for API usage examples and
@@ -208,8 +184,7 @@ This module serves as a foundation for other modules requiring secure
 secret storage and provides a clean API for developers to build secure
 applications.
 
-📞 **Support & Contributing**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**📞 Support & Contributing**
 
 This module is actively developed and maintained. See CONTRIBUTORS.rst
 for contributor information and guidelines.
@@ -225,25 +200,21 @@ Odoo Community Association practices.
 Configuration
 =============
 
-Vault Connector Configuration Guide
------------------------------------
+**Vault Connector Configuration Guide**
 
 This guide covers installation, configuration, and setup of the
 HashiCorp Vault Connector module for Odoo.
 
-📋 **Prerequisites**
-~~~~~~~~~~~~~~~~~~~~
+**📋 Prerequisites**
 
-System Requirements
-^^^^^^^^^^^^^^^^^^^
+**System Requirements**
 
 - **Odoo 16.0 or later**: Compatible with Odoo 16+
 - **Python 3.8+**: Required for requests library support
 - **External Vault**: HashiCorp Vault or OpenBao instance (v1.0+)
 - **Network Access**: HTTPS connectivity between Odoo and Vault
 
-Required Knowledge
-^^^^^^^^^^^^^^^^^^
+**Required Knowledge**
 
 - **Odoo Administration**: Module installation and configuration
 - **Vault Administration**: Basic Vault setup and token management
@@ -251,11 +222,9 @@ Required Knowledge
   practices
 - **Network Security**: Knowledge of secure network configurations
 
-🚀 **Installation**
-~~~~~~~~~~~~~~~~~~~
+**🚀 Installation**
 
-Step 1: Install Python Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Step 1: Install Python Dependencies**
 
 The module requires the requests Python library for HTTP operations.
 
@@ -286,8 +255,7 @@ The module requires the requests Python library for HTTP operations.
 
    poetry add requests
 
-Step 2: Install Odoo Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Step 2: Install Odoo Module**
 
 **Method 1: Manual Installation**
 
@@ -314,8 +282,7 @@ Step 2: Install Odoo Module
 
 2. Follow steps 2-4 from Method 1
 
-Step 3: Verify Installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Step 3: Verify Installation**
 
 1. Log into Odoo as administrator
 2. Go to **Apps** → **Update Apps List**
@@ -323,14 +290,12 @@ Step 3: Verify Installation
 4. Click **Install**
 5. Verify no error messages during installation
 
-🔐 **Vault Setup**
-~~~~~~~~~~~~~~~~~~
+**🔐 Vault Setup**
 
 The module requires an external Vault instance for secure secret
 storage. This section covers basic setup.
 
-HashiCorp Vault Installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**HashiCorp Vault Installation**
 
 **Using Docker (Recommended for Testing)**:
 
@@ -366,8 +331,7 @@ HashiCorp Vault Installation
    # Install Vault
    sudo yum -y install vault
 
-OpenBao Alternative
-^^^^^^^^^^^^^^^^^^^
+**OpenBao Alternative**
 
 OpenBao is an open-source Vault fork that's fully compatible:
 
@@ -378,8 +342,7 @@ OpenBao is an open-source Vault fork that's fully compatible:
    unzip bao_1.0.0_linux_amd64.zip
    sudo mv bao /usr/local/bin/
 
-Vault Configuration
-^^^^^^^^^^^^^^^^^^^
+**Vault Configuration**
 
 **Basic Production Configuration** (/etc/vault.d/vault.hcl):
 
@@ -429,11 +392,9 @@ Vault Configuration
    # Create token for Odoo
    vault token create -policy=odoo-connector -ttl=8760h
 
-🔧 **Odoo Configuration**
-~~~~~~~~~~~~~~~~~~~~~~~~~
+**🔧 Odoo Configuration**
 
-Environment Variables
-^^^^^^^^^^^^^^^^^^^^^
+**Environment Variables**
 
 Set these environment variables for your Odoo instance:
 
@@ -476,8 +437,7 @@ Set these environment variables for your Odoo instance:
      VAULT_ADDR: <base64-encoded-url>
      VAULT_TOKEN: <base64-encoded-token>
 
-Testing Vault Connection
-^^^^^^^^^^^^^^^^^^^^^^^^
+**Testing Vault Connection**
 
 1. Restart Odoo after setting environment variables
 
@@ -493,15 +453,13 @@ Testing Vault Connection
 
 3. Check Odoo logs for any Vault connection errors
 
-👥 **User Management**
-~~~~~~~~~~~~~~~~~~~~~~
+**👥 User Management**
 
 The Vault Connector module is a utility module that doesn't provide
 specific user interfaces but enables other modules to securely store and
 retrieve secrets.
 
-Access Control
-^^^^^^^^^^^^^^
+**Access Control**
 
 **Technical Module**: This module operates at the technical level and
 doesn't define specific user groups. Access control is managed by:
@@ -511,8 +469,7 @@ doesn't define specific user groups. Access control is managed by:
 - **Module Dependencies**: Other modules handle user access to Vault
   functionality
 
-Developer Access
-^^^^^^^^^^^^^^^^
+**Developer Access**
 
 **For developers building on this module**:
 
@@ -536,11 +493,9 @@ Developer Access
            # Store only the token in your model
            self.vault_token = token
 
-🔒 **Security Configuration**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**🔒 Security Configuration**
 
-Vault Security Hardening
-^^^^^^^^^^^^^^^^^^^^^^^^
+**Vault Security Hardening**
 
 **Production Vault Security**:
 
@@ -569,8 +524,7 @@ Vault Security Hardening
    # Revoke old token
    vault token revoke <old-token>
 
-Network Security
-^^^^^^^^^^^^^^^^
+**Network Security**
 
 **Firewall Rules**:
 
@@ -584,8 +538,7 @@ Network Security
 - Implement certificate pinning if possible
 - Monitor certificate expiration
 
-Odoo Security Settings
-^^^^^^^^^^^^^^^^^^^^^^
+**Odoo Security Settings**
 
 **Database Security**:
 
@@ -601,11 +554,9 @@ Odoo Security Settings
 - Regular password changes
 - Monitor user login patterns
 
-🧪 **Testing Configuration**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**🧪 Testing Configuration**
 
-Vault Connectivity Test
-^^^^^^^^^^^^^^^^^^^^^^^
+**Vault Connectivity Test**
 
 **Manual Test**:
 
@@ -651,8 +602,7 @@ Vault Connectivity Test
 - Verify Vault token has proper permissions
 - Check Odoo logs for connection errors
 
-Module Functionality Test
-^^^^^^^^^^^^^^^^^^^^^^^^^
+**Module Functionality Test**
 
 **Basic Integration Test**:
 
@@ -668,11 +618,9 @@ Module Functionality Test
 - Proper error handling for connection issues
 - No sensitive data in Odoo logs or database
 
-📊 **Monitoring & Maintenance**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**📊 Monitoring & Maintenance**
 
-Log Monitoring
-^^^^^^^^^^^^^^
+**Log Monitoring**
 
 **Odoo Logs to Monitor**:
 
@@ -688,8 +636,7 @@ Log Monitoring
 - Failed authentication attempts
 - Token usage patterns
 
-Regular Maintenance
-^^^^^^^^^^^^^^^^^^^
+**Regular Maintenance**
 
 **Weekly Tasks**:
 
@@ -712,11 +659,9 @@ Regular Maintenance
 - Update documentation
 - Training for new users
 
-🚨 **Troubleshooting**
-~~~~~~~~~~~~~~~~~~~~~~
+**🚨 Troubleshooting**
 
-Common Configuration Issues
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Common Configuration Issues**
 
 **Vault Connection Failed**:
 
@@ -758,8 +703,7 @@ Common Configuration Issues
   - Check network connectivity to Vault
   - Review Vault and Odoo error logs
 
-Performance Issues
-^^^^^^^^^^^^^^^^^^
+**Performance Issues**
 
 **Slow Secret Operations**:
 
@@ -771,8 +715,7 @@ Performance Issues
 - **Cause**: Network issues or Vault overload
 - **Solutions**: Increase timeout values, check Vault performance
 
-Getting Support
-^^^^^^^^^^^^^^^
+**Getting Support**
 
 **Before Requesting Support**:
 
@@ -801,14 +744,12 @@ Getting Support
 Usage
 =====
 
-Vault Connector Usage Guide
----------------------------
+**Vault Connector Usage Guide**
 
 This guide provides step-by-step instructions and examples for using the
 HashiCorp Vault Connector in your Odoo modules.
 
-🚀 **Getting Started**
-~~~~~~~~~~~~~~~~~~~~~~
+**🚀 Getting Started**
 
 After installation and configuration, the Vault Connector provides a
 secure API for storing and retrieving secrets. The module operates as a
@@ -817,17 +758,14 @@ utility library for other modules to use.
 **Note**: This is a technical module designed for developers building
 secure Odoo applications.
 
-📋 **Basic API Usage**
-~~~~~~~~~~~~~~~~~~~~~~
+**📋 Basic API Usage**
 
 1. **Import the Connector** → 2. **Store Secrets** → 3. **Retrieve
    Secrets** → 4. **Handle Errors**
 
-💡 **Core Concepts**
-~~~~~~~~~~~~~~~~~~~~
+**💡 Core Concepts**
 
-Understanding the Vault Connector
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Understanding the Vault Connector**
 
 The Vault Connector provides a secure interface between Odoo and
 HashiCorp Vault for:
@@ -841,11 +779,9 @@ HashiCorp Vault for:
 - **UUID Enforcement**: Secret keys must be in valid UUID format,
   enforced by the connector to ensure uniqueness and security
 
-🔧 **API Reference**
-~~~~~~~~~~~~~~~~~~~~
+**🔧 API Reference**
 
-Importing the Connector
-^^^^^^^^^^^^^^^^^^^^^^^
+**Importing the Connector**
 
 In your Odoo module, import the VaultConnector class:
 
@@ -853,8 +789,7 @@ In your Odoo module, import the VaultConnector class:
 
    from odoo.addons.vault_connector.models.vault_connector import VaultConnector
 
-Basic Usage Pattern
-^^^^^^^^^^^^^^^^^^^
+**Basic Usage Pattern**
 
 1. **Create Connector Instance**:
 
@@ -896,11 +831,9 @@ Basic Usage Pattern
 
       # Note: The token must be a valid UUID. The connector will raise an exception if an invalid format is used.
 
-📚 **Advanced API Methods**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**📚 Advanced API Methods**
 
-Available Methods
-^^^^^^^^^^^^^^^^^
+**Available Methods**
 
 The VaultConnector provides these methods for secret management:
 
@@ -946,8 +879,7 @@ The VaultConnector provides these methods for secret management:
        # Handle other errors
        _logger.error(f"Unexpected error: {e}")
 
-Method Parameters and Returns
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Method Parameters and Returns**
 
 **store_secret(data)**:
 
@@ -975,11 +907,9 @@ Method Parameters and Returns
   - \`vault_url\`: Configured Vault URL
   - \`authenticated\`: Boolean authentication status
 
-🏗️ **Integration Examples**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**🏗️ Integration Examples**
 
-Example 1: Secure API Key Storage
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Example 1: Secure API Key Storage**
 
 Store third-party API keys securely in your Odoo module:
 
@@ -1013,8 +943,7 @@ Store third-party API keys securely in your Odoo module:
            vault = VaultConnector()
            return vault.get_secret(self.vault_token)
 
-Example 2: Database Connection Strings
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Example 2: Database Connection Strings**
 
 Securely manage database connections:
 
@@ -1042,8 +971,7 @@ Securely manage database connections:
            data = vault.get_secret(self.vault_token)
            return data.get('connection_string')
 
-Example 3: Certificate Management
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Example 3: Certificate Management**
 
 Store SSL certificates and private keys:
 
@@ -1071,11 +999,9 @@ Store SSL certificates and private keys:
            vault = VaultConnector()
            return vault.get_secret(self.vault_token)
 
-🔒 **Security Best Practices**
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**🔒 Security Best Practices**
 
-Data Handling Guidelines
-^^^^^^^^^^^^^^^^^^^^^^^^
+**Data Handling Guidelines**
 
 **Never Store Secrets in Odoo**:
 
@@ -1099,8 +1025,7 @@ Data Handling Guidelines
 - Provide meaningful error messages to users
 - Implement fallback mechanisms where appropriate
 
-Example Secure Implementation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Example Secure Implementation**
 
 Here's a secure pattern for handling secrets:
 
@@ -1159,11 +1084,9 @@ Here's a secure pattern for handling secrets:
                _logger.error(f"Error retrieving secret: {str(e)}")
                return None
 
-📋 **Common Workflows**
-~~~~~~~~~~~~~~~~~~~~~~~
+**📋 Common Workflows**
 
-Workflow 1: API Key Management
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Workflow 1: API Key Management**
 
 **Scenario**: Securely manage third-party API keys for payment
 processors
@@ -1193,8 +1116,7 @@ processors
 
       provider.store_api_credentials(new_api_key, new_secret_key)
 
-Workflow 2: Database Connection Security
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Workflow 2: Database Connection Security**
 
 **Scenario**: Securely store database connection strings for
 integrations
@@ -1220,8 +1142,7 @@ integrations
 
 4. **Monitor & Rotate**: Regular credential rotation for security
 
-Workflow 3: Certificate Management
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Workflow 3: Certificate Management**
 
 **Scenario**: Manage SSL certificates and private keys for integrations
 
@@ -1246,8 +1167,7 @@ Workflow 3: Certificate Management
 
 4. **Automated Deployment**: Update systems with new certificates
 
-Workflow 4: Multi-Environment Secrets
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Workflow 4: Multi-Environment Secrets**
 
 **Scenario**: Different secrets for development, staging, and production
 
@@ -1267,11 +1187,9 @@ Workflow 4: Multi-Environment Secrets
 
 4. **Deployment Automation**: Automated secret deployment with CI/CD
 
-🔍 **Advanced Topics**
-~~~~~~~~~~~~~~~~~~~~~~
+**🔍 Advanced Topics**
 
-Performance Considerations
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Performance Considerations**
 
 **Connection Pooling**: The VaultConnector creates new connections for
 each request. For high-volume applications, consider:
@@ -1292,8 +1210,7 @@ each request. For high-volume applications, consider:
 - Monitor connection performance
 - Set up alerts for Vault failures
 
-Custom Configuration
-^^^^^^^^^^^^^^^^^^^^
+**Custom Configuration**
 
 **Environment Variables**: Customize Vault connection:
 
@@ -1308,8 +1225,7 @@ Custom Configuration
 - Vault clustering for high availability
 - Geographic distribution for global deployments
 
-Migration and Backup
-^^^^^^^^^^^^^^^^^^^^
+**Migration and Backup**
 
 **Secret Migration**: When changing Vault instances:
 
@@ -1325,11 +1241,9 @@ Migration and Backup
 - Recovery procedures documentation
 - Test restoration processes
 
-📞 **Troubleshooting**
-~~~~~~~~~~~~~~~~~~~~~~
+**📞 Troubleshooting**
 
-Common Issues
-^^^^^^^^^^^^^
+**Common Issues**
 
 **"Vault not accessible" Error**:
 
@@ -1366,8 +1280,7 @@ Common Issues
 - Implement connection pooling if needed
 - Consider caching for frequently accessed secrets
 
-Debugging Tips
-^^^^^^^^^^^^^^
+**Debugging Tips**
 
 **Enable Debug Logging**: Add to Odoo configuration:
 
@@ -1395,8 +1308,7 @@ Debugging Tips
    print("VAULT_ADDR:", os.environ.get('VAULT_ADDR'))
    print("VAULT_TOKEN:", os.environ.get('VAULT_TOKEN', 'Not set'))
 
-Getting Help
-^^^^^^^^^^^^
+**Getting Help**
 
 For advanced troubleshooting, check:
 
@@ -1426,17 +1338,14 @@ Authors
 Contributors
 ------------
 
-Contributors & Development
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Contributors & Development**
 
 This document outlines the contributors to the HashiCorp Vault Connector
 module and provides guidelines for future development.
 
-👥 **Contributors**
-^^^^^^^^^^^^^^^^^^^
+**👥 Contributors**
 
-Original Development
-''''''''''''''''''''
+**Original Development**
 
 **Ross Golder** <ross@golder.org>
 
@@ -1460,11 +1369,9 @@ Original Development
   - Error handling improvements
   - Code consolidation and optimization
 
-🏗️ **Development Guidelines**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**🏗️ Development Guidelines**
 
-Code Standards
-''''''''''''''
+**Code Standards**
 
 **Python Style**:
 
@@ -1487,8 +1394,7 @@ Code Standards
 - Implement proper error handling to prevent data leaks
 - Include audit logging for sensitive operations
 
-Vault Integration Standards
-'''''''''''''''''''''''''''
+**Vault Integration Standards**
 
 **Connection Handling**:
 
@@ -1505,11 +1411,9 @@ Vault Integration Standards
 - Proper HTTP status code handling
 - Timeout and retry mechanisms
 
-🔧 **Development Setup**
-^^^^^^^^^^^^^^^^^^^^^^^^
+**🔧 Development Setup**
 
-Local Development Environment
-'''''''''''''''''''''''''''''
+**Local Development Environment**
 
 **Prerequisites**:
 
@@ -1534,8 +1438,7 @@ Local Development Environment
 
    ./odoo-bin --addons-path=/path/to/addons --dev=all
 
-Testing Framework
-'''''''''''''''''
+**Testing Framework**
 
 **Unit Tests**:
 
@@ -1558,11 +1461,9 @@ Testing Framework
 - Connection security checks
 - Audit trail validation
 
-📝 **Contributing Guidelines**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**📝 Contributing Guidelines**
 
-Code Contributions
-''''''''''''''''''
+**Code Contributions**
 
 **Before Starting**:
 
@@ -1592,8 +1493,7 @@ Code Contributions
 - Odoo conventions validation
 - Performance impact assessment
 
-Documentation Contributions
-'''''''''''''''''''''''''''
+**Documentation Contributions**
 
 **Documentation Areas**:
 
@@ -1609,8 +1509,7 @@ Documentation Contributions
 - Provide real-world examples
 - Keep security warnings prominent
 
-Security Contributions
-''''''''''''''''''''''
+**Security Contributions**
 
 **Security Review Areas**:
 
@@ -1626,11 +1525,9 @@ Security Contributions
 - Include potential impact assessment
 - Allow time for responsible disclosure
 
-🎯 **Development Roadmap**
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+**🎯 Development Roadmap**
 
-Planned Features
-''''''''''''''''
+**Planned Features**
 
 **Near-term (Next Release)**:
 
@@ -1653,8 +1550,7 @@ Planned Features
 - Integration with other secret stores
 - Enterprise compliance features
 
-Technical Debt
-''''''''''''''
+**Technical Debt**
 
 **Current Areas for Improvement**:
 
@@ -1670,11 +1566,9 @@ Technical Debt
 - Enhanced caching for performance
 - Better separation of concerns
 
-🐛 **Issue Reporting**
-^^^^^^^^^^^^^^^^^^^^^^
+**🐛 Issue Reporting**
 
-Bug Reports
-'''''''''''
+**Bug Reports**
 
 **Before Reporting**:
 
@@ -1709,8 +1603,7 @@ Bug Reports
    - Screenshots if relevant
    - Configuration details
 
-Feature Requests
-''''''''''''''''
+**Feature Requests**
 
 **Request Template**:
 
@@ -1726,11 +1619,9 @@ Feature Requests
 
    **Alternatives**: Other ways to achieve the same goal
 
-🔒 **Security Policy**
-^^^^^^^^^^^^^^^^^^^^^^
+**🔒 Security Policy**
 
-Responsible Disclosure
-''''''''''''''''''''''
+**Responsible Disclosure**
 
 **Security Vulnerability Reporting**:
 
@@ -1747,8 +1638,7 @@ Responsible Disclosure
 4. Coordinated disclosure
 5. Public advisory if needed
 
-Security Best Practices
-'''''''''''''''''''''''
+**Security Best Practices**
 
 **For Contributors**:
 
@@ -1764,11 +1654,9 @@ Security Best Practices
 - Monitor access logs regularly
 - Follow security documentation
 
-📞 **Community & Support**
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+**📞 Community & Support**
 
-Communication Channels
-''''''''''''''''''''''
+**Communication Channels**
 
 **Development Discussion**:
 
@@ -1782,8 +1670,7 @@ Communication Channels
 - Community Forums: Peer support
 - Professional Support: Available for enterprise users
 
-Recognition
-'''''''''''
+**Recognition**
 
 **Contributor Recognition**:
 
@@ -1799,11 +1686,9 @@ Recognition
 - Security reviews
 - User support and tutorials
 
-📋 **Release History**
-^^^^^^^^^^^^^^^^^^^^^^
+**📋 Release History**
 
-Version 16.0.1.0.0 (Current)
-''''''''''''''''''''''''''''
+**Version 16.0.1.0.0 (Current)**
 
    - Initial public release
    - Core Vault connector functionality
@@ -1814,8 +1699,7 @@ Version 16.0.1.0.0 (Current)
    - Environment variable configuration
    - Comprehensive documentation
 
-Previous Development
-''''''''''''''''''''
+**Previous Development**
 
    - Internal development and testing
    - Security architecture design

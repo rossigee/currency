@@ -98,10 +98,10 @@ Other modules depend on vault_connector and use its simple API::
 
     # Store a secret
     self.env['vault.connector'].set_secret(secret_id, secret_data)
-    
+
     # Retrieve a secret
     secret_data = self.env['vault.connector'].get_secret(secret_id)
-    
+
     # Check vault status
     status = self.env['vault.connector'].check_vault_status()
 

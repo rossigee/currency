@@ -14,20 +14,20 @@ These environment variables must be set for the module to function:
 
 ``VAULT_ADDR``
     The URL of your HashiCorp Vault server.
-    
+
     **Example**: ``https://vault.company.com:8200``
-    
+
     **Required**: Yes
-    
+
     **Security Note**: Always use HTTPS in production
 
 ``VAULT_TOKEN``
     Authentication token for accessing Vault.
-    
+
     **Example**: ``hvs.CAESIJ2B...`` (Vault service token)
-    
+
     **Required**: Yes
-    
+
     **Security Note**: Use a dedicated service token with minimal required permissions
 
 Optional Variables
@@ -35,18 +35,18 @@ Optional Variables
 
 ``VAULT_SKIP_VERIFY``
     Skip TLS certificate verification (development only).
-    
+
     **Default**: ``false``
-    
+
     **Values**: ``true`` or ``false``
-    
+
     **Security Warning**: Never use ``true`` in production environments
 
 ``VAULT_KV_STORE``
     Custom name for the KV secrets engine mount.
-    
+
     **Default**: ``odoo-{database_name}``
-    
+
     **Example**: ``my-custom-kv-store``
 
 Setting Environment Variables
@@ -113,7 +113,7 @@ Enable the KV version 2 secrets engine if not already enabled::
 
     # Enable KV v2 at default path
     vault secrets enable -version=2 kv
-    
+
     # Or enable at custom path
     vault secrets enable -path=odoo-secrets -version=2 kv
 
@@ -126,7 +126,7 @@ Create a policy file (``odoo-policy.hcl``)::
     path "odoo-*" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
-    
+
     # Allow token self-lookup for authentication verification
     path "auth/token/lookup-self" {
       capabilities = ["read"]

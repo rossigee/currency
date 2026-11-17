@@ -26,13 +26,13 @@ Connection Problems
 
     # Test network connectivity
     curl -I $VAULT_ADDR/v1/sys/health
-    
+
     # Check firewall rules
     telnet vault.example.com 8200
-    
+
     # Verify DNS resolution
     nslookup vault.example.com
-    
+
     # Test with increased timeout (temporary debug)
     curl -m 10 $VAULT_ADDR/v1/sys/seal-status
 
@@ -53,13 +53,13 @@ Connection Problems
     # Verify VAULT_ADDR format
     echo $VAULT_ADDR
     # Should be: https://vault.example.com:8200
-    
+
     # Test basic connectivity
     ping vault.example.com
-    
+
     # Check port accessibility
     nc -zv vault.example.com 8200
-    
+
     # Verify Vault server status
     systemctl status vault  # On Vault server
 
@@ -82,13 +82,13 @@ Authentication Issues
 
     # Check token status
     vault token lookup $VAULT_TOKEN
-    
+
     # Check token TTL
     vault token lookup -format=json $VAULT_TOKEN | jq '.data.ttl'
-    
+
     # Renew token if possible
     vault token renew $VAULT_TOKEN
-    
+
     # Create new token with policy
     vault token create -policy=odoo-policy -display-name="odoo-service"
 
@@ -133,12 +133,12 @@ Vault Server Issues
 
     # Check seal status
     vault status
-    
+
     # Unseal vault (requires unseal keys)
     vault operator unseal <key1>
     vault operator unseal <key2>
     vault operator unseal <key3>
-    
+
     # Verify unsealed
     vault status
 
@@ -157,13 +157,13 @@ Vault Server Issues
 
     # List enabled secrets engines
     vault secrets list
-    
+
     # Enable KV v2 secrets engine
     vault secrets enable -version=2 kv
-    
+
     # Enable at custom path
     vault secrets enable -path=odoo-mydb -version=2 kv
-    
+
     # Check policy allows access
     vault policy read odoo-policy
 
@@ -185,10 +185,10 @@ Configuration Issues
     # Check environment variables
     echo $VAULT_ADDR
     echo $VAULT_TOKEN
-    
+
     # For systemd services, check environment
     systemctl show odoo --property=Environment
-    
+
     # For Docker, check container environment
     docker exec odoo env | grep VAULT
 
@@ -208,13 +208,13 @@ Configuration Issues
 
     # Test certificate validity
     openssl s_client -connect vault.example.com:8200 -servername vault.example.com
-    
+
     # Check certificate expiration
     echo | openssl s_client -connect vault.example.com:8200 2>/dev/null | openssl x509 -noout -dates
-    
+
     # Temporary bypass (development only)
     export VAULT_SKIP_VERIFY=true
-    
+
     # Fix certificate chain
     # Ensure intermediate certificates are included in server config
 
@@ -230,7 +230,7 @@ Use Odoo shell to test the connector::
 
     # Enter Odoo shell
     odoo shell -d your_database
-    
+
     # Test vault status
     status = env['vault.connector'].check_vault_status()
     print(f"Accessible: {status['accessible']}")
@@ -240,10 +240,10 @@ Use Odoo shell to test the connector::
 
     # Test basic connectivity
     curl -I $VAULT_ADDR/v1/sys/health
-    
+
     # Test with authentication
     curl -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/sys/seal-status
-    
+
     # Test KV store access
     curl -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/odoo-mydb/metadata
 
@@ -251,10 +251,10 @@ Use Odoo shell to test the connector::
 
     # Check all required variables
     env | grep VAULT
-    
+
     # Validate VAULT_ADDR format
     echo $VAULT_ADDR | grep -E '^https?://[^/]+:[0-9]+$'
-    
+
     # Test token format
     echo $VAULT_TOKEN | grep -E '^hvs\.'
 
@@ -265,13 +265,13 @@ Vault Server Diagnostics
 
     # Overall status
     vault status
-    
+
     # Detailed system info
     vault read sys/health
-    
+
     # List mounted secrets engines
     vault secrets list
-    
+
     # Check audit logs
     vault audit list
 
@@ -279,10 +279,10 @@ Vault Server Diagnostics
 
     # Token information
     vault token lookup $VAULT_TOKEN
-    
+
     # Token capabilities on path
     vault token capabilities $VAULT_TOKEN odoo-mydb/data/test
-    
+
     # Policy information
     vault policy read odoo-policy
 
@@ -290,10 +290,10 @@ Vault Server Diagnostics
 
     # Vault server metrics (if enabled)
     curl $VAULT_ADDR/v1/sys/metrics
-    
+
     # Check for rate limiting
     vault read sys/quotas/rate-limit
-    
+
     # Monitor vault logs
     journalctl -u vault -f
 
@@ -318,7 +318,7 @@ Increase Vault log level::
 
     # In vault.hcl
     log_level = "DEBUG"
-    
+
     # Or set environment variable
     export VAULT_LOG_LEVEL=DEBUG
 
@@ -328,7 +328,7 @@ Capture network traffic::
 
     # Using tcpdump
     tcpdump -i any -A host vault.example.com and port 8200
-    
+
     # Using curl verbose mode
     curl -v -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/sys/seal-status
 
@@ -348,7 +348,7 @@ Slow Response Times
 
     # Test latency
     ping vault.example.com
-    
+
     # Use closer Vault instance
     # Configure load balancer
 
@@ -356,7 +356,7 @@ Slow Response Times
 
     # Check Vault metrics
     vault read sys/metrics
-    
+
     # Scale Vault cluster
     # Optimize Vault configuration
 
@@ -364,7 +364,7 @@ Slow Response Times
 
     # Check secret size
     vault kv get -format=json odoo-mydb/uuid | jq '.data | length'
-    
+
     # Split large secrets
     # Use references for large data
 
@@ -395,14 +395,14 @@ Automatic Recovery Strategies
     def robust_vault_operation(self, secret_id, max_retries=3):
         """Implement retry logic for vault operations"""
         import time
-        
+
         for attempt in range(max_retries):
             try:
                 return self.env['vault.connector'].get_secret(secret_id)
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise
-                
+
                 error_msg = str(e).lower()
                 if 'timeout' in error_msg or 'connection' in error_msg:
                     # Retry on network issues
@@ -420,7 +420,7 @@ Automatic Recovery Strategies
             return self.env['vault.connector'].get_secret(secret_id)
         except Exception as e:
             _logger.warning(f"Vault access failed: {e}")
-            
+
             if fallback_config:
                 _logger.info("Using fallback configuration")
                 return fallback_config
@@ -500,10 +500,10 @@ When seeking support, gather this information:
 
     # Vault status from Odoo
     status = env['vault.connector'].check_vault_status()
-    
+
     # Vault server status
     vault status
-    
+
     # Network connectivity
     curl -I $VAULT_ADDR/v1/sys/health
 

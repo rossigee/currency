@@ -17,14 +17,14 @@ Store a secret in Vault::
     # Generate a UUID for the secret
     import uuid
     secret_id = str(uuid.uuid4())
-    
+
     # Define the secret data
     secret_data = {
         'username': 'admin',
         'password': 'secret123',
         'api_key': 'abc123def456'
     }
-    
+
     # Store the secret
     try:
         result = self.env['vault.connector'].set_secret(secret_id, secret_data)
@@ -54,7 +54,7 @@ Verify Vault connectivity and status::
 
     # Check if Vault is accessible
     status = self.env['vault.connector'].check_vault_status()
-    
+
     if status['accessible']:
         print("Vault is accessible and ready")
     else:
@@ -86,17 +86,17 @@ Example for storing database connection strings::
     class MyConfiguration(models.Model):
         _name = 'my.configuration'
         _description = 'My Module Configuration'
-        
+
         name = fields.Char('Configuration Name', required=True)
         secret_id = fields.Char('Secret ID', readonly=True)
-        
+
         def create_db_connection(self, connection_params):
             """Store database connection securely"""
             import uuid
-            
+
             # Generate UUID for this secret
             secret_id = str(uuid.uuid4())
-            
+
             # Store connection parameters securely
             try:
                 self.env['vault.connector'].set_secret(secret_id, {
@@ -106,18 +106,18 @@ Example for storing database connection strings::
                     'username': connection_params['username'],
                     'password': connection_params['password']
                 })
-                
+
                 # Store only the UUID in Odoo database
                 self.secret_id = secret_id
-                
+
             except Exception as e:
                 raise ValidationError(f"Failed to store connection: {e}")
-        
+
         def get_db_connection(self):
             """Retrieve database connection securely"""
             if not self.secret_id:
                 raise ValidationError("No connection configured")
-            
+
             try:
                 return self.env['vault.connector'].get_secret(self.secret_id)
             except Exception as e:
@@ -130,53 +130,53 @@ Example for managing third-party API keys::
     class ThirdPartyIntegration(models.Model):
         _name = 'third.party.integration'
         _description = 'Third Party Integration'
-        
+
         name = fields.Char('Integration Name', required=True)
         api_key_id = fields.Char('API Key ID', readonly=True)
         base_url = fields.Char('Base URL')  # Not sensitive, can be stored normally
-        
+
         def set_api_credentials(self, api_key, api_secret):
             """Store API credentials securely"""
             import uuid
-            
+
             secret_id = str(uuid.uuid4())
-            
+
             try:
                 self.env['vault.connector'].set_secret(secret_id, {
                     'api_key': api_key,
                     'api_secret': api_secret,
                     'created_date': fields.Datetime.now().isoformat()
                 })
-                
+
                 self.api_key_id = secret_id
-                
+
             except Exception as e:
                 raise ValidationError(f"Failed to store API credentials: {e}")
-        
+
         def make_api_call(self, endpoint, data=None):
             """Make authenticated API call"""
             if not self.api_key_id:
                 raise ValidationError("API credentials not configured")
-            
+
             try:
                 # Retrieve credentials
                 credentials = self.env['vault.connector'].get_secret(self.api_key_id)
-                
+
                 # Make API call
                 headers = {
                     'Authorization': f"Bearer {credentials['api_key']}",
                     'Content-Type': 'application/json'
                 }
-                
+
                 import requests
                 response = requests.post(
                     f"{self.base_url}/{endpoint}",
                     json=data,
                     headers=headers
                 )
-                
+
                 return response.json()
-                
+
             except Exception as e:
                 raise ValidationError(f"API call failed: {e}")
 
@@ -192,10 +192,10 @@ For managing multiple related secrets::
         """Setup configuration for multiple environments"""
         environments = ['dev', 'staging', 'prod']
         config_ids = {}
-        
+
         for env in environments:
             secret_id = str(uuid.uuid4())
-            
+
             # Environment-specific configuration
             config_data = {
                 'environment': env,
@@ -204,7 +204,7 @@ For managing multiple related secrets::
                 'api_base_url': f"https://api-{env}.company.com",
                 'secret_key': self.generate_secret_key()
             }
-            
+
             try:
                 self.env['vault.connector'].set_secret(secret_id, config_data)
                 config_ids[env] = secret_id
@@ -217,7 +217,7 @@ For managing multiple related secrets::
                     except:
                         pass
                 raise ValidationError(f"Failed to setup {env} config: {e}")
-        
+
         return config_ids
 
 Error Handling Patterns
@@ -228,7 +228,7 @@ Robust error handling for production use::
     def secure_operation_with_retry(self, secret_id, max_retries=3):
         """Perform vault operation with retry logic"""
         import time
-        
+
         for attempt in range(max_retries):
             try:
                 # Check vault status first
@@ -240,18 +240,18 @@ Robust error handling for production use::
                         raise ValidationError("Vault token is invalid - check configuration")
                     else:
                         raise ValidationError(f"Vault is not accessible: {status['error']}")
-                
+
                 # Perform the operation
                 return self.env['vault.connector'].get_secret(secret_id)
-                
+
             except Exception as e:
                 if attempt == max_retries - 1:
                     # Last attempt failed
                     raise ValidationError(f"Failed after {max_retries} attempts: {e}")
-                
+
                 # Wait before retry
                 time.sleep(2 ** attempt)  # Exponential backoff
-        
+
         raise ValidationError("Maximum retries exceeded")
 
 Security Best Practices
@@ -265,29 +265,29 @@ Secret Lifecycle Management
     class SecureSecretManager(models.TransientModel):
         _name = 'secure.secret.manager'
         _description = 'Secure Secret Manager'
-        
+
         def rotate_secret(self, old_secret_id):
             """Rotate a secret safely"""
             try:
                 # Retrieve current secret
                 current_secret = self.env['vault.connector'].get_secret(old_secret_id)
-                
+
                 # Generate new secret ID
                 new_secret_id = str(uuid.uuid4())
-                
+
                 # Update secret data (e.g., new password)
                 updated_secret = current_secret.copy()
                 updated_secret['password'] = self.generate_new_password()
                 updated_secret['rotated_date'] = fields.Datetime.now().isoformat()
-                
+
                 # Store new secret
                 self.env['vault.connector'].set_secret(new_secret_id, updated_secret)
-                
+
                 # Update references to use new secret ID
                 # (This depends on your specific model structure)
-                
+
                 return new_secret_id
-                
+
             except Exception as e:
                 raise ValidationError(f"Secret rotation failed: {e}")
 
@@ -298,26 +298,26 @@ Always validate data before storing::
 
     def validate_and_store_secret(self, secret_data):
         """Validate secret data before storage"""
-        
+
         # Validate required fields
         required_fields = ['username', 'password']
         for field in required_fields:
             if field not in secret_data:
                 raise ValidationError(f"Missing required field: {field}")
-        
+
         # Validate data types
         if not isinstance(secret_data['username'], str):
             raise ValidationError("Username must be a string")
-        
+
         # Validate password strength
         password = secret_data['password']
         if len(password) < 8:
             raise ValidationError("Password must be at least 8 characters")
-        
+
         # Store the validated secret
         secret_id = str(uuid.uuid4())
         self.env['vault.connector'].set_secret(secret_id, secret_data)
-        
+
         return secret_id
 
 Testing Your Integration
@@ -330,21 +330,21 @@ When testing modules that use vault_connector::
 
     from unittest.mock import patch
     from odoo.tests import common
-    
+
     class TestMySecureModule(common.TransactionCase):
-        
+
         @patch('vault_connector.models.vault_connector.VaultConnector.check_vault_status')
         @patch('vault_connector.models.vault_connector.VaultConnector.set_secret')
         def test_store_credentials(self, mock_set_secret, mock_status):
             """Test credential storage"""
-            
+
             # Mock vault status as accessible
             mock_status.return_value = {'accessible': True, 'error': None}
             mock_set_secret.return_value = True
-            
+
             # Test your module's functionality
             result = self.my_model.store_api_credentials('key123', 'secret456')
-            
+
             # Verify vault methods were called
             mock_set_secret.assert_called_once()
             self.assertTrue(result)

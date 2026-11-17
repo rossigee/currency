@@ -30,7 +30,7 @@ Check if Vault is accessible and unsealed.
 
 **Returns**:
     Dictionary with status information:
-    
+
     * ``accessible`` (bool): Whether Vault is accessible
     * ``error`` (str|None): Error message if not accessible, None if accessible
 
@@ -41,19 +41,19 @@ Check if Vault is accessible and unsealed.
         'accessible': True,
         'error': None
     }
-    
+
     # Vault is sealed
     {
         'accessible': False,
         'error': 'Vault is sealed'
     }
-    
+
     # Invalid token
     {
         'accessible': False,
         'error': 'Vault token is invalid or expired'
     }
-    
+
     # Connection timeout
     {
         'accessible': False,
@@ -70,7 +70,7 @@ Check if Vault is accessible and unsealed.
 
 **Environment Variables Used**:
     * ``VAULT_ADDR`` (required)
-    * ``VAULT_TOKEN`` (required) 
+    * ``VAULT_TOKEN`` (required)
     * ``VAULT_SKIP_VERIFY`` (optional)
 
 **Error Conditions**:
@@ -105,10 +105,10 @@ Retrieve a secret from Vault.
     try:
         secret_id = "123e4567-e89b-12d3-a456-426614174000"
         secret_data = self.env['vault.connector'].get_secret(secret_id)
-        
+
         username = secret_data['username']
         password = secret_data['password']
-        
+
     except ValidationError as e:
         print(f"Invalid secret ID: {e}")
     except Exception as e:
@@ -151,7 +151,7 @@ Store a secret in Vault.
 **Usage Example**::
 
     import uuid
-    
+
     try:
         secret_id = str(uuid.uuid4())
         secret_data = {
@@ -160,11 +160,11 @@ Store a secret in Vault.
             'api_key': 'abc123def456',
             'created_at': '2025-01-01T00:00:00Z'
         }
-        
+
         result = self.env['vault.connector'].set_secret(secret_id, secret_data)
         if result:
             print(f"Secret stored with ID: {secret_id}")
-            
+
     except ValidationError as e:
         print(f"Invalid secret ID: {e}")
     except Exception as e:
@@ -219,40 +219,40 @@ The module requires several environment variables for configuration:
 
 ``VAULT_ADDR``
     **Type**: String
-    
+
     **Description**: URL of the Vault server
-    
+
     **Format**: ``https://vault.example.com:8200``
-    
+
     **Security**: Must use HTTPS in production
 
 ``VAULT_TOKEN``
     **Type**: String
-    
+
     **Description**: Vault authentication token
-    
+
     **Format**: Vault service token (e.g., ``hvs.CAESIJ...``)
-    
+
     **Security**: Keep secret, rotate regularly
 
 **Optional Variables**
 
 ``VAULT_SKIP_VERIFY``
     **Type**: Boolean string
-    
+
     **Description**: Skip TLS certificate verification
-    
+
     **Values**: ``"true"`` or ``"false"`` (default: ``"false"``)
-    
+
     **Security Warning**: Only use ``"true"`` in development
 
 ``VAULT_KV_STORE``
     **Type**: String
-    
+
     **Description**: Custom KV store mount path
-    
+
     **Default**: ``odoo-{database_name}``
-    
+
     **Example**: ``"my-secrets"``
 
 Data Formats
@@ -348,13 +348,13 @@ Exception Types
 
 **ValidationError**
     Raised for input validation failures:
-    
+
     * Empty or invalid UUID format for secret_id
     * Missing required parameters
 
 **Exception** (Generic)
     Raised for operational failures:
-    
+
     * Missing environment variables
     * Vault connectivity issues
     * Authentication failures
@@ -378,14 +378,14 @@ Recommended error handling pattern for robust applications::
                     raise UserError("Vault authentication failed - check configuration")
                 else:
                     raise UserError(f"Vault unavailable: {status['error']}")
-            
+
             # Perform vault operation
             return self.env['vault.connector'].get_secret(secret_id)
-            
+
         except ValidationError as e:
             # Handle validation errors
             raise UserError(f"Invalid input: {e}")
-            
+
         except Exception as e:
             # Handle unexpected errors
             _logger.error(f"Vault operation failed: {e}")
@@ -422,12 +422,12 @@ Integration Examples
 
     # Store and retrieve a simple secret
     import uuid
-    
+
     secret_id = str(uuid.uuid4())
     self.env['vault.connector'].set_secret(secret_id, {
         'api_key': 'my-secret-key'
     })
-    
+
     # Later retrieval
     secret = self.env['vault.connector'].get_secret(secret_id)
     api_key = secret['api_key']
@@ -436,15 +436,15 @@ Integration Examples
 
     class MyService(models.Model):
         _name = 'my.service'
-        
+
         name = fields.Char('Service Name')
         config_secret_id = fields.Char('Config Secret ID')
-        
+
         def configure_service(self, config_data):
             secret_id = str(uuid.uuid4())
             self.env['vault.connector'].set_secret(secret_id, config_data)
             self.config_secret_id = secret_id
-        
+
         def get_service_config(self):
             if not self.config_secret_id:
                 return {}
@@ -458,14 +458,14 @@ Integration Examples
             'database': self.check_database_health(),
             'cache': self.check_cache_health(),
         }
-        
+
         # Add vault status
         vault_status = self.env['vault.connector'].check_vault_status()
         health_status['vault'] = {
             'status': 'healthy' if vault_status['accessible'] else 'unhealthy',
             'message': vault_status['error'] or 'Connected'
         }
-        
+
         return health_status
 
 This API reference provides comprehensive documentation for integrating with the Vault Connector. Always follow security best practices and validate your implementation in a test environment.

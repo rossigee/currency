@@ -5,22 +5,9 @@
     "name": "Vault Connector",
     "version": "18.0.1.0.0",
     "category": "Tools",
-    "author": "Ross Golder",
+    "author": "Ross Golder, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/currency",
     "summary": "Secure connection to Vault for secret storage",
-    "description": """
-        This module provides a secure connection interface to Vault
-        (HashiCorp Vault or OpenBao) for storing and retrieving sensitive
-        data like private keys, tokens, and other secrets. It can be used
-        as a dependency by other modules that need secure secret storage.
-
-        Features:
-        - Vault connectivity and status checking
-        - Secure secret storage and retrieval
-        - Environment variable configuration
-        - Error handling and categorization
-        - KV store path configuration
-    """,
     "license": "AGPL-3",
     "depends": [
         "base",

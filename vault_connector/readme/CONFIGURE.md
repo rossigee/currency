@@ -1,18 +1,18 @@
-## Vault Connector Configuration Guide
+**Vault Connector Configuration Guide**
 
 This guide covers installation, configuration, and setup of the
 HashiCorp Vault Connector module for Odoo.
 
-### 📋 **Prerequisites**
+**📋 Prerequisites**
 
-#### System Requirements
+**System Requirements**
 
 - **Odoo 16.0 or later**: Compatible with Odoo 16+
 - **Python 3.8+**: Required for requests library support
 - **External Vault**: HashiCorp Vault or OpenBao instance (v1.0+)
 - **Network Access**: HTTPS connectivity between Odoo and Vault
 
-#### Required Knowledge
+**Required Knowledge**
 
 - **Odoo Administration**: Module installation and configuration
 - **Vault Administration**: Basic Vault setup and token management
@@ -20,9 +20,9 @@ HashiCorp Vault Connector module for Odoo.
   practices
 - **Network Security**: Knowledge of secure network configurations
 
-### 🚀 **Installation**
+**🚀 Installation**
 
-#### Step 1: Install Python Dependencies
+**Step 1: Install Python Dependencies**
 
 The module requires the requests Python library for HTTP operations.
 
@@ -45,7 +45,7 @@ The module requires the requests Python library for HTTP operations.
 
     poetry add requests
 
-#### Step 2: Install Odoo Module
+**Step 2: Install Odoo Module**
 
 **Method 1: Manual Installation**
 
@@ -68,7 +68,7 @@ The module requires the requests Python library for HTTP operations.
 
 2.  Follow steps 2-4 from Method 1
 
-#### Step 3: Verify Installation
+**Step 3: Verify Installation**
 
 1.  Log into Odoo as administrator
 2.  Go to **Apps** → **Update Apps List**
@@ -76,12 +76,12 @@ The module requires the requests Python library for HTTP operations.
 4.  Click **Install**
 5.  Verify no error messages during installation
 
-### 🔐 **Vault Setup**
+**🔐 Vault Setup**
 
 The module requires an external Vault instance for secure secret
 storage. This section covers basic setup.
 
-#### HashiCorp Vault Installation
+**HashiCorp Vault Installation**
 
 **Using Docker (Recommended for Testing)**:
 
@@ -111,7 +111,7 @@ storage. This section covers basic setup.
     # Install Vault
     sudo yum -y install vault
 
-#### OpenBao Alternative
+**OpenBao Alternative**
 
 OpenBao is an open-source Vault fork that's fully compatible:
 
@@ -120,7 +120,7 @@ OpenBao is an open-source Vault fork that's fully compatible:
     unzip bao_1.0.0_linux_amd64.zip
     sudo mv bao /usr/local/bin/
 
-#### Vault Configuration
+**Vault Configuration**
 
 **Basic Production Configuration** (/etc/vault.d/vault.hcl):
 
@@ -164,9 +164,9 @@ OpenBao is an open-source Vault fork that's fully compatible:
     # Create token for Odoo
     vault token create -policy=odoo-connector -ttl=8760h
 
-### 🔧 **Odoo Configuration**
+**🔧 Odoo Configuration**
 
-#### Environment Variables
+**Environment Variables**
 
 Set these environment variables for your Odoo instance:
 
@@ -201,7 +201,7 @@ Set these environment variables for your Odoo instance:
       VAULT_ADDR: <base64-encoded-url>
       VAULT_TOKEN: <base64-encoded-token>
 
-#### Testing Vault Connection
+**Testing Vault Connection**
 
 1.  Restart Odoo after setting environment variables
 
@@ -215,13 +215,13 @@ Set these environment variables for your Odoo instance:
 
 3.  Check Odoo logs for any Vault connection errors
 
-### 👥 **User Management**
+**👥 User Management**
 
 The Vault Connector module is a utility module that doesn't provide
 specific user interfaces but enables other modules to securely store and
 retrieve secrets.
 
-#### Access Control
+**Access Control**
 
 **Technical Module**: This module operates at the technical level and
 doesn't define specific user groups. Access control is managed by:
@@ -231,7 +231,7 @@ doesn't define specific user groups. Access control is managed by:
 - **Module Dependencies**: Other modules handle user access to Vault
   functionality
 
-#### Developer Access
+**Developer Access**
 
 **For developers building on this module**:
 
@@ -253,9 +253,9 @@ doesn't define specific user groups. Access control is managed by:
             # Store only the token in your model
             self.vault_token = token
 
-### 🔒 **Security Configuration**
+**🔒 Security Configuration**
 
-#### Vault Security Hardening
+**Vault Security Hardening**
 
 **Production Vault Security**:
 
@@ -280,7 +280,7 @@ doesn't define specific user groups. Access control is managed by:
     # Revoke old token
     vault token revoke <old-token>
 
-#### Network Security
+**Network Security**
 
 **Firewall Rules**:
 
@@ -294,7 +294,7 @@ doesn't define specific user groups. Access control is managed by:
 - Implement certificate pinning if possible
 - Monitor certificate expiration
 
-#### Odoo Security Settings
+**Odoo Security Settings**
 
 **Database Security**:
 
@@ -310,9 +310,9 @@ doesn't define specific user groups. Access control is managed by:
 - Regular password changes
 - Monitor user login patterns
 
-### 🧪 **Testing Configuration**
+**🧪 Testing Configuration**
 
-#### Vault Connectivity Test
+**Vault Connectivity Test**
 
 **Manual Test**:
 
@@ -352,7 +352,7 @@ doesn't define specific user groups. Access control is managed by:
 - Verify Vault token has proper permissions
 - Check Odoo logs for connection errors
 
-#### Module Functionality Test
+**Module Functionality Test**
 
 **Basic Integration Test**:
 
@@ -368,9 +368,9 @@ doesn't define specific user groups. Access control is managed by:
 - Proper error handling for connection issues
 - No sensitive data in Odoo logs or database
 
-### 📊 **Monitoring & Maintenance**
+**📊 Monitoring & Maintenance**
 
-#### Log Monitoring
+**Log Monitoring**
 
 **Odoo Logs to Monitor**:
 
@@ -386,7 +386,7 @@ doesn't define specific user groups. Access control is managed by:
 - Failed authentication attempts
 - Token usage patterns
 
-#### Regular Maintenance
+**Regular Maintenance**
 
 **Weekly Tasks**:
 
@@ -409,9 +409,9 @@ doesn't define specific user groups. Access control is managed by:
 - Update documentation
 - Training for new users
 
-### 🚨 **Troubleshooting**
+**🚨 Troubleshooting**
 
-#### Common Configuration Issues
+**Common Configuration Issues**
 
 **Vault Connection Failed**:
 
@@ -449,7 +449,7 @@ doesn't define specific user groups. Access control is managed by:
   - Check network connectivity to Vault
   - Review Vault and Odoo error logs
 
-#### Performance Issues
+**Performance Issues**
 
 **Slow Secret Operations**:
 
@@ -461,7 +461,7 @@ doesn't define specific user groups. Access control is managed by:
 - **Cause**: Network issues or Vault overload
 - **Solutions**: Increase timeout values, check Vault performance
 
-#### Getting Support
+**Getting Support**
 
 **Before Requesting Support**:
 
