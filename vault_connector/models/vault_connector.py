@@ -6,6 +6,7 @@ import os
 import threading
 import time
 import uuid
+from urllib.parse import urlparse
 
 import requests
 
@@ -22,6 +23,26 @@ _vault_session_lock = threading.Lock()
 class VaultConnector(models.AbstractModel):
     _name = "vault.connector"
     _description = "Vault Connector"
+
+    def _tls_verify(self, vault_addr):
+        """Return the TLS verification setting for requests to Vault.
+
+        Verification is only disabled when VAULT_SKIP_VERIFY=true is set AND the
+        Vault address is a loopback host (local development). Any other
+        combination raises, so the option cannot weaken a live or reachable Vault.
+        """
+        if os.environ.get("VAULT_SKIP_VERIFY", "false").lower() != "true":
+            return True
+        host = urlparse(vault_addr or "").hostname or ""
+        if host not in ("localhost", "127.0.0.1", "::1"):
+            raise ValidationError(
+                _("VAULT_SKIP_VERIFY is only allowed for a loopback VAULT_ADDR.")
+            )
+        _logger.warning(
+            "TLS verification disabled for local Vault at %s (VAULT_SKIP_VERIFY)",
+            vault_addr,
+        )
+        return False
 
     @api.model
     def _get_kv_store_name(self):
@@ -43,9 +64,7 @@ class VaultConnector(models.AbstractModel):
         3. None: raises exception if neither is available
         """
         vault_addr = os.environ.get("VAULT_ADDR")
-        vault_skip_verify = (
-            os.environ.get("VAULT_SKIP_VERIFY", "false").lower() == "true"
-        )
+        vault_verify = self._tls_verify(vault_addr)
 
         role_id = os.environ.get("VAULT_ROLE_ID")
         secret_id = os.environ.get("VAULT_SECRET_ID")
@@ -69,7 +88,7 @@ class VaultConnector(models.AbstractModel):
                     response = requests.post(
                         renew_url,
                         headers=headers,
-                        verify=not vault_skip_verify,
+                        verify=vault_verify,
                         timeout=5,
                     )
                     if response.status_code == 200:
@@ -92,7 +111,7 @@ class VaultConnector(models.AbstractModel):
                     response = requests.post(
                         login_url,
                         json={"role_id": role_id, "secret_id": secret_id},
-                        verify=not vault_skip_verify,
+                        verify=vault_verify,
                         timeout=5,
                     )
                     response.raise_for_status()
@@ -124,9 +143,7 @@ class VaultConnector(models.AbstractModel):
     def check_vault_status(self):
         """Check if vault is accessible and unsealed"""
         vault_addr = os.environ.get("VAULT_ADDR")
-        vault_skip_verify = (
-            os.environ.get("VAULT_SKIP_VERIFY", "false").lower() == "true"
-        )
+        vault_verify = self._tls_verify(vault_addr)
 
         if not vault_addr:
             return {
@@ -145,7 +162,7 @@ class VaultConnector(models.AbstractModel):
         try:
             # Check vault seal status
             status_url = f"{vault_addr}/v1/sys/seal-status"
-            response = requests.get(status_url, verify=not vault_skip_verify, timeout=5)
+            response = requests.get(status_url, verify=vault_verify, timeout=5)
             response.raise_for_status()
             status_data = response.json()
 
@@ -156,7 +173,7 @@ class VaultConnector(models.AbstractModel):
             headers = {"X-Vault-Token": vault_token}
             auth_url = f"{vault_addr}/v1/auth/token/lookup-self"
             auth_response = requests.get(
-                auth_url, headers=headers, verify=not vault_skip_verify, timeout=5
+                auth_url, headers=headers, verify=vault_verify, timeout=5
             )
 
             if auth_response.status_code == 403:
@@ -187,9 +204,7 @@ class VaultConnector(models.AbstractModel):
     @api.model
     def get_secret(self, secret_id):
         vault_addr = os.environ.get("VAULT_ADDR")
-        vault_skip_verify = (
-            os.environ.get("VAULT_SKIP_VERIFY", "false").lower() == "true"
-        )
+        vault_verify = self._tls_verify(vault_addr)
         if not vault_addr:
             raise Exception("VAULT_ADDR environment variable must be set.")
 
@@ -220,7 +235,7 @@ class VaultConnector(models.AbstractModel):
             response = requests.get(
                 url,
                 headers=headers,
-                verify=not vault_skip_verify,
+                verify=vault_verify,
                 timeout=30,
             )
             response.raise_for_status()
@@ -247,9 +262,7 @@ class VaultConnector(models.AbstractModel):
         not required to be a UUID. Raises if the field is missing.
         """
         vault_addr = os.environ.get("VAULT_ADDR")
-        vault_skip_verify = (
-            os.environ.get("VAULT_SKIP_VERIFY", "false").lower() == "true"
-        )
+        vault_verify = self._tls_verify(vault_addr)
         if not vault_addr:
             raise Exception("VAULT_ADDR environment variable must be set.")
         mount, _sep, key = (path or "").partition("/")
@@ -268,7 +281,7 @@ class VaultConnector(models.AbstractModel):
             response = requests.get(
                 url,
                 headers={"X-Vault-Token": vault_token},
-                verify=not vault_skip_verify,
+                verify=vault_verify,
                 timeout=30,
             )
             response.raise_for_status()
@@ -282,9 +295,7 @@ class VaultConnector(models.AbstractModel):
     @api.model
     def set_secret(self, secret_id, data):
         vault_addr = os.environ.get("VAULT_ADDR")
-        vault_skip_verify = (
-            os.environ.get("VAULT_SKIP_VERIFY", "false").lower() == "true"
-        )
+        vault_verify = self._tls_verify(vault_addr)
         if not vault_addr:
             raise Exception("VAULT_ADDR environment variable must be set.")
 
@@ -311,7 +322,7 @@ class VaultConnector(models.AbstractModel):
                 url,
                 headers=headers,
                 json={"data": data},
-                verify=not vault_skip_verify,
+                verify=vault_verify,
                 timeout=30,
             )
             response.raise_for_status()

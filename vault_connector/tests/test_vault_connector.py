@@ -263,10 +263,14 @@ class TestVaultConnector(common.TransactionCase):
         self.assertIn("Failed to set secret", str(cm.exception))
 
     def test_vault_skip_verify_option(self):
-        """Test that VAULT_SKIP_VERIFY option is properly handled"""
-        os.environ["VAULT_SKIP_VERIFY"] = "true"
-
-        with patch("requests.get") as mock_get:
+        """VAULT_SKIP_VERIFY is honoured for a loopback VAULT_ADDR"""
+        with (
+            patch.dict(
+                os.environ,
+                {"VAULT_SKIP_VERIFY": "true", "VAULT_ADDR": "https://127.0.0.1:8200"},
+            ),
+            patch("requests.get") as mock_get,
+        ):
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_response.json.return_value = {"sealed": False}
@@ -348,3 +352,17 @@ class TestVaultConnector(common.TransactionCase):
     def test_get_kv_field_rejects_bad_path(self):
         with self.assertRaises(ValidationError):
             self.vault_connector.get_kv_field("tenants", "discord_url")
+
+    def test_tls_verify_defaults_to_true(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("VAULT_SKIP_VERIFY", None)
+            self.assertTrue(self.vault_connector._tls_verify("https://vault.example"))
+
+    def test_tls_verify_skip_allowed_only_for_loopback(self):
+        with patch.dict(os.environ, {"VAULT_SKIP_VERIFY": "true"}):
+            self.assertFalse(self.vault_connector._tls_verify("https://127.0.0.1:8200"))
+            self.assertFalse(self.vault_connector._tls_verify("http://localhost:8200"))
+            with self.assertRaises(ValidationError):
+                self.vault_connector._tls_verify("https://vault.example.com")
+            with self.assertRaises(ValidationError):
+                self.vault_connector._tls_verify(None)
