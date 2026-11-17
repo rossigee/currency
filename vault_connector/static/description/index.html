@@ -1,0 +1,1899 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils: https://docutils.sourceforge.io/" />
+<title>Vault Connector</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 9511 2024-01-13 09:50:07Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+Despite the name, some widely supported CSS2 features are used.
+
+See https://docutils.sourceforge.io/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+.subscript {
+  vertical-align: sub;
+  font-size: smaller }
+
+.superscript {
+  vertical-align: super;
+  font-size: smaller }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left, table.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right, table.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+.align-top    {
+  vertical-align: top }
+
+.align-middle {
+  vertical-align: middle }
+
+.align-bottom {
+  vertical-align: bottom }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: gray; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic, pre.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document" id="vault-connector">
+<h1 class="title">Vault Connector</h1>
+
+<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! This file is generated by oca-gen-addon-readme !!
+!! changes will be overwritten.                   !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! source digest: sha256:0a5a59fd4c30c792d63e520b487ffc956cc6bc8c178b8a8677c88eb6e6ed7272
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Beta" src="https://img.shields.io/badge/maturity-Beta-yellow.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/currency/tree/18.0/vault_connector"><img alt="OCA/currency" src="https://img.shields.io/badge/github-OCA%2Fcurrency-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/currency-18-0/currency-18-0-vault_connector"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/currency&amp;target_branch=18.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
+<p><strong>HashiCorp Vault Connector for Odoo</strong></p>
+<p>A secure integration module that provides a robust connection interface
+between Odoo and HashiCorp Vault for storing and retrieving sensitive
+data like private keys, API tokens, certificates, and other secrets.</p>
+<p><strong>🚀 Key Features</strong></p>
+<p><strong>Secure Secret Storage</strong></p>
+<ul class="simple">
+<li><strong>Vault Integration</strong>: Direct connection to HashiCorp Vault or OpenBao
+instances</li>
+<li><strong>KV Store Support</strong>: Uses Vault’s Key-Value secrets engine for data
+storage</li>
+<li><strong>Token-based Authentication</strong>: Secure authentication using Vault
+tokens</li>
+<li><strong>Status Monitoring</strong>: Real-time Vault connection status checking</li>
+</ul>
+<p><strong>Data Protection</strong></p>
+<ul class="simple">
+<li><strong>No Plain Text Storage</strong>: Secrets never stored in Odoo database</li>
+<li><strong>UUID Token System</strong>: Only unique identifiers stored in Odoo</li>
+<li><strong>External Security</strong>: Leverages Vault’s enterprise-grade security
+features</li>
+<li><strong>Audit Trails</strong>: All secret access logged through Vault’s audit
+system</li>
+</ul>
+<p><strong>Developer-Friendly API</strong></p>
+<ul class="simple">
+<li><strong>Simple Interface</strong>: Easy-to-use methods for storing and retrieving
+secrets</li>
+<li><strong>Error Handling</strong>: Comprehensive error categorization and handling</li>
+<li><strong>Configuration Management</strong>: Environment variable-based configuration</li>
+<li><strong>Extensible Design</strong>: Clean API for other modules to build upon</li>
+</ul>
+<p><strong>Enterprise Integration</strong></p>
+<ul class="simple">
+<li><strong>Production Ready</strong>: Designed for enterprise Odoo deployments</li>
+<li><strong>Scalable Architecture</strong>: Supports high-availability Vault clusters</li>
+<li><strong>Compliance Support</strong>: Helps meet security and audit requirements</li>
+<li><strong>Dependency Module</strong>: Serves as foundation for other secure modules</li>
+</ul>
+<p><strong>🔒 Security &amp; Architecture</strong></p>
+<p><strong>Connection Security</strong></p>
+<ul class="simple">
+<li><strong>HTTPS Only</strong>: All communications encrypted in transit</li>
+<li><strong>Token Authentication</strong>: Secure token-based access to Vault</li>
+<li><strong>Network Isolation</strong>: Supports private network configurations</li>
+<li><strong>Certificate Validation</strong>: Full TLS certificate verification</li>
+</ul>
+<p><strong>Data Architecture</strong></p>
+<ul class="simple">
+<li><strong>External Storage</strong>: All sensitive data stored outside Odoo</li>
+<li><strong>Token References</strong>: Only UUID tokens maintained in database</li>
+<li><strong>Path Organization</strong>: Configurable Vault paths for data organization</li>
+<li><strong>Atomic Operations</strong>: Consistent data operations with proper error
+handling</li>
+</ul>
+<p><strong>Access Control</strong></p>
+<ul class="simple">
+<li><strong>Vault Policies</strong>: Leverages Vault’s native policy system</li>
+<li><strong>Principle of Least Privilege</strong>: Minimal required permissions</li>
+<li><strong>Audit Logging</strong>: Complete audit trail through Vault</li>
+<li><strong>Token Management</strong>: Proper token lifecycle management</li>
+</ul>
+<p><strong>🏢 Business Use Cases</strong></p>
+<p><strong>Secure Configuration Management</strong></p>
+<ul class="simple">
+<li>Store API keys and tokens securely</li>
+<li>Manage database connection strings</li>
+<li>Protect certificate private keys</li>
+<li>Secure third-party service credentials</li>
+</ul>
+<p><strong>Compliance &amp; Governance</strong></p>
+<ul class="simple">
+<li>Meet security audit requirements</li>
+<li>Implement proper secret rotation</li>
+<li>Maintain audit trails for access</li>
+<li>Support compliance frameworks</li>
+</ul>
+<p><strong>Development &amp; Operations</strong></p>
+<ul class="simple">
+<li>Separate secrets from code</li>
+<li>Enable secure CI/CD pipelines</li>
+<li>Support multiple environments</li>
+<li>Facilitate secret sharing between teams</li>
+</ul>
+<p><strong>Integration Foundation</strong></p>
+<ul class="simple">
+<li>Serve as security layer for other modules</li>
+<li>Enable cryptocurrency operations</li>
+<li>Support secure payment processing</li>
+<li>Foundation for custom security modules</li>
+</ul>
+<p><strong>📋 Requirements</strong></p>
+<p><strong>Technical Prerequisites</strong></p>
+<ul class="simple">
+<li><strong>Odoo 16.0+</strong>: Compatible with Odoo 16 and later versions</li>
+<li><strong>Python Libraries</strong>: requests package for HTTP operations</li>
+<li><strong>HashiCorp Vault</strong>: External Vault or OpenBao instance (v1.0+)</li>
+<li><strong>Network Access</strong>: HTTPS connectivity between Odoo and Vault</li>
+</ul>
+<p><strong>Vault Configuration</strong></p>
+<ul class="simple">
+<li><strong>KV Secrets Engine</strong>: Version 2 KV store enabled</li>
+<li><strong>Authentication</strong>: Valid Vault token with appropriate permissions</li>
+<li><strong>Network Accessibility</strong>: Vault reachable from Odoo server</li>
+<li><strong>TLS Configuration</strong>: Proper SSL/TLS certificates configured</li>
+</ul>
+<p><strong>User Knowledge</strong></p>
+<ul class="simple">
+<li><strong>Vault Basics</strong>: Understanding of Vault concepts and operation</li>
+<li><strong>Secret Management</strong>: Knowledge of secure secret handling practices</li>
+<li><strong>Network Security</strong>: Understanding of secure network configurations</li>
+<li><strong>Odoo Administration</strong>: Familiarity with Odoo module installation</li>
+</ul>
+<p><strong>⚠️ Security Warnings</strong></p>
+<p><strong>Production Deployment</strong></p>
+<p><strong>SECURITY CRITICAL</strong>: This module handles sensitive data. Ensure proper
+security measures are in place before production use.</p>
+<p><strong>Vault Security</strong></p>
+<ul class="simple">
+<li><strong>Secure Vault Instance</strong>: Use properly configured, secured Vault
+installation</li>
+<li><strong>Token Management</strong>: Regularly rotate tokens and follow Vault best
+practices</li>
+<li><strong>Network Security</strong>: Use HTTPS and secure network connections only</li>
+<li><strong>Access Monitoring</strong>: Monitor Vault access logs for suspicious
+activity</li>
+</ul>
+<p><strong>Configuration Security</strong></p>
+<ul class="simple">
+<li><strong>Environment Variables</strong>: Store Vault credentials in secure
+environment variables</li>
+<li><strong>No Hardcoding</strong>: Never hardcode tokens or URLs in configuration
+files</li>
+<li><strong>Least Privilege</strong>: Use minimal required permissions for Vault tokens</li>
+<li><strong>Regular Updates</strong>: Keep Vault and this module updated with security
+patches</li>
+</ul>
+<p><strong>🎯 Getting Started</strong></p>
+<p>See the CONFIGURE.rst file for detailed installation and setup
+instructions. See the USAGE.rst file for API usage examples and
+integration patterns.</p>
+<p>This module serves as a foundation for other modules requiring secure
+secret storage and provides a clean API for developers to build secure
+applications.</p>
+<p><strong>📞 Support &amp; Contributing</strong></p>
+<p>This module is actively developed and maintained. See CONTRIBUTORS.rst
+for contributor information and guidelines.</p>
+<p>For issues, feature requests, or contributions, please follow standard
+Odoo Community Association practices.</p>
+<p><strong>Table of contents</strong></p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#configuration" id="toc-entry-1">Configuration</a></li>
+<li><a class="reference internal" href="#usage" id="toc-entry-2">Usage</a></li>
+<li><a class="reference internal" href="#bug-tracker" id="toc-entry-3">Bug Tracker</a></li>
+<li><a class="reference internal" href="#credits" id="toc-entry-4">Credits</a><ul>
+<li><a class="reference internal" href="#authors" id="toc-entry-5">Authors</a></li>
+<li><a class="reference internal" href="#contributors" id="toc-entry-6">Contributors</a></li>
+<li><a class="reference internal" href="#maintainers" id="toc-entry-7">Maintainers</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="configuration">
+<h1><a class="toc-backref" href="#toc-entry-1">Configuration</a></h1>
+<p><strong>Vault Connector Configuration Guide</strong></p>
+<p>This guide covers installation, configuration, and setup of the
+HashiCorp Vault Connector module for Odoo.</p>
+<p><strong>📋 Prerequisites</strong></p>
+<p><strong>System Requirements</strong></p>
+<ul class="simple">
+<li><strong>Odoo 16.0 or later</strong>: Compatible with Odoo 16+</li>
+<li><strong>Python 3.8+</strong>: Required for requests library support</li>
+<li><strong>External Vault</strong>: HashiCorp Vault or OpenBao instance (v1.0+)</li>
+<li><strong>Network Access</strong>: HTTPS connectivity between Odoo and Vault</li>
+</ul>
+<p><strong>Required Knowledge</strong></p>
+<ul class="simple">
+<li><strong>Odoo Administration</strong>: Module installation and configuration</li>
+<li><strong>Vault Administration</strong>: Basic Vault setup and token management</li>
+<li><strong>Secret Management</strong>: Understanding of secure secret storage
+practices</li>
+<li><strong>Network Security</strong>: Knowledge of secure network configurations</li>
+</ul>
+<p><strong>🚀 Installation</strong></p>
+<p><strong>Step 1: Install Python Dependencies</strong></p>
+<p>The module requires the requests Python library for HTTP operations.</p>
+<p><strong>On Ubuntu/Debian</strong>:</p>
+<pre class="literal-block">
+sudo apt update
+sudo apt install python3-pip
+pip3 install requests
+</pre>
+<p><strong>On CentOS/RHEL</strong>:</p>
+<pre class="literal-block">
+sudo yum install python3-pip
+pip3 install requests
+</pre>
+<p><strong>Using Conda</strong>:</p>
+<pre class="literal-block">
+conda install -c conda-forge requests
+</pre>
+<p><strong>Using Poetry (if used in your Odoo deployment)</strong>:</p>
+<pre class="literal-block">
+poetry add requests
+</pre>
+<p><strong>Step 2: Install Odoo Module</strong></p>
+<p><strong>Method 1: Manual Installation</strong></p>
+<ol class="arabic">
+<li><p class="first">Copy the module to your Odoo addons directory:</p>
+<pre class="literal-block">
+cp -r vault_connector /path/to/odoo/addons/
+</pre>
+</li>
+<li><p class="first">Restart Odoo server</p>
+</li>
+<li><p class="first">Update the apps list in Odoo</p>
+</li>
+<li><p class="first">Install the “HashiCorp Vault Connector” module</p>
+</li>
+</ol>
+<p><strong>Method 2: Git Clone</strong></p>
+<ol class="arabic">
+<li><p class="first">Clone into addons directory:</p>
+<pre class="literal-block">
+cd /path/to/odoo/addons/
+git clone &lt;repository-url&gt; vault_connector
+</pre>
+</li>
+<li><p class="first">Follow steps 2-4 from Method 1</p>
+</li>
+</ol>
+<p><strong>Step 3: Verify Installation</strong></p>
+<ol class="arabic simple">
+<li>Log into Odoo as administrator</li>
+<li>Go to <strong>Apps</strong> → <strong>Update Apps List</strong></li>
+<li>Search for “HashiCorp Vault Connector”</li>
+<li>Click <strong>Install</strong></li>
+<li>Verify no error messages during installation</li>
+</ol>
+<p><strong>🔐 Vault Setup</strong></p>
+<p>The module requires an external Vault instance for secure secret
+storage. This section covers basic setup.</p>
+<p><strong>HashiCorp Vault Installation</strong></p>
+<p><strong>Using Docker (Recommended for Testing)</strong>:</p>
+<pre class="literal-block">
+# Run Vault in development mode (DO NOT USE IN PRODUCTION)
+docker run --cap-add=IPC_LOCK -d --name=vault-dev -p 8200:8200 vault:latest
+
+# Get the root token
+docker logs vault-dev
+</pre>
+<p><strong>Production Installation on Ubuntu/Debian</strong>:</p>
+<pre class="literal-block">
+# Add HashiCorp GPG key
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+
+# Add repository
+sudo apt-add-repository &quot;deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main&quot;
+
+# Install Vault
+sudo apt update &amp;&amp; sudo apt install vault
+</pre>
+<p><strong>Production Installation on CentOS/RHEL</strong>:</p>
+<pre class="literal-block">
+# Add repository
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+
+# Install Vault
+sudo yum -y install vault
+</pre>
+<p><strong>OpenBao Alternative</strong></p>
+<p>OpenBao is an open-source Vault fork that’s fully compatible:</p>
+<pre class="literal-block">
+# Download and install OpenBao
+wget https://github.com/openbao/openbao/releases/download/v1.0.0/bao_1.0.0_linux_amd64.zip
+unzip bao_1.0.0_linux_amd64.zip
+sudo mv bao /usr/local/bin/
+</pre>
+<p><strong>Vault Configuration</strong></p>
+<p><strong>Basic Production Configuration</strong> (/etc/vault.d/vault.hcl):</p>
+<pre class="literal-block">
+ui = true
+
+storage &quot;file&quot; {
+  path = &quot;/opt/vault/data&quot;
+}
+
+listener &quot;tcp&quot; {
+  address     = &quot;0.0.0.0:8200&quot;
+  tls_cert_file = &quot;/path/to/cert.pem&quot;
+  tls_key_file  = &quot;/path/to/key.pem&quot;
+}
+</pre>
+<p><strong>Initialize Vault</strong>:</p>
+<pre class="literal-block">
+# Start Vault
+sudo systemctl start vault
+
+# Initialize (save these keys securely!)
+vault operator init
+
+# Unseal Vault (use 3 of the 5 unseal keys)
+vault operator unseal &lt;key1&gt;
+vault operator unseal &lt;key2&gt;
+vault operator unseal &lt;key3&gt;
+</pre>
+<p><strong>Create Odoo Policy</strong>:</p>
+<pre class="literal-block">
+# Login with root token
+vault auth &lt;root-token&gt;
+
+# Create policy for Odoo
+vault policy write odoo-connector - &lt;&lt;EOF
+path &quot;secret/*&quot; {
+  capabilities = [&quot;create&quot;, &quot;read&quot;, &quot;update&quot;, &quot;delete&quot;, &quot;list&quot;]
+}
+EOF
+
+# Create token for Odoo
+vault token create -policy=odoo-connector -ttl=8760h
+</pre>
+<p><strong>🔧 Odoo Configuration</strong></p>
+<p><strong>Environment Variables</strong></p>
+<p>Set these environment variables for your Odoo instance:</p>
+<p><strong>Option 1: Environment File</strong> (.env or in Docker):</p>
+<pre class="literal-block">
+VAULT_ADDR=https://your-vault-server.com:8200
+VAULT_TOKEN=hvs.XXXXXXXXXXXXXXXXXXXX
+</pre>
+<p><strong>Option 2: System Environment</strong>:</p>
+<pre class="literal-block">
+export VAULT_ADDR=https://your-vault-server.com:8200
+export VAULT_TOKEN=hvs.XXXXXXXXXXXXXXXXXXXX
+</pre>
+<p><strong>Option 3: Docker Compose</strong>:</p>
+<pre class="literal-block">
+version: '3'
+services:
+  odoo:
+    image: odoo:16
+    environment:
+      - VAULT_ADDR=https://your-vault-server.com:8200
+      - VAULT_TOKEN=hvs.XXXXXXXXXXXXXXXXXXXX
+</pre>
+<p><strong>Option 4: Kubernetes</strong>:</p>
+<pre class="literal-block">
+apiVersion: v1
+kind: Secret
+metadata:
+  name: odoo-vault-config
+type: Opaque
+data:
+  VAULT_ADDR: &lt;base64-encoded-url&gt;
+  VAULT_TOKEN: &lt;base64-encoded-token&gt;
+</pre>
+<p><strong>Testing Vault Connection</strong></p>
+<ol class="arabic">
+<li><p class="first">Restart Odoo after setting environment variables</p>
+</li>
+<li><p class="first">Test connection using Python console or Odoo shell:</p>
+<pre class="literal-block">
+# Test connection
+from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+vault = VaultConnector()
+status = vault.check_status()
+print(f&quot;Vault status: {status}&quot;)
+</pre>
+</li>
+<li><p class="first">Check Odoo logs for any Vault connection errors</p>
+</li>
+</ol>
+<p><strong>👥 User Management</strong></p>
+<p>The Vault Connector module is a utility module that doesn’t provide
+specific user interfaces but enables other modules to securely store and
+retrieve secrets.</p>
+<p><strong>Access Control</strong></p>
+<p><strong>Technical Module</strong>: This module operates at the technical level and
+doesn’t define specific user groups. Access control is managed by:</p>
+<ul class="simple">
+<li><strong>Vault Token Permissions</strong>: Controlled by Vault policies</li>
+<li><strong>Environment Variables</strong>: Secured at system level</li>
+<li><strong>Module Dependencies</strong>: Other modules handle user access to Vault
+functionality</li>
+</ul>
+<p><strong>Developer Access</strong></p>
+<p><strong>For developers building on this module</strong>:</p>
+<ol class="arabic simple">
+<li>Import the VaultConnector class in your module</li>
+<li>Use environment variables for Vault configuration</li>
+<li>Implement appropriate user permissions in your module</li>
+<li>Follow security best practices for secret handling</li>
+</ol>
+<p><strong>Example Integration</strong>:</p>
+<pre class="literal-block">
+from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+
+class MySecureModel(models.Model):
+    _name = 'my.secure.model'
+
+    def store_secret(self, secret_data):
+        vault = VaultConnector()
+        token = vault.store_secret(secret_data)
+        # Store only the token in your model
+        self.vault_token = token
+</pre>
+<p><strong>🔒 Security Configuration</strong></p>
+<p><strong>Vault Security Hardening</strong></p>
+<p><strong>Production Vault Security</strong>:</p>
+<ol class="arabic simple">
+<li><strong>Use TLS</strong>: Always use HTTPS for Vault communication</li>
+<li><strong>Network Segmentation</strong>: Isolate Vault on secure network</li>
+<li><strong>Regular Backups</strong>: Backup Vault data and unseal keys</li>
+<li><strong>Monitor Access</strong>: Enable Vault audit logging</li>
+<li><strong>Rotate Tokens</strong>: Regularly rotate Odoo’s Vault token</li>
+</ol>
+<p><strong>Vault Audit Logging</strong>:</p>
+<pre class="literal-block">
+vault audit enable file file_path=/vault/logs/audit.log
+</pre>
+<p><strong>Token Rotation</strong>:</p>
+<pre class="literal-block">
+# Create new token
+vault token create -policy=odoo-bitcoin -ttl=8760h
+
+# Update Odoo environment variables
+# Restart Odoo
+
+# Revoke old token
+vault token revoke &lt;old-token&gt;
+</pre>
+<p><strong>Network Security</strong></p>
+<p><strong>Firewall Rules</strong>:</p>
+<ul class="simple">
+<li>Only allow Odoo server IP to connect to Vault</li>
+<li>Use VPN or private networks when possible</li>
+<li>Block public access to Vault unless necessary</li>
+</ul>
+<p><strong>TLS Configuration</strong>:</p>
+<ul class="simple">
+<li>Use valid SSL certificates</li>
+<li>Implement certificate pinning if possible</li>
+<li>Monitor certificate expiration</li>
+</ul>
+<p><strong>Odoo Security Settings</strong></p>
+<p><strong>Database Security</strong>:</p>
+<ul class="simple">
+<li>Enable database encryption at rest</li>
+<li>Use strong database passwords</li>
+<li>Regular database backups</li>
+<li>Monitor database access logs</li>
+</ul>
+<p><strong>Session Security</strong>:</p>
+<ul class="simple">
+<li>Short session timeouts for Bitcoin users</li>
+<li>Two-factor authentication where possible</li>
+<li>Regular password changes</li>
+<li>Monitor user login patterns</li>
+</ul>
+<p><strong>🧪 Testing Configuration</strong></p>
+<p><strong>Vault Connectivity Test</strong></p>
+<p><strong>Manual Test</strong>:</p>
+<pre class="literal-block">
+# Test Vault connection
+curl -H &quot;X-Vault-Token: $VAULT_TOKEN&quot; $VAULT_ADDR/v1/sys/health
+</pre>
+<p><strong>Odoo Test</strong>:</p>
+<ol class="arabic">
+<li><p class="first">Open Odoo shell or Python console</p>
+</li>
+<li><p class="first">Test the connector:</p>
+<pre class="literal-block">
+from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+vault = VaultConnector()
+
+# Test connection
+status = vault.check_status()
+print(f&quot;Connection status: {status}&quot;)
+
+# Test secret storage
+test_data = {&quot;test&quot;: &quot;secret_value&quot;}
+token = vault.store_secret(test_data)
+print(f&quot;Stored secret with token: {token}&quot;)
+
+# Test secret retrieval
+retrieved = vault.get_secret(token)
+print(f&quot;Retrieved secret: {retrieved}&quot;)
+</pre>
+</li>
+<li><p class="first">Check Vault for stored data:</p>
+<pre class="literal-block">
+vault kv get secret/&lt;token-uuid&gt;
+</pre>
+</li>
+</ol>
+<p><strong>Connection Troubleshooting</strong>:</p>
+<ul class="simple">
+<li>Verify environment variables are set</li>
+<li>Check network connectivity to Vault</li>
+<li>Verify Vault token has proper permissions</li>
+<li>Check Odoo logs for connection errors</li>
+</ul>
+<p><strong>Module Functionality Test</strong></p>
+<p><strong>Basic Integration Test</strong>:</p>
+<ol class="arabic simple">
+<li><strong>Store Secret</strong>: Use VaultConnector to store test data</li>
+<li><strong>Retrieve Secret</strong>: Verify data can be retrieved using token</li>
+<li><strong>Error Handling</strong>: Test with invalid tokens and network issues</li>
+<li><strong>Performance</strong>: Test multiple concurrent operations</li>
+</ol>
+<p><strong>Expected Results</strong>:</p>
+<ul class="simple">
+<li>Secrets stored securely in Vault</li>
+<li>Only tokens stored in Odoo</li>
+<li>Proper error handling for connection issues</li>
+<li>No sensitive data in Odoo logs or database</li>
+</ul>
+<p><strong>📊 Monitoring &amp; Maintenance</strong></p>
+<p><strong>Log Monitoring</strong></p>
+<p><strong>Odoo Logs to Monitor</strong>:</p>
+<ul class="simple">
+<li>Vault connector operations</li>
+<li>Vault connection attempts</li>
+<li>Secret storage/retrieval operations</li>
+<li>Authentication failures</li>
+</ul>
+<p><strong>Vault Logs to Monitor</strong>:</p>
+<ul class="simple">
+<li>Odoo authentication attempts</li>
+<li>Secret storage/retrieval operations</li>
+<li>Failed authentication attempts</li>
+<li>Token usage patterns</li>
+</ul>
+<p><strong>Regular Maintenance</strong></p>
+<p><strong>Weekly Tasks</strong>:</p>
+<ul class="simple">
+<li>Review Vault access logs</li>
+<li>Check system connectivity</li>
+<li>Verify backup procedures</li>
+<li>Monitor user activity</li>
+</ul>
+<p><strong>Monthly Tasks</strong>:</p>
+<ul class="simple">
+<li>Rotate Vault tokens</li>
+<li>Review user permissions</li>
+<li>Update security patches</li>
+<li>Test disaster recovery</li>
+</ul>
+<p><strong>Quarterly Tasks</strong>:</p>
+<ul class="simple">
+<li>Full security audit</li>
+<li>Review backup restoration</li>
+<li>Update documentation</li>
+<li>Training for new users</li>
+</ul>
+<p><strong>🚨 Troubleshooting</strong></p>
+<p><strong>Common Configuration Issues</strong></p>
+<p><strong>Vault Connection Failed</strong>:</p>
+<ul class="simple">
+<li><strong>Symptoms</strong>: “Vault not accessible” errors, empty private key data</li>
+<li><strong>Solutions</strong>:<ul>
+<li>Check VAULT_ADDR and VAULT_TOKEN environment variables</li>
+<li>Verify network connectivity to Vault server</li>
+<li>Check Vault server status and unseal state</li>
+<li>Verify token has proper permissions</li>
+</ul>
+</li>
+</ul>
+<p><strong>Module Not Available</strong>:</p>
+<ul class="simple">
+<li><strong>Symptoms</strong>: Vault connector not available for import</li>
+<li><strong>Solutions</strong>:<ul>
+<li>Verify module installation completed successfully</li>
+<li>Check module is in correct addons path</li>
+<li>Restart Odoo server after installation</li>
+<li>Check Odoo logs for import errors</li>
+</ul>
+</li>
+</ul>
+<p><strong>Module Installation Fails</strong>:</p>
+<ul class="simple">
+<li><strong>Symptoms</strong>: Error during module installation</li>
+<li><strong>Solutions</strong>:<ul>
+<li>Install required Python dependencies (requests)</li>
+<li>Check Odoo version compatibility</li>
+<li>Verify addons path configuration</li>
+<li>Review installation logs</li>
+</ul>
+</li>
+</ul>
+<p><strong>Secret Storage/Retrieval Errors</strong>:</p>
+<ul class="simple">
+<li><strong>Symptoms</strong>: Errors when storing or retrieving secrets</li>
+<li><strong>Solutions</strong>:<ul>
+<li>Check Vault token permissions</li>
+<li>Verify KV store is properly configured</li>
+<li>Check network connectivity to Vault</li>
+<li>Review Vault and Odoo error logs</li>
+</ul>
+</li>
+</ul>
+<p><strong>Performance Issues</strong></p>
+<p><strong>Slow Secret Operations</strong>:</p>
+<ul class="simple">
+<li><strong>Cause</strong>: Network latency to Vault</li>
+<li><strong>Solutions</strong>: Move Vault closer to Odoo, optimize network</li>
+</ul>
+<p><strong>Connection Timeouts</strong>:</p>
+<ul class="simple">
+<li><strong>Cause</strong>: Network issues or Vault overload</li>
+<li><strong>Solutions</strong>: Increase timeout values, check Vault performance</li>
+</ul>
+<p><strong>Getting Support</strong></p>
+<p><strong>Before Requesting Support</strong>:</p>
+<ol class="arabic simple">
+<li>Check all configuration steps</li>
+<li>Review logs for specific error messages</li>
+<li>Test Vault connectivity independently</li>
+<li>Verify environment variables are set correctly</li>
+<li>Test with minimal example code</li>
+</ol>
+<p><strong>Information to Provide</strong>:</p>
+<ul class="simple">
+<li>Odoo version and installation method</li>
+<li>Vault version and configuration</li>
+<li>Environment variable settings (without tokens!)</li>
+<li>Relevant log excerpts</li>
+<li>Steps to reproduce issues</li>
+<li>Expected vs actual behavior</li>
+</ul>
+<p><strong>Support Channels</strong>:</p>
+<ul class="simple">
+<li>Module documentation and README files</li>
+<li>Odoo Community Association forums</li>
+<li>HashiCorp Vault community</li>
+<li>Professional Odoo support services</li>
+</ul>
+</div>
+<div class="section" id="usage">
+<h1><a class="toc-backref" href="#toc-entry-2">Usage</a></h1>
+<p><strong>Vault Connector Usage Guide</strong></p>
+<p>This guide provides step-by-step instructions and examples for using the
+HashiCorp Vault Connector in your Odoo modules.</p>
+<p><strong>🚀 Getting Started</strong></p>
+<p>After installation and configuration, the Vault Connector provides a
+secure API for storing and retrieving secrets. The module operates as a
+utility library for other modules to use.</p>
+<p><strong>Note</strong>: This is a technical module designed for developers building
+secure Odoo applications.</p>
+<p><strong>📋 Basic API Usage</strong></p>
+<ol class="arabic simple">
+<li><strong>Import the Connector</strong> → 2. <strong>Store Secrets</strong> → 3. <strong>Retrieve
+Secrets</strong> → 4. <strong>Handle Errors</strong></li>
+</ol>
+<p><strong>💡 Core Concepts</strong></p>
+<p><strong>Understanding the Vault Connector</strong></p>
+<p>The Vault Connector provides a secure interface between Odoo and
+HashiCorp Vault for:</p>
+<ul class="simple">
+<li><strong>Secret Storage</strong>: Store sensitive data outside Odoo database</li>
+<li><strong>Token Management</strong>: Generate and manage UUID tokens for secret
+references</li>
+<li><strong>Secure Retrieval</strong>: Retrieve secrets using tokens with proper
+authentication</li>
+<li><strong>Error Handling</strong>: Robust error handling and status reporting</li>
+<li><strong>UUID Enforcement</strong>: Secret keys must be in valid UUID format,
+enforced by the connector to ensure uniqueness and security</li>
+</ul>
+<p><strong>🔧 API Reference</strong></p>
+<p><strong>Importing the Connector</strong></p>
+<p>In your Odoo module, import the VaultConnector class:</p>
+<pre class="literal-block">
+from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+</pre>
+<p><strong>Basic Usage Pattern</strong></p>
+<ol class="arabic">
+<li><p class="first"><strong>Create Connector Instance</strong>:</p>
+<pre class="literal-block">
+vault = VaultConnector()
+</pre>
+</li>
+<li><p class="first"><strong>Check Vault Status</strong>:</p>
+<pre class="literal-block">
+status = vault.check_status()
+if status['status'] == 'connected':
+    print(&quot;Vault is ready&quot;)
+else:
+    print(f&quot;Vault error: {status['message']}&quot;)
+</pre>
+</li>
+<li><p class="first"><strong>Store a Secret</strong>:</p>
+<pre class="literal-block">
+secret_data = {
+    'api_key': 'your-secret-api-key',
+    'database_url': 'postgres://user:pass&#64;host:5432/db'
+}
+token = vault.store_secret(secret_data)
+# Store only the token in your Odoo model
+your_model.vault_token = token
+
+# Note: The token must be a valid UUID. The connector enforces this format for security and uniqueness.
+</pre>
+</li>
+<li><p class="first"><strong>Retrieve a Secret</strong>:</p>
+<pre class="literal-block">
+secret_data = vault.get_secret(token)
+api_key = secret_data.get('api_key')
+database_url = secret_data.get('database_url')
+
+# Note: The token must be a valid UUID. The connector will raise an exception if an invalid format is used.
+</pre>
+</li>
+</ol>
+<p><strong>📚 Advanced API Methods</strong></p>
+<p><strong>Available Methods</strong></p>
+<p>The VaultConnector provides these methods for secret management:</p>
+<p><strong>Connection Methods</strong>:</p>
+<pre class="literal-block">
+# Check Vault connection and status
+status = vault.check_status()
+
+# Get detailed connection info
+info = vault.get_connection_info()
+</pre>
+<p><strong>Secret Management Methods</strong>:</p>
+<pre class="literal-block">
+# Store a secret and get a token
+token = vault.store_secret(data_dict)
+
+# Retrieve secret by token
+data = vault.get_secret(token)
+
+# Update existing secret
+success = vault.update_secret(token, new_data_dict)
+
+# Delete secret (optional - secrets can be left to expire)
+success = vault.delete_secret(token)
+</pre>
+<p><strong>Error Handling</strong>:</p>
+<pre class="literal-block">
+try:
+    token = vault.store_secret(sensitive_data)
+except VaultConnectionError as e:
+    # Handle connection issues
+    _logger.error(f&quot;Vault connection failed: {e}&quot;)
+except VaultAuthenticationError as e:
+    # Handle authentication issues
+    _logger.error(f&quot;Vault authentication failed: {e}&quot;)
+except Exception as e:
+    # Handle other errors
+    _logger.error(f&quot;Unexpected error: {e}&quot;)
+</pre>
+<p><strong>Method Parameters and Returns</strong></p>
+<p><strong>store_secret(data)</strong>:</p>
+<ul class="simple">
+<li><strong>Parameter</strong>: data (dict) - The secret data to store</li>
+<li><strong>Returns</strong>: str - UUID token for retrieving the secret</li>
+<li><strong>Raises</strong>: VaultConnectionError, VaultAuthenticationError</li>
+<li><strong>Note</strong>: The returned token is guaranteed to be a valid UUID,
+enforced by the connector.</li>
+</ul>
+<p><strong>get_secret(token)</strong>:</p>
+<ul class="simple">
+<li><strong>Parameter</strong>: token (str) - UUID token from store_secret</li>
+<li><strong>Returns</strong>: dict - The stored secret data</li>
+<li><strong>Raises</strong>: VaultConnectionError, VaultNotFoundError, ValidationError
+(if token is not a valid UUID)</li>
+<li><strong>Note</strong>: The token must be a valid UUID, or an exception will be
+raised.</li>
+</ul>
+<p><strong>check_status()</strong>:</p>
+<ul class="simple">
+<li><strong>Returns</strong>: dict with keys:<ul>
+<li>`status`: ‘connected’, ‘error’, or ‘unavailable’</li>
+<li>`message`: Descriptive status message</li>
+<li>`vault_url`: Configured Vault URL</li>
+<li>`authenticated`: Boolean authentication status</li>
+</ul>
+</li>
+</ul>
+<p><strong>🏗️ Integration Examples</strong></p>
+<p><strong>Example 1: Secure API Key Storage</strong></p>
+<p>Store third-party API keys securely in your Odoo module:</p>
+<pre class="literal-block">
+from odoo import models, fields, api
+from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+
+class PaymentProvider(models.Model):
+    _name = 'payment.provider'
+
+    name = fields.Char('Provider Name')
+    vault_token = fields.Char('Vault Token', readonly=True)
+
+    &#64;api.model
+    def store_api_credentials(self, api_key, secret_key):
+        &quot;&quot;&quot;Store API credentials securely in Vault&quot;&quot;&quot;
+        vault = VaultConnector()
+        credentials = {
+            'api_key': api_key,
+            'secret_key': secret_key,
+            'provider': self.name
+        }
+        self.vault_token = vault.store_secret(credentials)
+        return True
+
+    def get_api_credentials(self):
+        &quot;&quot;&quot;Retrieve API credentials from Vault&quot;&quot;&quot;
+        if not self.vault_token:
+            return None
+        vault = VaultConnector()
+        return vault.get_secret(self.vault_token)
+</pre>
+<p><strong>Example 2: Database Connection Strings</strong></p>
+<p>Securely manage database connections:</p>
+<pre class="literal-block">
+class DatabaseConnection(models.Model):
+    _name = 'database.connection'
+
+    name = fields.Char('Connection Name')
+    vault_token = fields.Char('Vault Token', readonly=True)
+
+    def store_connection_string(self, connection_string):
+        &quot;&quot;&quot;Store database connection string securely&quot;&quot;&quot;
+        vault = VaultConnector()
+        data = {
+            'connection_string': connection_string,
+            'connection_name': self.name,
+            'created_date': fields.Datetime.now().isoformat()
+        }
+        self.vault_token = vault.store_secret(data)
+
+    def get_connection_string(self):
+        &quot;&quot;&quot;Get database connection string&quot;&quot;&quot;
+        vault = VaultConnector()
+        data = vault.get_secret(self.vault_token)
+        return data.get('connection_string')
+</pre>
+<p><strong>Example 3: Certificate Management</strong></p>
+<p>Store SSL certificates and private keys:</p>
+<pre class="literal-block">
+class SSLCertificate(models.Model):
+    _name = 'ssl.certificate'
+
+    name = fields.Char('Certificate Name')
+    vault_token = fields.Char('Vault Token', readonly=True)
+
+    def store_certificate(self, cert_data, private_key):
+        &quot;&quot;&quot;Store SSL certificate and private key&quot;&quot;&quot;
+        vault = VaultConnector()
+        data = {
+            'certificate': cert_data,
+            'private_key': private_key,
+            'name': self.name,
+            'expiry_date': self.calculate_expiry(cert_data)
+        }
+        self.vault_token = vault.store_secret(data)
+
+    def get_certificate_data(self):
+        &quot;&quot;&quot;Retrieve certificate data&quot;&quot;&quot;
+        vault = VaultConnector()
+        return vault.get_secret(self.vault_token)
+</pre>
+<p><strong>🔒 Security Best Practices</strong></p>
+<p><strong>Data Handling Guidelines</strong></p>
+<p><strong>Never Store Secrets in Odoo</strong>:</p>
+<ul class="simple">
+<li>Always use Vault for sensitive data storage</li>
+<li>Only store UUID tokens in Odoo database</li>
+<li>Never log or print sensitive data</li>
+<li>Use proper exception handling to avoid data leaks</li>
+</ul>
+<p><strong>Token Management</strong>:</p>
+<ul class="simple">
+<li>Store tokens in readonly fields when possible</li>
+<li>Implement proper access controls on token fields</li>
+<li>Consider token rotation for long-lived secrets</li>
+<li>Clean up unused tokens periodically</li>
+<li>Ensure tokens are valid UUIDs as enforced by the connector</li>
+</ul>
+<p><strong>Error Handling</strong>:</p>
+<ul class="simple">
+<li>Always use try/except blocks for Vault operations</li>
+<li>Log errors without exposing sensitive data</li>
+<li>Provide meaningful error messages to users</li>
+<li>Implement fallback mechanisms where appropriate</li>
+</ul>
+<p><strong>Example Secure Implementation</strong></p>
+<p>Here’s a secure pattern for handling secrets:</p>
+<pre class="literal-block">
+import logging
+from odoo import models, fields, api
+from odoo.addons.vault_connector.models.vault_connector import (
+    VaultConnector, VaultConnectionError, VaultNotFoundError
+)
+
+_logger = logging.getLogger(__name__)
+
+class SecureModel(models.Model):
+    _name = 'secure.model'
+
+    name = fields.Char('Name', required=True)
+    vault_token = fields.Char('Vault Token', readonly=True)
+
+    def store_sensitive_data(self, data):
+        &quot;&quot;&quot;Securely store sensitive data&quot;&quot;&quot;
+        try:
+            vault = VaultConnector()
+            # Check connection first
+            status = vault.check_status()
+            if status['status'] != 'connected':
+                raise UserError(&quot;Vault is not available&quot;)
+
+            # Store the secret
+            self.vault_token = vault.store_secret(data)
+            _logger.info(f&quot;Secret stored for {self.name}&quot;)
+            return True
+
+        except VaultConnectionError:
+            _logger.error(&quot;Failed to connect to Vault&quot;)
+            raise UserError(&quot;Unable to store sensitive data - connection failed&quot;)
+        except Exception as e:
+            _logger.error(f&quot;Unexpected error storing secret: {str(e)}&quot;)
+            raise UserError(&quot;Unable to store sensitive data&quot;)
+
+    def get_sensitive_data(self):
+        &quot;&quot;&quot;Securely retrieve sensitive data&quot;&quot;&quot;
+        if not self.vault_token:
+            return None
+
+        try:
+            vault = VaultConnector()
+            return vault.get_secret(self.vault_token)
+        except VaultNotFoundError:
+            _logger.warning(f&quot;Secret not found for {self.name}&quot;)
+            return None
+        except VaultConnectionError:
+            _logger.error(&quot;Failed to connect to Vault&quot;)
+            return None
+        except Exception as e:
+            _logger.error(f&quot;Error retrieving secret: {str(e)}&quot;)
+            return None
+</pre>
+<p><strong>📋 Common Workflows</strong></p>
+<p><strong>Workflow 1: API Key Management</strong></p>
+<p><strong>Scenario</strong>: Securely manage third-party API keys for payment
+processors</p>
+<ol class="arabic">
+<li><p class="first"><strong>Create Model</strong>: Define a model for payment providers</p>
+</li>
+<li><p class="first"><strong>Store Credentials</strong>: Use Vault to store API keys and secrets:</p>
+<pre class="literal-block">
+provider = self.env['payment.provider'].create({
+    'name': 'Stripe Payment Gateway'
+})
+provider.store_api_credentials(api_key, secret_key)
+</pre>
+</li>
+<li><p class="first"><strong>Use Credentials</strong>: Retrieve when making API calls:</p>
+<pre class="literal-block">
+credentials = provider.get_api_credentials()
+api_key = credentials['api_key']
+# Make secure API call
+</pre>
+</li>
+<li><p class="first"><strong>Rotate Keys</strong>: Update credentials when needed:</p>
+<pre class="literal-block">
+provider.store_api_credentials(new_api_key, new_secret_key)
+</pre>
+</li>
+</ol>
+<p><strong>Workflow 2: Database Connection Security</strong></p>
+<p><strong>Scenario</strong>: Securely store database connection strings for
+integrations</p>
+<ol class="arabic">
+<li><p class="first"><strong>Define Connection Model</strong>: Create model for external database
+connections</p>
+</li>
+<li><p class="first"><strong>Store Connection String</strong>: Use Vault for connection details:</p>
+<pre class="literal-block">
+connection = self.env['database.connection'].create({
+    'name': 'Customer CRM Database'
+})
+connection.store_connection_string('postgres://user:password&#64;host:5432/db')
+</pre>
+</li>
+<li><p class="first"><strong>Use Connection</strong>: Retrieve for database operations:</p>
+<pre class="literal-block">
+conn_string = connection.get_connection_string()
+# Establish database connection securely
+</pre>
+</li>
+<li><p class="first"><strong>Monitor &amp; Rotate</strong>: Regular credential rotation for security</p>
+</li>
+</ol>
+<p><strong>Workflow 3: Certificate Management</strong></p>
+<p><strong>Scenario</strong>: Manage SSL certificates and private keys for integrations</p>
+<ol class="arabic">
+<li><p class="first"><strong>Certificate Storage</strong>: Store certificates securely:</p>
+<pre class="literal-block">
+cert = self.env['ssl.certificate'].create({
+    'name': 'API Gateway Certificate'
+})
+cert.store_certificate(cert_data, private_key_data)
+</pre>
+</li>
+<li><p class="first"><strong>Certificate Usage</strong>: Retrieve for HTTPS connections:</p>
+<pre class="literal-block">
+cert_data = cert.get_certificate_data()
+certificate = cert_data['certificate']
+private_key = cert_data['private_key']
+</pre>
+</li>
+<li><p class="first"><strong>Expiry Management</strong>: Monitor and renew certificates</p>
+</li>
+<li><p class="first"><strong>Automated Deployment</strong>: Update systems with new certificates</p>
+</li>
+</ol>
+<p><strong>Workflow 4: Multi-Environment Secrets</strong></p>
+<p><strong>Scenario</strong>: Different secrets for development, staging, and production</p>
+<ol class="arabic">
+<li><p class="first"><strong>Environment-Specific Storage</strong>: Use different Vault paths or
+instances</p>
+</li>
+<li><p class="first"><strong>Configuration Management</strong>: Environment variables for Vault
+selection:</p>
+<pre class="literal-block">
+# Different Vault configurations per environment
+VAULT_ADDR=https://vault-prod.company.com:8200  # Production
+VAULT_ADDR=https://vault-staging.company.com:8200  # Staging
+</pre>
+</li>
+<li><p class="first"><strong>Secret Versioning</strong>: Track secret versions across environments</p>
+</li>
+<li><p class="first"><strong>Deployment Automation</strong>: Automated secret deployment with CI/CD</p>
+</li>
+</ol>
+<p><strong>🔍 Advanced Topics</strong></p>
+<p><strong>Performance Considerations</strong></p>
+<p><strong>Connection Pooling</strong>: The VaultConnector creates new connections for
+each request. For high-volume applications, consider:</p>
+<ul class="simple">
+<li>Implementing connection pooling in your module</li>
+<li>Caching Vault status checks</li>
+<li>Batching multiple secret operations</li>
+</ul>
+<p><strong>Error Recovery</strong>: Implement robust error handling:</p>
+<ul class="simple">
+<li>Retry logic for temporary network issues</li>
+<li>Graceful degradation when Vault is unavailable</li>
+<li>Fallback mechanisms for critical operations</li>
+</ul>
+<p><strong>Monitoring</strong>: Track Vault operations:</p>
+<ul class="simple">
+<li>Log all Vault interactions (without sensitive data)</li>
+<li>Monitor connection performance</li>
+<li>Set up alerts for Vault failures</li>
+</ul>
+<p><strong>Custom Configuration</strong></p>
+<p><strong>Environment Variables</strong>: Customize Vault connection:</p>
+<ul class="simple">
+<li>`VAULT_ADDR`: Vault server URL</li>
+<li>`VAULT_TOKEN`: Authentication token</li>
+<li>`VAULT_KV_PATH`: Custom KV store path (default: ‘secret’)</li>
+<li>`VAULT_TIMEOUT`: Request timeout in seconds</li>
+</ul>
+<p><strong>Multiple Vault Instances</strong>: For complex deployments:</p>
+<ul class="simple">
+<li>Different Vault instances per environment</li>
+<li>Vault clustering for high availability</li>
+<li>Geographic distribution for global deployments</li>
+</ul>
+<p><strong>Migration and Backup</strong></p>
+<p><strong>Secret Migration</strong>: When changing Vault instances:</p>
+<ol class="arabic simple">
+<li>Export secrets from old Vault (if possible)</li>
+<li>Re-encrypt and import to new Vault</li>
+<li>Update tokens in Odoo records</li>
+<li>Verify all secrets accessible</li>
+</ol>
+<p><strong>Backup Strategy</strong>: Ensure business continuity:</p>
+<ul class="simple">
+<li>Regular Vault backups (follow HashiCorp guidelines)</li>
+<li>Token inventory and mapping</li>
+<li>Recovery procedures documentation</li>
+<li>Test restoration processes</li>
+</ul>
+<p><strong>📞 Troubleshooting</strong></p>
+<p><strong>Common Issues</strong></p>
+<p><strong>“Vault not accessible” Error</strong>:</p>
+<ul class="simple">
+<li>Check VAULT_ADDR and VAULT_TOKEN environment variables</li>
+<li>Verify network connectivity to Vault server</li>
+<li>Check Vault server status and unseal state</li>
+<li>Verify token has proper permissions</li>
+</ul>
+<p><strong>“Import Error” for VaultConnector</strong>:</p>
+<ul class="simple">
+<li>Ensure module is properly installed</li>
+<li>Check module is in correct addons path</li>
+<li>Restart Odoo server after installation</li>
+<li>Verify no circular import dependencies</li>
+</ul>
+<p><strong>“Secret not found” Error</strong>:</p>
+<ul class="simple">
+<li>Verify token exists and is correct</li>
+<li>Check if secret has been deleted from Vault</li>
+<li>Verify KV store path configuration</li>
+<li>Check Vault token permissions for read access</li>
+</ul>
+<p><strong>“Invalid secret ID format” Error</strong>:</p>
+<ul class="simple">
+<li>Ensure the token provided is a valid UUID</li>
+<li>Verify that the token was generated or stored correctly</li>
+<li>Check for any manual edits to token fields that might have corrupted
+the UUID format</li>
+</ul>
+<p><strong>Performance Issues</strong>:</p>
+<ul class="simple">
+<li>Check network latency to Vault server</li>
+<li>Monitor Vault server performance</li>
+<li>Implement connection pooling if needed</li>
+<li>Consider caching for frequently accessed secrets</li>
+</ul>
+<p><strong>Debugging Tips</strong></p>
+<p><strong>Enable Debug Logging</strong>: Add to Odoo configuration:</p>
+<pre class="literal-block">
+[logger_vault_connector]
+level = DEBUG
+handlers = console
+qualname = odoo.addons.vault_connector
+</pre>
+<p><strong>Test Connection Manually</strong>:</p>
+<pre class="literal-block">
+# In Odoo shell
+from odoo.addons.vault_connector.models.vault_connector import VaultConnector
+vault = VaultConnector()
+print(vault.check_status())
+</pre>
+<p><strong>Verify Environment Variables</strong>:</p>
+<pre class="literal-block">
+import os
+print(&quot;VAULT_ADDR:&quot;, os.environ.get('VAULT_ADDR'))
+print(&quot;VAULT_TOKEN:&quot;, os.environ.get('VAULT_TOKEN', 'Not set'))
+</pre>
+<p><strong>Getting Help</strong></p>
+<p>For advanced troubleshooting, check:</p>
+<ol class="arabic simple">
+<li><strong>Odoo Logs</strong>: Review server logs for detailed error messages</li>
+<li><strong>Vault Logs</strong>: Check Vault audit logs for access attempts</li>
+<li><strong>Network Connectivity</strong>: Test HTTPS connection to Vault</li>
+<li><strong>Token Permissions</strong>: Verify Vault token policies and capabilities</li>
+</ol>
+</div>
+<div class="section" id="bug-tracker">
+<h1><a class="toc-backref" href="#toc-entry-3">Bug Tracker</a></h1>
+<p>Bugs are tracked on <a class="reference external" href="https://github.com/OCA/currency/issues">GitHub Issues</a>.
+In case of trouble, please check there if your issue has already been reported.
+If you spotted it first, help us to smash it by providing a detailed and welcomed
+<a class="reference external" href="https://github.com/OCA/currency/issues/new?body=module:%20vault_connector%0Aversion:%2018.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.</p>
+<p>Do not contact contributors directly about support or help with technical issues.</p>
+</div>
+<div class="section" id="credits">
+<h1><a class="toc-backref" href="#toc-entry-4">Credits</a></h1>
+<div class="section" id="authors">
+<h2><a class="toc-backref" href="#toc-entry-5">Authors</a></h2>
+<ul class="simple">
+<li>Ross Golder</li>
+</ul>
+</div>
+<div class="section" id="contributors">
+<h2><a class="toc-backref" href="#toc-entry-6">Contributors</a></h2>
+<p><strong>Contributors &amp; Development</strong></p>
+<p>This document outlines the contributors to the HashiCorp Vault Connector
+module and provides guidelines for future development.</p>
+<p><strong>👥 Contributors</strong></p>
+<p><strong>Original Development</strong></p>
+<p><strong>Ross Golder</strong> &lt;<a class="reference external" href="mailto:ross&#64;golder.org">ross&#64;golder.org</a>&gt;</p>
+<ul class="simple">
+<li><strong>Role</strong>: Original Author &amp; Lead Developer</li>
+<li><strong>Contributions</strong>:<ul>
+<li>Initial module architecture and design</li>
+<li>Vault integration for secure secret storage</li>
+<li>Core API implementation</li>
+<li>Error handling and status reporting</li>
+<li>Security model and best practices</li>
+</ul>
+</li>
+</ul>
+<p><strong>Claude (Anthropic AI)</strong></p>
+<ul class="simple">
+<li><strong>Role</strong>: Development Assistant</li>
+<li><strong>Contributions</strong>:<ul>
+<li>Code architecture improvements</li>
+<li>API design refinements</li>
+<li>Documentation creation</li>
+<li>Error handling improvements</li>
+<li>Code consolidation and optimization</li>
+</ul>
+</li>
+</ul>
+<p><strong>🏗️ Development Guidelines</strong></p>
+<p><strong>Code Standards</strong></p>
+<p><strong>Python Style</strong>:</p>
+<ul class="simple">
+<li>Follow PEP 8 coding standards</li>
+<li>Use descriptive variable and function names</li>
+<li>Include comprehensive docstrings</li>
+<li>Implement proper error handling</li>
+</ul>
+<p><strong>Odoo Conventions</strong>:</p>
+<ul class="simple">
+<li>Follow Odoo coding guidelines</li>
+<li>Use proper field types and relationships</li>
+<li>Implement security rules and access controls</li>
+<li>Include proper view structures and UX</li>
+</ul>
+<p><strong>Security First</strong>:</p>
+<ul class="simple">
+<li>Never store sensitive data in plain text</li>
+<li>Always use Vault for secret storage</li>
+<li>Implement proper error handling to prevent data leaks</li>
+<li>Include audit logging for sensitive operations</li>
+</ul>
+<p><strong>Vault Integration Standards</strong></p>
+<p><strong>Connection Handling</strong>:</p>
+<ul class="simple">
+<li><strong>Environment Variables</strong>: Use secure environment variable
+configuration</li>
+<li><strong>Error Handling</strong>: Robust error categorization and handling</li>
+<li><strong>Status Monitoring</strong>: Real-time connection status checking</li>
+<li><strong>Token Management</strong>: Secure UUID token generation and validation</li>
+</ul>
+<p><strong>API Standards</strong>:</p>
+<ul class="simple">
+<li>RESTful communication with Vault</li>
+<li>JSON data serialization</li>
+<li>Proper HTTP status code handling</li>
+<li>Timeout and retry mechanisms</li>
+</ul>
+<p><strong>🔧 Development Setup</strong></p>
+<p><strong>Local Development Environment</strong></p>
+<p><strong>Prerequisites</strong>:</p>
+<pre class="literal-block">
+# Python dependencies
+pip install requests
+
+# Development Vault (Docker)
+docker run --cap-add=IPC_LOCK -d --name=dev-vault -p 8200:8200 vault:latest
+</pre>
+<p><strong>Environment Variables</strong>:</p>
+<pre class="literal-block">
+export VAULT_ADDR=http://localhost:8200
+export VAULT_TOKEN=&lt;dev-token&gt;
+</pre>
+<p><strong>Odoo Development Mode</strong>:</p>
+<pre class="literal-block">
+./odoo-bin --addons-path=/path/to/addons --dev=all
+</pre>
+<p><strong>Testing Framework</strong></p>
+<p><strong>Unit Tests</strong>:</p>
+<ul class="simple">
+<li>Test secret storage and retrieval</li>
+<li>Validate error handling</li>
+<li>Check connection status monitoring</li>
+<li>Verify token generation</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul class="simple">
+<li>End-to-end secret workflows</li>
+<li>Vault connectivity testing</li>
+<li>Error recovery scenarios</li>
+<li>Performance under load</li>
+</ul>
+<p><strong>Security Tests</strong>:</p>
+<ul class="simple">
+<li>Vault token validation</li>
+<li>Secret data isolation verification</li>
+<li>Connection security checks</li>
+<li>Audit trail validation</li>
+</ul>
+<p><strong>📝 Contributing Guidelines</strong></p>
+<p><strong>Code Contributions</strong></p>
+<p><strong>Before Starting</strong>:</p>
+<ol class="arabic simple">
+<li>Create an issue describing the feature/bug</li>
+<li>Discuss implementation approach</li>
+<li>Get approval for major changes</li>
+<li>Fork the repository</li>
+</ol>
+<p><strong>Development Process</strong>:</p>
+<ol class="arabic simple">
+<li>Create feature branch from main</li>
+<li>Implement changes with tests</li>
+<li>Update documentation as needed</li>
+<li>Submit pull request with description</li>
+</ol>
+<p><strong>Pull Request Requirements</strong>:</p>
+<ul class="simple">
+<li>Clear description of changes</li>
+<li>Test coverage for new functionality</li>
+<li>Documentation updates</li>
+<li>Security review for sensitive changes</li>
+</ul>
+<p><strong>Code Review Process</strong>:</p>
+<ul class="simple">
+<li>Security-focused review required</li>
+<li>Vault integration best practices check</li>
+<li>Odoo conventions validation</li>
+<li>Performance impact assessment</li>
+</ul>
+<p><strong>Documentation Contributions</strong></p>
+<p><strong>Documentation Areas</strong>:</p>
+<ul class="simple">
+<li>User guides and tutorials</li>
+<li>Technical documentation</li>
+<li>Security best practices</li>
+<li>Troubleshooting guides</li>
+</ul>
+<p><strong>Documentation Standards</strong>:</p>
+<ul class="simple">
+<li>Clear, step-by-step instructions</li>
+<li>Include screenshots where helpful</li>
+<li>Provide real-world examples</li>
+<li>Keep security warnings prominent</li>
+</ul>
+<p><strong>Security Contributions</strong></p>
+<p><strong>Security Review Areas</strong>:</p>
+<ul class="simple">
+<li>Vault integration security</li>
+<li>Secret data handling practices</li>
+<li>Error handling security</li>
+<li>Token management security</li>
+</ul>
+<p><strong>Reporting Security Issues</strong>:</p>
+<ul class="simple">
+<li>Contact maintainers privately first</li>
+<li>Provide detailed reproduction steps</li>
+<li>Include potential impact assessment</li>
+<li>Allow time for responsible disclosure</li>
+</ul>
+<p><strong>🎯 Development Roadmap</strong></p>
+<p><strong>Planned Features</strong></p>
+<p><strong>Near-term (Next Release)</strong>:</p>
+<ul class="simple">
+<li>Connection pooling for performance</li>
+<li>Enhanced error categorization</li>
+<li>Improved logging and monitoring</li>
+<li>Additional configuration options</li>
+</ul>
+<p><strong>Medium-term</strong>:</p>
+<ul class="simple">
+<li>Multiple Vault instance support</li>
+<li>Secret versioning and rotation</li>
+<li>Batch operations for performance</li>
+<li>Advanced monitoring and metrics</li>
+</ul>
+<p><strong>Long-term</strong>:</p>
+<ul class="simple">
+<li>Auto-scaling and load balancing</li>
+<li>Secret lifecycle management</li>
+<li>Integration with other secret stores</li>
+<li>Enterprise compliance features</li>
+</ul>
+<p><strong>Technical Debt</strong></p>
+<p><strong>Current Areas for Improvement</strong>:</p>
+<ul class="simple">
+<li>Enhanced connection management and pooling</li>
+<li>Improved error handling and user feedback</li>
+<li>Performance optimization for high-volume operations</li>
+<li>Expanded test coverage</li>
+</ul>
+<p><strong>Architecture Improvements</strong>:</p>
+<ul class="simple">
+<li>Plugin architecture for different secret stores</li>
+<li>Modular design for different authentication methods</li>
+<li>Enhanced caching for performance</li>
+<li>Better separation of concerns</li>
+</ul>
+<p><strong>🐛 Issue Reporting</strong></p>
+<p><strong>Bug Reports</strong></p>
+<p><strong>Before Reporting</strong>:</p>
+<ol class="arabic simple">
+<li>Check existing issues</li>
+<li>Verify it’s not a configuration problem</li>
+<li>Test with minimal reproduction case</li>
+<li>Check logs for error details</li>
+</ol>
+<p><strong>Report Template</strong>:</p>
+<pre class="literal-block">
+**Description**: Brief description of the issue
+
+**Environment**:
+- Odoo version:
+- Module version:
+- Vault version:
+- Operating system:
+
+**Steps to Reproduce**:
+1. Step one
+2. Step two
+3. Step three
+
+**Expected Behavior**: What should happen
+
+**Actual Behavior**: What actually happens
+
+**Additional Information**:
+- Log excerpts (without sensitive data)
+- Screenshots if relevant
+- Configuration details
+</pre>
+<p><strong>Feature Requests</strong></p>
+<p><strong>Request Template</strong>:</p>
+<pre class="literal-block">
+**Feature Description**: What you want to achieve
+
+**Use Case**: Why this feature is needed
+
+**Proposed Implementation**: How you think it should work
+
+**Impact**: Who would benefit from this feature
+
+**Alternatives**: Other ways to achieve the same goal
+</pre>
+<p><strong>🔒 Security Policy</strong></p>
+<p><strong>Responsible Disclosure</strong></p>
+<p><strong>Security Vulnerability Reporting</strong>:</p>
+<ul class="simple">
+<li>Email security issues to: <a class="reference external" href="mailto:ross&#64;golder.org">ross&#64;golder.org</a></li>
+<li>Include “SECURITY” in the subject line</li>
+<li>Provide detailed reproduction steps</li>
+<li>Allow 90 days for response and fix</li>
+</ul>
+<p><strong>Security Review Process</strong>:</p>
+<ol class="arabic simple">
+<li>Initial triage within 48 hours</li>
+<li>Confirmation and assessment</li>
+<li>Fix development and testing</li>
+<li>Coordinated disclosure</li>
+<li>Public advisory if needed</li>
+</ol>
+<p><strong>Security Best Practices</strong></p>
+<p><strong>For Contributors</strong>:</p>
+<ul class="simple">
+<li>Never commit sensitive data</li>
+<li>Use secure coding practices</li>
+<li>Review crypto implementations carefully</li>
+<li>Test security controls thoroughly</li>
+</ul>
+<p><strong>For Users</strong>:</p>
+<ul class="simple">
+<li>Keep Vault properly secured</li>
+<li>Use strong authentication</li>
+<li>Monitor access logs regularly</li>
+<li>Follow security documentation</li>
+</ul>
+<p><strong>📞 Community &amp; Support</strong></p>
+<p><strong>Communication Channels</strong></p>
+<p><strong>Development Discussion</strong>:</p>
+<ul class="simple">
+<li>GitHub Issues: Technical discussions</li>
+<li>Email: <a class="reference external" href="mailto:ross&#64;golder.org">ross&#64;golder.org</a> for direct contact</li>
+<li>OCA Forums: Odoo-specific questions</li>
+</ul>
+<p><strong>User Support</strong>:</p>
+<ul class="simple">
+<li>Documentation: First resource for developers</li>
+<li>Community Forums: Peer support</li>
+<li>Professional Support: Available for enterprise users</li>
+</ul>
+<p><strong>Recognition</strong></p>
+<p><strong>Contributor Recognition</strong>:</p>
+<ul class="simple">
+<li>All contributors listed in this file</li>
+<li>Significant contributions acknowledged in releases</li>
+<li>Community appreciation for ongoing support</li>
+</ul>
+<p><strong>Ways to Contribute</strong>:</p>
+<ul class="simple">
+<li>Code contributions and bug fixes</li>
+<li>Documentation improvements</li>
+<li>Testing and feedback</li>
+<li>Security reviews</li>
+<li>User support and tutorials</li>
+</ul>
+<p><strong>📋 Release History</strong></p>
+<p><strong>Version 16.0.1.0.0 (Current)</strong></p>
+<blockquote>
+<ul class="simple">
+<li>Initial public release</li>
+<li>Core Vault connector functionality</li>
+<li>Secret storage and retrieval API</li>
+<li>Connection status monitoring</li>
+<li>Error handling and categorization</li>
+<li>UUID token management</li>
+<li>Environment variable configuration</li>
+<li>Comprehensive documentation</li>
+</ul>
+</blockquote>
+<p><strong>Previous Development</strong></p>
+<blockquote>
+<ul class="simple">
+<li>Internal development and testing</li>
+<li>Security architecture design</li>
+<li>Vault integration implementation</li>
+<li>Odoo integration framework</li>
+</ul>
+</blockquote>
+<p>Thank you to all contributors who have helped make this module possible!</p>
+</div>
+<div class="section" id="maintainers">
+<h2><a class="toc-backref" href="#toc-entry-7">Maintainers</a></h2>
+<p>This module is maintained by the OCA.</p>
+<a class="reference external image-reference" href="https://odoo-community.org">
+<img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />
+</a>
+<p>OCA, or the Odoo Community Association, is a nonprofit organization whose
+mission is to support the collaborative development of Odoo features and
+promote its widespread use.</p>
+<p>This module is part of the <a class="reference external" href="https://github.com/OCA/currency/tree/18.0/vault_connector">OCA/currency</a> project on GitHub.</p>
+<p>You are welcome to contribute. To learn how please visit <a class="reference external" href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
+</div>
+</div>
+</div>
+</body>
+</html>
