@@ -38,7 +38,7 @@ class VaultConnector(models.AbstractModel):
             raise ValidationError(
                 _("VAULT_SKIP_VERIFY is only allowed for a loopback VAULT_ADDR.")
             )
-        _logger.warning(
+        _logger.info(
             "TLS verification disabled for local Vault at %s (VAULT_SKIP_VERIFY)",
             vault_addr,
         )
