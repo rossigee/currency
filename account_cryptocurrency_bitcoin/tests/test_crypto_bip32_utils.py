@@ -1,6 +1,9 @@
 # Copyright 2025 Ross Golder
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import os
+import unittest
+
 from odoo.exceptions import ValidationError
 from odoo.tests.common import TransactionCase
 
@@ -166,6 +169,10 @@ class TestCryptoBip32Utils(TransactionCase):
             f"Taproot address should start with 'bc1p', got: {taproot_addr['address']}",
         )
 
+    @unittest.skipUnless(
+        os.environ.get("VAULT_ADDR"),
+        "derivation tests store keys in Vault; set VAULT_ADDR to run them",
+    )
     def test_multiple_derivation_paths(self):
         """Test different BIP derivation paths"""
         master_xprv = self.test_vector_1["master_xprv"]
